@@ -71,6 +71,7 @@
     <div class="connect-zone">
       <button type="button" class="connect-btn" data-connect aria-label="连接切换">
         <span class="connect-aura" aria-hidden="true"></span>
+        <span class="connect-ripple" aria-hidden="true"></span>
         <span class="connect-ring" aria-hidden="true"></span>
         <span class="connect-arc" aria-hidden="true"></span>
         <span class="connect-disc">
@@ -79,28 +80,39 @@
       </button>
       <div class="connect-copy">
         <div class="connect-status" data-conn-label>点击连接</div>
-        
+        <div class="connect-sub muted" data-conn-sub>流量未加密 · 点击开始加速</div>
+        <div class="connect-meta" data-conn-meta hidden>
+          <span class="conn-chip"><span class="conn-chip-k">时长</span><strong data-conn-timer>00:00</strong></span>
+          <span class="conn-chip"><span class="conn-chip-k">出口</span><strong data-conn-exit>US · NTT America</strong></span>
+        </div>
       </div>
     </div>
 
-    <div class="mode-switch" role="group" aria-label="连接模式">
-      <div class="mode-switch-top">
-        <div class="mode-switch-label">连接模式</div>
-        <p class="mode-hint muted">当前 <strong data-mode-label>VPN</strong></p>
-      </div>
+    <div class="mode-switch mode-switch-lite" role="group" aria-label="连接模式">
       <div class="seg mode-seg">
         <button type="button" data-mode="proxy">代理</button>
         <button type="button" data-mode="system">系统代理</button>
         <button type="button" data-mode="vpn">VPN</button>
       </div>
+      <p class="mode-hint muted" data-mode-hint>TUN 全局接管 · 所有应用与终端生效</p>
     </div>
 
     <div class="home-stats">
-      <div class="stat"><span class="stat-k">实时</span><span class="stat-v" data-traffic-live>0 B/s</span></div>
+      <div class="stat"><span class="stat-k">上行</span><span class="stat-v" data-traffic-up-val>0 B/s</span></div>
+      <div class="stat"><span class="stat-k">下行</span><span class="stat-v" data-traffic-down-val>0 B/s</span></div>
       <div class="stat"><span class="stat-k">总量</span><span class="stat-v" data-traffic-total>0 B</span></div>
-      <div class="stat"><span class="stat-k">出口</span><span class="stat-v" data-exit-label>—</span></div>
     </div>
-    <button type="button" class="btn block home-cta" data-goto="nodes">打开节点列表</button>
+
+    <button type="button" class="btn block node-cta" data-goto="nodes">
+      <span class="node-cta-left">
+        <span class="node-cta-kicker">当前节点</span>
+        <strong data-node-label>美国家宽 § 0</strong>
+      </span>
+      <span class="node-cta-right">
+        <span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span>
+        <span class="pill-chevron" aria-hidden="true">›</span>
+      </span>
+    </button>
   </div>
 </section>
 

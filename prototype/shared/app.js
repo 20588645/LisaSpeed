@@ -13,8 +13,87 @@
     appearance: "system",
   };
 
+  const MODE_HINTS = {
+    proxy: "仅本机代理端口生效 · 不修改系统设置",
+    system: "接管系统代理 · 浏览器与常规应用生效",
+    vpn: "TUN 全局接管 · 所有应用与终端生效",
+  };
+
+  // Demo traffic feed: fake but live numbers so the connected state feels real.
+  const demo = { timer: null, elapsed: 0, total: 0, up: 0, down: 0 };
+
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  function fmtBytes(n) {
+    if (n >= 1024 ** 3) return (n / 1024 ** 3).toFixed(1) + " GB";
+    if (n >= 1024 ** 2) return (n / 1024 ** 2).toFixed(1) + " MB";
+    if (n >= 1024) return Math.round(n / 1024) + " KB";
+    return Math.round(n) + " B";
+  }
+
+  const fmtRate = (n) => fmtBytes(n) + "/s";
+
+  function fmtClock(sec) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = Math.floor(sec % 60);
+    const mm = String(m).padStart(2, "0");
+    const ss = String(s).padStart(2, "0");
+    return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+  }
+
+  function renderTraffic() {
+    const connected = state.connection === "connected";
+    const up = connected ? demo.up : 0;
+    const down = connected ? demo.down : 0;
+    $$("[data-traffic-up]").forEach((el) => {
+      el.textContent = `↑ ${fmtRate(up)}`;
+    });
+    $$("[data-traffic-down]").forEach((el) => {
+      el.textContent = `↓ ${fmtRate(down)}`;
+    });
+    $$("[data-traffic-up-val]").forEach((el) => {
+      el.textContent = fmtRate(up);
+    });
+    $$("[data-traffic-down-val]").forEach((el) => {
+      el.textContent = fmtRate(down);
+    });
+    $$("[data-traffic-live]").forEach((el) => {
+      el.textContent = fmtRate(up + down);
+    });
+    $$("[data-traffic-total]").forEach((el) => {
+      el.textContent = connected ? fmtBytes(demo.total) : "0 B";
+    });
+    $$("[data-conn-timer]").forEach((el) => {
+      el.textContent = fmtClock(demo.elapsed);
+    });
+  }
+
+  function demoTick() {
+    demo.elapsed += 1;
+    demo.up = (78 + Math.random() * 60) * 1024;
+    demo.down = (22 + Math.random() * 42) * 1024;
+    demo.total += demo.up + demo.down;
+    renderTraffic();
+  }
+
+  function startDemo(seedSeconds = 0) {
+    stopDemo();
+    demo.elapsed = seedSeconds;
+    demo.total = 2.4 * 1024 ** 3;
+    demo.up = 96 * 1024;
+    demo.down = 32 * 1024;
+    renderTraffic();
+    demo.timer = setInterval(demoTick, 1000);
+  }
+
+  function stopDemo() {
+    if (demo.timer) {
+      clearInterval(demo.timer);
+      demo.timer = null;
+    }
+  }
 
   function systemScheme() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -126,39 +205,41 @@
     }, 1600);
   }
 
-  function setConnection(next) {
+  function setConnection(next, { seedSeconds = 0 } = {}) {
     state.connection = next;
     document.documentElement.setAttribute("data-conn", next);
+    const connected = next === "connected";
     $$("[data-conn-label]").forEach((el) => {
-      el.textContent =
-        next === "connected" ? "已连接" : next === "connecting" ? "连接中…" : "点击连接";
+      el.textContent = connected ? "已连接" : next === "connecting" ? "连接中…" : "点击连接";
+    });
+    $$("[data-conn-sub]").forEach((el) => {
+      el.textContent = connected
+        ? "隧道已建立 · 流量已加密"
+        : next === "connecting"
+          ? "正在建立加密隧道…"
+          : "流量未加密 · 点击开始加速";
+    });
+    $$("[data-conn-meta]").forEach((el) => {
+      el.hidden = !connected;
     });
     $$("[data-delay]").forEach((el) => {
-      el.hidden = next !== "connected";
+      el.hidden = !connected;
       const v = el.querySelector("[data-delay-value]");
-      if (v && next === "connected") v.textContent = String(state.delay);
-    });
-    const connected = next === "connected";
-    // Demo rates mirror the shipping app: home live = up+down; sidebar splits them.
-    const up = connected ? "96 KB/s" : "0 B/s";
-    const down = connected ? "32 KB/s" : "0 B/s";
-    const live = connected ? "128 KB/s" : "0 B/s";
-    const total = connected ? "2.4 GB" : "0 B";
-    $$("[data-traffic-up]").forEach((el) => {
-      el.textContent = connected ? `↑ ${up}` : "↑ 0 B/s";
-    });
-    $$("[data-traffic-down]").forEach((el) => {
-      el.textContent = connected ? `↓ ${down}` : "↓ 0 B/s";
-    });
-    $$("[data-traffic-live]").forEach((el) => {
-      el.textContent = live;
-    });
-    $$("[data-traffic-total]").forEach((el) => {
-      el.textContent = total;
+      if (v && connected) v.textContent = String(state.delay);
     });
     $$("[data-exit-label]").forEach((el) => {
-      el.textContent = connected ? "US · NTT Americ…" : "—";
+      el.textContent = connected ? "US · NTT America" : "—";
     });
+    $$("[data-conn-exit]").forEach((el) => {
+      el.textContent = "US · NTT America";
+    });
+    if (connected) {
+      startDemo(seedSeconds);
+    } else {
+      stopDemo();
+      demo.elapsed = 0;
+      renderTraffic();
+    }
   }
 
   function cycleConnection() {
@@ -177,6 +258,9 @@
     });
     $$("[data-mode-label]").forEach((el) => {
       el.textContent = mode === "proxy" ? "代理" : mode === "system" ? "系统代理" : "VPN";
+    });
+    $$("[data-mode-hint]").forEach((el) => {
+      el.textContent = MODE_HINTS[mode] || "";
     });
   }
 
@@ -241,8 +325,21 @@
   document.addEventListener("DOMContentLoaded", () => {
     bind();
     loadAppearance();
-    showPage("home");
-    setConnection("disconnected");
-    setMode("vpn");
+    // URL params allow deep-linking a state for review/screenshots,
+    // e.g. ?conn=connected&mode=proxy&appearance=light&page=nodes
+    const params = new URLSearchParams(location.search);
+    const appearance = params.get("appearance");
+    if (appearance === "light" || appearance === "dark" || appearance === "system") {
+      applyAppearance(appearance, { persist: false });
+    }
+    const page = params.get("page");
+    showPage(page && $(`[data-page="${page}"]`) ? page : "home");
+    const mode = params.get("mode");
+    setMode(["proxy", "system", "vpn"].includes(mode) ? mode : "vpn");
+    if (params.get("conn") === "connected") {
+      setConnection("connected", { seedSeconds: 754 });
+    } else {
+      setConnection("disconnected");
+    }
   });
 })();

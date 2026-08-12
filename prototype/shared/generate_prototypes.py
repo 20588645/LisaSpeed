@@ -23,22 +23,82 @@ def shell_nav(theme: str) -> str:
     return "\n".join(items)
 
 def page_home(theme: str = "tech") -> str:
-    # Tech mirrors the shipping Flutter home: no latency pill under the connect
-    # button; live/total are bidirectional sums; exit uses the app's IP-info style.
+    # Tech home v2: richer hero (status sub-line + duration/exit chips), compact
+    # mode switch with a per-mode hint, up/down/total stats, current-node CTA.
     if theme == "tech":
-        delay_block = ""
-        profile_label = "VMess"
-        total_default = "0 B"
-        exit_default = "—"
-    else:
-        delay_block = (
-            '<div class="delay-pill" data-delay hidden>'
-            "<span>延迟</span> <strong><span data-delay-value>276</span> ms</strong>"
-            "</div>"
-        )
-        profile_label = "VMess · 美国家宽"
-        total_default = "1.2 GB"
-        exit_default = "LA · NTT"
+        return """
+<section class="page page-home" data-page="home">
+  <header class="page-head home-head">
+    <div>
+      <div class="brand-line"><strong>LisaSpeed</strong> <span class="chip">0.0.1</span></div>
+      <p class="muted home-sub">一键连接 · 当前订阅与模式</p>
+    </div>
+    <button type="button" class="btn ghost add-btn" data-open-modal="add-profile"><span class="plus">+</span> 添加订阅</button>
+  </header>
+  <div class="home-stage">
+    <button type="button" class="pill profile-pill" data-goto="subscriptions">
+      <span class="pill-dot" aria-hidden="true"></span>
+      <span data-profile-label>VMess</span>
+      <span class="pill-chevron" aria-hidden="true">›</span>
+    </button>
+
+    <div class="connect-zone">
+      <button type="button" class="connect-btn" data-connect aria-label="连接切换">
+        <span class="connect-aura" aria-hidden="true"></span>
+        <span class="connect-ripple" aria-hidden="true"></span>
+        <span class="connect-ring" aria-hidden="true"></span>
+        <span class="connect-arc" aria-hidden="true"></span>
+        <span class="connect-disc">
+          <span class="connect-mark">L</span>
+        </span>
+      </button>
+      <div class="connect-copy">
+        <div class="connect-status" data-conn-label>点击连接</div>
+        <div class="connect-sub muted" data-conn-sub>流量未加密 · 点击开始加速</div>
+        <div class="connect-meta" data-conn-meta hidden>
+          <span class="conn-chip"><span class="conn-chip-k">时长</span><strong data-conn-timer>00:00</strong></span>
+          <span class="conn-chip"><span class="conn-chip-k">出口</span><strong data-conn-exit>US · NTT America</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mode-switch mode-switch-lite" role="group" aria-label="连接模式">
+      <div class="seg mode-seg">
+        <button type="button" data-mode="proxy">代理</button>
+        <button type="button" data-mode="system">系统代理</button>
+        <button type="button" data-mode="vpn">VPN</button>
+      </div>
+      <p class="mode-hint muted" data-mode-hint>TUN 全局接管 · 所有应用与终端生效</p>
+    </div>
+
+    <div class="home-stats">
+      <div class="stat"><span class="stat-k">上行</span><span class="stat-v" data-traffic-up-val>0 B/s</span></div>
+      <div class="stat"><span class="stat-k">下行</span><span class="stat-v" data-traffic-down-val>0 B/s</span></div>
+      <div class="stat"><span class="stat-k">总量</span><span class="stat-v" data-traffic-total>0 B</span></div>
+    </div>
+
+    <button type="button" class="btn block node-cta" data-goto="nodes">
+      <span class="node-cta-left">
+        <span class="node-cta-kicker">当前节点</span>
+        <strong data-node-label>美国家宽 § 0</strong>
+      </span>
+      <span class="node-cta-right">
+        <span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span>
+        <span class="pill-chevron" aria-hidden="true">›</span>
+      </span>
+    </button>
+  </div>
+</section>
+"""
+    # Instrument keeps the legacy home layout as the alternative design.
+    delay_block = (
+        '<div class="delay-pill" data-delay hidden>'
+        "<span>延迟</span> <strong><span data-delay-value>276</span> ms</strong>"
+        "</div>"
+    )
+    profile_label = "VMess · 美国家宽"
+    total_default = "1.2 GB"
+    exit_default = "LA · NTT"
     return f"""
 <section class="page page-home" data-page="home">
   <header class="page-head home-head">
@@ -681,7 +741,7 @@ button { cursor: pointer; }
 }
 .sidebar-brand { display: flex; gap: 12px; align-items: center; padding: 4px 10px 18px; }
 .sidebar-tag { letter-spacing: 0.04em; }
-.nav { display: grid; gap: 4px; flex: 1; }
+.nav { display: grid; gap: 4px; flex: 1; align-content: start; }
 .nav-item {
   display: flex; gap: 12px; align-items: center;
   border: 0; background: transparent; color: var(--muted);
@@ -864,6 +924,8 @@ button { cursor: pointer; }
 .mode-seg button { min-height: 42px; font-weight: 600; font-size: 13px; }
 .mode-hint { margin: 0; font-size: 12px; }
 .mode-hint strong { color: var(--accent); font-weight: 700; }
+.mode-switch-lite { display: grid; gap: 8px; padding: 8px 8px 9px; }
+.mode-switch-lite .mode-hint { margin: 0; padding: 0 2px; text-align: center; }
 
 .connect-zone { display: grid; justify-items: center; gap: 14px; padding: 12px 0 6px; }
 .connect-btn {
@@ -922,6 +984,35 @@ button { cursor: pointer; }
   transition: filter .3s ease, transform .3s ease;
 }
 .connect-copy { display: grid; justify-items: center; gap: 8px; min-height: 52px; }
+.connect-sub { font-size: 12.5px; margin: 0; transition: color .3s ease; }
+.connect-meta { display: flex; gap: 8px; align-items: center; }
+.connect-meta[hidden] { display: none !important; }
+.conn-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 999px;
+  font-size: 12px; color: var(--muted);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+}
+.conn-chip-k { font-size: 11px; }
+.conn-chip strong {
+  color: var(--accent); font-family: var(--mono);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.01em;
+}
+.connect-ripple {
+  position: absolute; inset: 8px; border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  opacity: 0; transform: scale(0.9); pointer-events: none;
+}
+html[data-conn="connected"] .connect-ripple { animation: ripple-out 1s var(--ease, ease) 1 both; }
+@keyframes ripple-out {
+  0% { opacity: 0.5; transform: scale(0.92); }
+  100% { opacity: 0; transform: scale(1.28); }
+}
+@keyframes aura-breathe {
+  0%, 100% { opacity: 0.1; transform: scale(0.97); }
+  50% { opacity: 0.3; transform: scale(1.03); }
+}
 .connect-btn:hover .connect-aura { opacity: 0.35; }
 .connect-btn:hover .connect-arc { opacity: 0.95; }
 .connect-btn:hover .connect-disc {
@@ -993,8 +1084,20 @@ html[data-conn="connected"] .connect-status { color: var(--ok); }
 }
 .stat:last-child { border-right: 0; }
 .stat-k { display: block; color: var(--muted); font-size: 11px; margin-bottom: 4px; letter-spacing: 0.04em; }
-.stat-v { font-weight: 700; font-size: 13px; font-family: var(--mono); }
+.stat-v { font-weight: 700; font-size: 13px; font-family: var(--mono); transition: color .3s ease; }
 .home-cta { border-style: dashed; background: transparent; }
+.node-cta {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: 14px; text-align: left;
+}
+.node-cta:hover { border-color: var(--accent); }
+.node-cta-left { display: grid; gap: 2px; min-width: 0; }
+.node-cta-kicker { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
+.node-cta-left strong {
+  font-size: 13.5px; letter-spacing: 0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.node-cta-right { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; }
 
 .eyebrow {
   margin: 0 0 4px;
@@ -1207,6 +1310,33 @@ def main():
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 [data-theme="tech"] .page-home .page-head { margin-bottom: 8px; }
+/* Home hero v2 (tech only) */
+[data-theme="tech"] .connect-copy { min-height: 88px; gap: 6px; }
+html[data-theme="tech"][data-conn="connected"] .connect-sub {
+  color: color-mix(in srgb, var(--ok) 55%, var(--muted));
+}
+html[data-theme="tech"]:not([data-conn="connected"]):not([data-conn="connecting"]) .connect-aura {
+  opacity: 0.16;
+  animation: aura-breathe 3.8s ease-in-out infinite;
+}
+[data-theme="tech"] .node-cta {
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-theme="tech"] .node-cta:hover {
+  background: color-mix(in srgb, var(--accent) 7%, var(--glass));
+  box-shadow: var(--glow-soft, none);
+}
+[data-theme="tech"] .home-stats { position: relative; }
+[data-theme="tech"] .home-stats::before {
+  content: "";
+  position: absolute; top: 0; left: 10%; right: 10%; height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--accent) 32%, var(--accent-2) 68%, transparent);
+  opacity: 0; transition: opacity .45s ease;
+}
+html[data-theme="tech"][data-conn="connected"] .home-stats::before { opacity: 0.9; }
+html[data-theme="tech"]:not([data-conn="connected"]) .home-stats .stat-v { color: var(--muted); }
 [data-theme="tech"] .page-head h1 { font-weight: 800; }
 [data-theme="tech"] .log-line:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
 [data-theme="tech"] .modal-choice:hover {

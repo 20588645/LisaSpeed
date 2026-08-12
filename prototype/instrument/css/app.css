@@ -32,7 +32,7 @@ button { cursor: pointer; }
 }
 .sidebar-brand { display: flex; gap: 12px; align-items: center; padding: 4px 10px 18px; }
 .sidebar-tag { letter-spacing: 0.04em; }
-.nav { display: grid; gap: 4px; flex: 1; }
+.nav { display: grid; gap: 4px; flex: 1; align-content: start; }
 .nav-item {
   display: flex; gap: 12px; align-items: center;
   border: 0; background: transparent; color: var(--muted);
@@ -215,6 +215,8 @@ button { cursor: pointer; }
 .mode-seg button { min-height: 42px; font-weight: 600; font-size: 13px; }
 .mode-hint { margin: 0; font-size: 12px; }
 .mode-hint strong { color: var(--accent); font-weight: 700; }
+.mode-switch-lite { display: grid; gap: 8px; padding: 8px 8px 9px; }
+.mode-switch-lite .mode-hint { margin: 0; padding: 0 2px; text-align: center; }
 
 .connect-zone { display: grid; justify-items: center; gap: 14px; padding: 12px 0 6px; }
 .connect-btn {
@@ -273,6 +275,35 @@ button { cursor: pointer; }
   transition: filter .3s ease, transform .3s ease;
 }
 .connect-copy { display: grid; justify-items: center; gap: 8px; min-height: 52px; }
+.connect-sub { font-size: 12.5px; margin: 0; transition: color .3s ease; }
+.connect-meta { display: flex; gap: 8px; align-items: center; }
+.connect-meta[hidden] { display: none !important; }
+.conn-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 999px;
+  font-size: 12px; color: var(--muted);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+}
+.conn-chip-k { font-size: 11px; }
+.conn-chip strong {
+  color: var(--accent); font-family: var(--mono);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.01em;
+}
+.connect-ripple {
+  position: absolute; inset: 8px; border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  opacity: 0; transform: scale(0.9); pointer-events: none;
+}
+html[data-conn="connected"] .connect-ripple { animation: ripple-out 1s var(--ease, ease) 1 both; }
+@keyframes ripple-out {
+  0% { opacity: 0.5; transform: scale(0.92); }
+  100% { opacity: 0; transform: scale(1.28); }
+}
+@keyframes aura-breathe {
+  0%, 100% { opacity: 0.1; transform: scale(0.97); }
+  50% { opacity: 0.3; transform: scale(1.03); }
+}
 .connect-btn:hover .connect-aura { opacity: 0.35; }
 .connect-btn:hover .connect-arc { opacity: 0.95; }
 .connect-btn:hover .connect-disc {
@@ -344,8 +375,20 @@ html[data-conn="connected"] .connect-status { color: var(--ok); }
 }
 .stat:last-child { border-right: 0; }
 .stat-k { display: block; color: var(--muted); font-size: 11px; margin-bottom: 4px; letter-spacing: 0.04em; }
-.stat-v { font-weight: 700; font-size: 13px; font-family: var(--mono); }
+.stat-v { font-weight: 700; font-size: 13px; font-family: var(--mono); transition: color .3s ease; }
 .home-cta { border-style: dashed; background: transparent; }
+.node-cta {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: 14px; text-align: left;
+}
+.node-cta:hover { border-color: var(--accent); }
+.node-cta-left { display: grid; gap: 2px; min-width: 0; }
+.node-cta-kicker { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
+.node-cta-left strong {
+  font-size: 13.5px; letter-spacing: 0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.node-cta-right { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; }
 
 .eyebrow {
   margin: 0 0 4px;
