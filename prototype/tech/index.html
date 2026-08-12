@@ -35,7 +35,7 @@
         <span class="logo-mark">L</span>
         <div>
           <strong>LisaSpeed</strong>
-          <div class="muted tiny sidebar-tag">Tech 原型</div>
+          <div class="muted tiny sidebar-tag">本地加速</div>
         </div>
       </div>
       <nav class="nav"><button type="button" class="nav-item" data-nav="home"><span class="nav-ico" data-ico="home" aria-hidden="true"></span><span class="nav-label">主页</span></button>
@@ -44,8 +44,10 @@
 <button type="button" class="nav-item" data-nav="settings"><span class="nav-ico" data-ico="settings" aria-hidden="true"></span><span class="nav-label">设置</span></button></nav>
       <div class="sidebar-foot">
         <div class="traffic">
-          <div class="traffic-row"><span class="muted">实时</span> <strong data-traffic-live>0 B/s</strong></div>
-          <div class="traffic-row"><span class="muted">模式</span> <strong data-mode-label>VPN</strong></div>
+          <div class="traffic-row"><span class="muted">上行</span> <strong data-traffic-up>↑ 0 B/s</strong></div>
+          <div class="traffic-row"><span class="muted">下行</span> <strong data-traffic-down>↓ 0 B/s</strong></div>
+          <div class="traffic-row"><span class="muted">总量</span> <strong data-traffic-total>0 B</strong></div>
+          <div class="traffic-row"><span class="muted">连接模式</span> <strong data-mode-label>VPN</strong></div>
         </div>
       </div>
     </aside>
@@ -62,7 +64,7 @@
   <div class="home-stage">
     <button type="button" class="pill profile-pill" data-goto="subscriptions">
       <span class="pill-dot" aria-hidden="true"></span>
-      <span data-profile-label>VMess · 美国家宽</span>
+      <span data-profile-label>VMess</span>
       <span class="pill-chevron" aria-hidden="true">›</span>
     </button>
 
@@ -77,7 +79,7 @@
       </button>
       <div class="connect-copy">
         <div class="connect-status" data-conn-label>点击连接</div>
-        <div class="delay-pill" data-delay hidden><span>延迟</span> <strong><span data-delay-value>276</span> ms</strong></div>
+        
       </div>
     </div>
 
@@ -95,8 +97,8 @@
 
     <div class="home-stats">
       <div class="stat"><span class="stat-k">实时</span><span class="stat-v" data-traffic-live>0 B/s</span></div>
-      <div class="stat"><span class="stat-k">总量</span><span class="stat-v">1.2 GB</span></div>
-      <div class="stat"><span class="stat-k">出口</span><span class="stat-v">LA · NTT</span></div>
+      <div class="stat"><span class="stat-k">总量</span><span class="stat-v" data-traffic-total>0 B</span></div>
+      <div class="stat"><span class="stat-k">出口</span><span class="stat-v" data-exit-label>—</span></div>
     </div>
     <button type="button" class="btn block home-cta" data-goto="nodes">打开节点列表</button>
   </div>

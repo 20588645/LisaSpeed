@@ -22,8 +22,24 @@ def shell_nav(theme: str) -> str:
         )
     return "\n".join(items)
 
-def page_home() -> str:
-    return """
+def page_home(theme: str = "tech") -> str:
+    # Tech mirrors the shipping Flutter home: no latency pill under the connect
+    # button; live/total are bidirectional sums; exit uses the app's IP-info style.
+    if theme == "tech":
+        delay_block = ""
+        profile_label = "VMess"
+        total_default = "0 B"
+        exit_default = "—"
+    else:
+        delay_block = (
+            '<div class="delay-pill" data-delay hidden>'
+            "<span>延迟</span> <strong><span data-delay-value>276</span> ms</strong>"
+            "</div>"
+        )
+        profile_label = "VMess · 美国家宽"
+        total_default = "1.2 GB"
+        exit_default = "LA · NTT"
+    return f"""
 <section class="page page-home" data-page="home">
   <header class="page-head home-head">
     <div>
@@ -35,7 +51,7 @@ def page_home() -> str:
   <div class="home-stage">
     <button type="button" class="pill profile-pill" data-goto="subscriptions">
       <span class="pill-dot" aria-hidden="true"></span>
-      <span data-profile-label>VMess · 美国家宽</span>
+      <span data-profile-label>{profile_label}</span>
       <span class="pill-chevron" aria-hidden="true">›</span>
     </button>
 
@@ -50,7 +66,7 @@ def page_home() -> str:
       </button>
       <div class="connect-copy">
         <div class="connect-status" data-conn-label>点击连接</div>
-        <div class="delay-pill" data-delay hidden><span>延迟</span> <strong><span data-delay-value>276</span> ms</strong></div>
+        {delay_block}
       </div>
     </div>
 
@@ -68,8 +84,8 @@ def page_home() -> str:
 
     <div class="home-stats">
       <div class="stat"><span class="stat-k">实时</span><span class="stat-v" data-traffic-live>0 B/s</span></div>
-      <div class="stat"><span class="stat-k">总量</span><span class="stat-v">1.2 GB</span></div>
-      <div class="stat"><span class="stat-k">出口</span><span class="stat-v">LA · NTT</span></div>
+      <div class="stat"><span class="stat-k">总量</span><span class="stat-v" data-traffic-total>{total_default}</span></div>
+      <div class="stat"><span class="stat-k">出口</span><span class="stat-v" data-exit-label>{exit_default}</span></div>
     </div>
     <button type="button" class="btn block home-cta" data-goto="nodes">打开节点列表</button>
   </div>
@@ -381,9 +397,9 @@ def modals() -> str:
 </div>
 """
 
-def all_pages() -> str:
+def all_pages(theme: str = "tech") -> str:
     return "\n".join([
-        page_home(),
+        page_home(theme),
         page_proxies(),
         page_profiles(),
         page_profile_detail(),
@@ -457,6 +473,15 @@ def html_doc(theme: str, title: str) -> str:
             '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />\n'
             '  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />\n'
         )
+    sidebar_tag = "本地加速" if theme == "tech" else "Instrument 原型"
+    if theme == "tech":
+        sidebar_traffic = """          <div class="traffic-row"><span class="muted">上行</span> <strong data-traffic-up>↑ 0 B/s</strong></div>
+          <div class="traffic-row"><span class="muted">下行</span> <strong data-traffic-down>↓ 0 B/s</strong></div>
+          <div class="traffic-row"><span class="muted">总量</span> <strong data-traffic-total>0 B</strong></div>
+          <div class="traffic-row"><span class="muted">连接模式</span> <strong data-mode-label>VPN</strong></div>"""
+    else:
+        sidebar_traffic = """          <div class="traffic-row"><span class="muted">实时</span> <strong data-traffic-live>0 B/s</strong></div>
+          <div class="traffic-row"><span class="muted">模式</span> <strong data-mode-label>VPN</strong></div>"""
     return f"""<!DOCTYPE html>
 <html lang="zh-CN" data-theme="{theme}" data-appearance="system" data-color-scheme="dark">
 <head>
@@ -491,19 +516,18 @@ def html_doc(theme: str, title: str) -> str:
         <span class="logo-mark">L</span>
         <div>
           <strong>LisaSpeed</strong>
-          <div class="muted tiny sidebar-tag">{"Tech 原型" if theme == "tech" else "Instrument 原型"}</div>
+          <div class="muted tiny sidebar-tag">{sidebar_tag}</div>
         </div>
       </div>
       <nav class="nav">{shell_nav(theme)}</nav>
       <div class="sidebar-foot">
         <div class="traffic">
-          <div class="traffic-row"><span class="muted">实时</span> <strong data-traffic-live>0 B/s</strong></div>
-          <div class="traffic-row"><span class="muted">模式</span> <strong data-mode-label>VPN</strong></div>
+{sidebar_traffic}
         </div>
       </div>
     </aside>
     <main class="main">
-      {all_pages()}
+      {all_pages(theme)}
     </main>
   </div>
   {modals()}

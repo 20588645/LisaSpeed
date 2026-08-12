@@ -138,8 +138,26 @@
       const v = el.querySelector("[data-delay-value]");
       if (v && next === "connected") v.textContent = String(state.delay);
     });
+    const connected = next === "connected";
+    // Demo rates mirror the shipping app: home live = up+down; sidebar splits them.
+    const up = connected ? "96 KB/s" : "0 B/s";
+    const down = connected ? "32 KB/s" : "0 B/s";
+    const live = connected ? "128 KB/s" : "0 B/s";
+    const total = connected ? "2.4 GB" : "0 B";
+    $$("[data-traffic-up]").forEach((el) => {
+      el.textContent = connected ? `↑ ${up}` : "↑ 0 B/s";
+    });
+    $$("[data-traffic-down]").forEach((el) => {
+      el.textContent = connected ? `↓ ${down}` : "↓ 0 B/s";
+    });
     $$("[data-traffic-live]").forEach((el) => {
-      el.textContent = next === "connected" ? "128 KB/s" : "0 B/s";
+      el.textContent = live;
+    });
+    $$("[data-traffic-total]").forEach((el) => {
+      el.textContent = total;
+    });
+    $$("[data-exit-label]").forEach((el) => {
+      el.textContent = connected ? "US · NTT Americ…" : "—";
     });
   }
 
