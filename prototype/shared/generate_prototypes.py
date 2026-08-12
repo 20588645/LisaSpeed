@@ -22,19 +22,51 @@ def shell_nav(theme: str) -> str:
         )
     return "\n".join(items)
 
-def page_home(theme: str = "tech") -> str:
-    # Tech home v2: richer hero (status sub-line + duration/exit chips), compact
-    # mode switch with a per-mode hint, up/down/total stats, current-node CTA.
-    if theme == "tech":
-        return """
-<section class="page page-home" data-page="home">
-  <header class="page-head home-head">
+HOME_HEADER = """  <header class="page-head home-head">
     <div>
       <div class="brand-line"><strong>LisaSpeed</strong> <span class="chip">0.0.1</span></div>
       <p class="muted home-sub">一键连接 · 当前订阅与模式</p>
     </div>
     <button type="button" class="btn ghost add-btn" data-open-modal="add-profile"><span class="plus">+</span> 添加订阅</button>
-  </header>
+  </header>"""
+
+HOME_VARIANTS = [
+    ("home", "A · 居中单列"),
+    ("home-b", "B · 仪表盘"),
+    ("home-c", "C · 指挥条"),
+    ("home-d", "D · 极简"),
+]
+
+def variant_bar(active: str) -> str:
+    tabs = "".join(
+        f'<button type="button" class="vtab{" is-active" if pid == active else ""}" data-goto="{pid}">{label}</button>'
+        for pid, label in HOME_VARIANTS
+    )
+    return (
+        '<div class="variant-bar"><span class="muted tiny">布局方案</span>'
+        f'<div class="variant-tabs">{tabs}</div></div>'
+    )
+
+def connect_button(size: str = "") -> str:
+    cls = f"connect-btn {size}".strip()
+    return f"""<button type="button" class="{cls}" data-connect aria-label="连接切换">
+        <span class="connect-aura" aria-hidden="true"></span>
+        <span class="connect-ripple" aria-hidden="true"></span>
+        <span class="connect-ring" aria-hidden="true"></span>
+        <span class="connect-arc" aria-hidden="true"></span>
+        <span class="connect-disc">
+          <span class="connect-mark">L</span>
+        </span>
+      </button>"""
+
+def page_home(theme: str = "tech") -> str:
+    # Tech home v2: richer hero (status sub-line + duration/exit chips), compact
+    # mode switch with a per-mode hint, up/down/total stats, current-node CTA.
+    if theme == "tech":
+        return f"""
+<section class="page page-home" data-page="home">
+{HOME_HEADER}
+  {variant_bar("home")}
   <div class="home-stage">
     <button type="button" class="pill profile-pill" data-goto="subscriptions">
       <span class="pill-dot" aria-hidden="true"></span>
@@ -148,6 +180,143 @@ def page_home(theme: str = "tech") -> str:
       <div class="stat"><span class="stat-k">出口</span><span class="stat-v" data-exit-label>{exit_default}</span></div>
     </div>
     <button type="button" class="btn block home-cta" data-goto="nodes">打开节点列表</button>
+  </div>
+</section>
+"""
+
+def page_home_b() -> str:
+    """Layout B — dashboard split: hero card left, info cards right."""
+    return f"""
+<section class="page page-home-b" data-page="home-b">
+{HOME_HEADER}
+  {variant_bar("home-b")}
+  <div class="home-b-grid">
+    <div class="panel hb-hero">
+      <button type="button" class="pill profile-pill" data-goto="subscriptions">
+        <span class="pill-dot" aria-hidden="true"></span>
+        <span data-profile-label>VMess</span>
+        <span class="pill-chevron" aria-hidden="true">›</span>
+      </button>
+      {connect_button("md")}
+      <div class="connect-copy hb-copy">
+        <div class="connect-status" data-conn-label>点击连接</div>
+        <div class="connect-sub muted" data-conn-sub>流量未加密 · 点击开始加速</div>
+        <div class="connect-meta" data-conn-meta hidden>
+          <span class="conn-chip"><span class="conn-chip-k">时长</span><strong data-conn-timer>00:00</strong></span>
+        </div>
+      </div>
+      <div class="seg mode-seg hb-modes" role="group" aria-label="连接模式">
+        <button type="button" data-mode="proxy">代理</button>
+        <button type="button" data-mode="system">系统代理</button>
+        <button type="button" data-mode="vpn">VPN</button>
+      </div>
+      <p class="mode-hint muted" data-mode-hint>TUN 全局接管 · 所有应用与终端生效</p>
+    </div>
+    <div class="hb-side">
+      <div class="panel hb-card">
+        <div class="hb-k">出口</div>
+        <div class="hb-row"><span class="hb-v" data-exit-label>—</span></div>
+        <div class="hb-row"><span class="muted tiny">检测 IP</span><span class="mono tiny" data-exit-ip>—</span></div>
+      </div>
+      <div class="panel hb-card">
+        <div class="hb-k">流量</div>
+        <div class="hb-row"><span class="muted tiny">上行</span><span class="hb-v sm" data-traffic-up-val>0 B/s</span></div>
+        <div class="hb-row"><span class="muted tiny">下行</span><span class="hb-v sm" data-traffic-down-val>0 B/s</span></div>
+        <div class="hb-row"><span class="muted tiny">总量</span><span class="hb-v sm" data-traffic-total>0 B</span></div>
+      </div>
+      <button type="button" class="panel hb-card hb-link" data-goto="nodes">
+        <div class="hb-k">当前节点</div>
+        <div class="hb-row"><strong>美国家宽 § 0</strong><span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span></div>
+      </button>
+      <button type="button" class="panel hb-card hb-link" data-goto="subscriptions">
+        <div class="hb-k">订阅</div>
+        <div class="hb-row"><strong>VMess</strong><span class="muted tiny">今日已更新</span></div>
+      </button>
+    </div>
+  </div>
+</section>
+"""
+
+def page_home_c() -> str:
+    """Layout C — command banner: horizontal status bar + info card row."""
+    return f"""
+<section class="page page-home-c" data-page="home-c">
+{HOME_HEADER}
+  {variant_bar("home-c")}
+  <div class="panel hc-banner">
+    <div class="hc-left">
+      {connect_button("sm")}
+      <div class="hc-copy">
+        <div class="connect-status" data-conn-label>点击连接</div>
+        <div class="connect-sub muted" data-conn-sub>流量未加密 · 点击开始加速</div>
+        <div class="connect-meta" data-conn-meta hidden>
+          <span class="conn-chip"><span class="conn-chip-k">时长</span><strong data-conn-timer>00:00</strong></span>
+          <span class="conn-chip"><span class="conn-chip-k">出口</span><strong data-conn-exit>US · NTT America</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="hc-right">
+      <div class="seg mode-seg hc-modes" role="group" aria-label="连接模式">
+        <button type="button" data-mode="proxy">代理</button>
+        <button type="button" data-mode="system">系统代理</button>
+        <button type="button" data-mode="vpn">VPN</button>
+      </div>
+      <p class="mode-hint muted tiny" data-mode-hint>TUN 全局接管 · 所有应用与终端生效</p>
+    </div>
+  </div>
+  <div class="hc-grid">
+    <div class="panel hb-card">
+      <div class="hb-k">流量</div>
+      <div class="hb-row"><span class="muted tiny">上行</span><span class="hb-v sm" data-traffic-up-val>0 B/s</span></div>
+      <div class="hb-row"><span class="muted tiny">下行</span><span class="hb-v sm" data-traffic-down-val>0 B/s</span></div>
+      <div class="hb-row"><span class="muted tiny">总量</span><span class="hb-v sm" data-traffic-total>0 B</span></div>
+    </div>
+    <button type="button" class="panel hb-card hb-link" data-goto="nodes">
+      <div class="hb-k">当前节点</div>
+      <div class="hb-row"><strong>美国家宽 § 0</strong><span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span></div>
+      <div class="muted tiny">点击切换线路</div>
+    </button>
+    <button type="button" class="panel hb-card hb-link" data-goto="subscriptions">
+      <div class="hb-k">订阅</div>
+      <div class="hb-row"><strong>VMess</strong><span class="muted tiny">今日已更新</span></div>
+      <div class="muted tiny">剩余流量充足</div>
+    </button>
+  </div>
+</section>
+"""
+
+def page_home_d() -> str:
+    """Layout D — zen focus: oversized button, inline stats, text-pill modes."""
+    return f"""
+<section class="page page-home-d" data-page="home-d">
+{HOME_HEADER}
+  {variant_bar("home-d")}
+  <div class="home-d-stage">
+    <button type="button" class="pill profile-pill" data-goto="subscriptions">
+      <span class="pill-dot" aria-hidden="true"></span>
+      <span data-profile-label>VMess</span>
+      <span class="pill-chevron" aria-hidden="true">›</span>
+    </button>
+    {connect_button("xl")}
+    <div class="connect-copy hd-copy">
+      <div class="connect-status" data-conn-label>点击连接</div>
+      <div class="connect-sub muted" data-conn-sub>流量未加密 · 点击开始加速</div>
+      <div class="connect-meta" data-conn-meta hidden>
+        <span class="conn-chip"><span class="conn-chip-k">时长</span><strong data-conn-timer>00:00</strong></span>
+        <span class="conn-chip"><span class="conn-chip-k">出口</span><strong data-conn-exit>US · NTT America</strong></span>
+      </div>
+    </div>
+    <div class="hd-stats">
+      <span data-traffic-up>↑ 0 B/s</span>
+      <span data-traffic-down>↓ 0 B/s</span>
+      <span>共 <span data-traffic-total>0 B</span></span>
+    </div>
+    <div class="hd-modes" role="group" aria-label="连接模式">
+      <button type="button" data-mode="proxy">代理</button>
+      <button type="button" data-mode="system">系统代理</button>
+      <button type="button" data-mode="vpn">VPN</button>
+    </div>
+    <button type="button" class="hd-node" data-goto="nodes">节点 · 美国家宽 § 0 · 182 ms ›</button>
   </div>
 </section>
 """
@@ -458,8 +627,12 @@ def modals() -> str:
 """
 
 def all_pages(theme: str = "tech") -> str:
+    home_variants = (
+        [page_home_b(), page_home_c(), page_home_d()] if theme == "tech" else []
+    )
     return "\n".join([
         page_home(theme),
+        *home_variants,
         page_proxies(),
         page_profiles(),
         page_profile_detail(),
@@ -1099,6 +1272,82 @@ html[data-conn="connected"] .connect-status { color: var(--ok); }
 }
 .node-cta-right { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; }
 
+/* Home layout variants (prototype exploration) */
+.variant-bar { display: flex; align-items: center; gap: 10px; margin: -4px 0 16px; }
+.variant-tabs {
+  display: inline-flex; gap: 4px; padding: 3px;
+  border-radius: 999px; border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-elev) 60%, transparent);
+}
+.vtab {
+  border: 0; background: transparent; color: var(--muted);
+  font-size: 12px; padding: 5px 10px; border-radius: 999px;
+  transition: background .18s ease, color .18s ease;
+}
+.vtab:hover { color: var(--text); }
+.vtab.is-active {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent); font-weight: 600;
+}
+
+.connect-btn.md { width: 118px; height: 118px; }
+.connect-btn.md .connect-disc { inset: 18px; }
+.connect-btn.md .connect-mark { font-size: 26px; }
+.connect-btn.sm { width: 88px; height: 88px; }
+.connect-btn.sm .connect-disc { inset: 14px; }
+.connect-btn.sm .connect-mark { font-size: 20px; }
+.connect-btn.xl { width: 186px; height: 186px; }
+.connect-btn.xl .connect-disc { inset: 28px; }
+.connect-btn.xl .connect-mark { font-size: 42px; }
+
+.home-b-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; max-width: 860px; }
+.hb-hero { display: grid; justify-items: center; gap: 12px; padding: 24px 18px 18px; align-content: start; }
+.hb-copy { min-height: 0 !important; }
+.hb-modes { width: 100%; }
+.hb-modes button { min-height: 38px; font-size: 12.5px; }
+.hb-side { display: grid; gap: 12px; align-content: start; }
+.hb-card { display: grid; gap: 8px; padding: 14px 16px; }
+.hb-k {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.hb-v { font-family: var(--mono); font-weight: 700; font-size: 15px; }
+.hb-v.sm { font-size: 13px; }
+.hb-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.hb-link { text-align: left; color: var(--text); cursor: pointer; width: 100%; }
+.hb-link:hover { border-color: var(--accent); }
+
+.hc-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 18px; padding: 16px 20px; max-width: 860px;
+}
+.hc-left { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.hc-copy { display: grid; gap: 5px; }
+.hc-right { display: grid; gap: 8px; justify-items: end; }
+.hc-modes { width: 300px; }
+.hc-modes button { min-height: 34px; font-size: 12px; padding: 6px 8px; }
+.hc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 860px; margin-top: 14px; }
+
+.home-d-stage {
+  display: grid; justify-items: center; gap: 18px;
+  padding: 20px 0 40px; width: min(420px, 100%); margin: 0 auto;
+}
+.hd-copy { min-height: 92px; }
+.hd-stats { font-family: var(--mono); font-size: 13px; color: var(--muted); display: flex; gap: 16px; }
+.hd-modes { display: inline-flex; gap: 6px; }
+.hd-modes button {
+  border: 1px solid var(--line); background: transparent; color: var(--muted);
+  border-radius: 999px; padding: 6px 14px; font-size: 12px;
+  transition: border-color .18s ease, color .18s ease, background .18s ease;
+}
+.hd-modes button:hover { color: var(--text); border-color: var(--line-strong, var(--accent)); }
+.hd-modes button.is-active {
+  border-color: var(--accent); color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.hd-node { border: 0; background: transparent; color: var(--muted); font-size: 13px; padding: 6px 10px; }
+.hd-node:hover { color: var(--text); }
+
 .eyebrow {
   margin: 0 0 4px;
   font-size: 11px;
@@ -1337,6 +1586,8 @@ html[data-theme="tech"]:not([data-conn="connected"]):not([data-conn="connecting"
 }
 html[data-theme="tech"][data-conn="connected"] .home-stats::before { opacity: 0.9; }
 html[data-theme="tech"]:not([data-conn="connected"]) .home-stats .stat-v { color: var(--muted); }
+html[data-theme="tech"]:not([data-conn="connected"]) .hb-v { color: var(--muted); }
+html[data-theme="tech"][data-conn="connected"] .hd-stats { color: var(--text); }
 [data-theme="tech"] .page-head h1 { font-weight: 800; }
 [data-theme="tech"] .log-line:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
 [data-theme="tech"] .modal-choice:hover {

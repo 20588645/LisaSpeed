@@ -155,6 +155,9 @@
       el.classList.toggle("is-active", el.getAttribute("data-nav") === id);
     });
     const parentNav = {
+      "home-b": "home",
+      "home-c": "home",
+      "home-d": "home",
       "subscription-detail": "subscriptions",
       "settings-general": "settings",
       "settings-connection": "settings",
@@ -232,6 +235,9 @@
     });
     $$("[data-conn-exit]").forEach((el) => {
       el.textContent = "US · NTT America";
+    });
+    $$("[data-exit-ip]").forEach((el) => {
+      el.textContent = connected ? "192.220.58.72" : "—";
     });
     if (connected) {
       startDemo(seedSeconds);
