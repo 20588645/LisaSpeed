@@ -108,6 +108,8 @@
       "statsLive": "实时",
       "statsTotal": "总量",
       "statsExit": "出口",
+      "statsUp": "上行",
+      "statsDown": "下行",
       "delay": "延迟",
       "sidebarTag": "本地加速"
     },

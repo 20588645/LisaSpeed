@@ -136,7 +136,14 @@ class TechSidebar extends ConsumerWidget {
               ),
               child: Column(
                 children: [
-                  _TrafficRow(label: t.pages.home.statsLive, value: stats.downlink.toInt().speed()),
+                  _TrafficRow(label: t.pages.home.statsUp, value: '↑ ${stats.uplink.toInt().speed()}'),
+                  const Gap(8),
+                  _TrafficRow(label: t.pages.home.statsDown, value: '↓ ${stats.downlink.toInt().speed()}'),
+                  const Gap(8),
+                  _TrafficRow(
+                    label: t.pages.home.statsTotal,
+                    value: (stats.uplinkTotal + stats.downlinkTotal).toInt().size(),
+                  ),
                   const Gap(8),
                   _TrafficRow(label: t.pages.home.connectionMode, value: mode.presentShort(t)),
                 ],

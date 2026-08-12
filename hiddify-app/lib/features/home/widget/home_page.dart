@@ -9,7 +9,6 @@ import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/home/widget/connection_button.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
-import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
@@ -164,7 +163,6 @@ class _HomeStage extends ConsumerWidget {
           ),
           const Gap(18),
           const ConnectionButton(),
-          const ActiveProxyDelayIndicator(),
           const Gap(18),
           Container(
             width: double.infinity,
@@ -223,9 +221,9 @@ class _HomeStage extends ConsumerWidget {
             child: IntrinsicHeight(
               child: Row(
                 children: [
-                  _HomeStat(label: t.pages.home.statsLive, value: stats.downlink.toInt().speed()),
+                  _HomeStat(label: t.pages.home.statsLive, value: (stats.uplink + stats.downlink).toInt().speed()),
                   VerticalDivider(width: 1, thickness: 1, color: ConnectionButtonTheme.lineOf(context)),
-                  _HomeStat(label: t.pages.home.statsTotal, value: stats.downlinkTotal.toInt().size()),
+                  _HomeStat(label: t.pages.home.statsTotal, value: (stats.uplinkTotal + stats.downlinkTotal).toInt().size()),
                   VerticalDivider(width: 1, thickness: 1, color: ConnectionButtonTheme.lineOf(context)),
                   _HomeStat(label: t.pages.home.statsExit, value: exitLabel()),
                 ],

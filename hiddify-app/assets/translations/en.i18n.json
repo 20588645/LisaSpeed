@@ -108,6 +108,8 @@
       "statsLive": "Live",
       "statsTotal": "Total",
       "statsExit": "Exit",
+      "statsUp": "Upload",
+      "statsDown": "Download",
       "delay": "Latency",
       "sidebarTag": "Local speed"
     },
