@@ -7,6 +7,7 @@ import (
 	"net/netip"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	C "github.com/sagernet/sing-box/constant"
@@ -19,7 +20,15 @@ import (
 
 type TunnelService struct {
 	UnimplementedTunnelServiceServer
-	box *libbox.BoxService
+
+	// mu guards box and hostsGen. hostsGen invalidates in-flight async
+	// hosts-override writes: Start bumps it and hands the value to the
+	// resolver goroutine; Stop/Exit bump it again so a write that finishes
+	// after teardown becomes a no-op instead of leaving a stale block in
+	// /etc/hosts.
+	mu       sync.Mutex
+	box      *libbox.BoxService
+	hostsGen uint64
 }
 
 // tunnelWorkDir is writable by the root LaunchDaemon. macOS system volume (/)
@@ -64,17 +73,38 @@ func (s *TunnelService) Start(ctx context.Context, in *TunnelStartRequest) (*Tun
 			Message: err.Error(),
 		}, err
 	}
+	s.mu.Lock()
 	s.box = instance
+	s.hostsGen++
+	gen := s.hostsGen
+	s.mu.Unlock()
 	// Hosts/DNS maintenance must not block the Start RPC (client budget is
 	// tight). Run after TUN is up so connect can succeed first.
-	go func(dir string) {
-		restoreDNSOverride(dir)
-		applyPublicDNSOverride(dir)
-	}(workDir)
+	go s.applyHostsOverrideAsync(workDir, gen)
 
 	return &TunnelResponse{
 		Message: "OK",
 	}, err
+}
+
+// applyHostsOverrideAsync cleans stale DNS/hosts state, then resolves and
+// installs the poison-override hosts block. Resolution is slow (serial dig
+// with per-query timeouts), so a quick connect->disconnect used to lose a
+// race: Stop cleaned /etc/hosts before this goroutine wrote the block, which
+// then stayed behind until the next connect. The generation check makes any
+// write that lands after Stop/Exit (or a newer Start) a no-op.
+func (s *TunnelService) applyHostsOverrideAsync(workDir string, gen uint64) {
+	restoreDNSOverride(workDir)
+	body, ok := resolvePoisonHostsBlock()
+	if !ok {
+		return
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.hostsGen != gen || s.box == nil {
+		return
+	}
+	_ = writePoisonHostsBlock(body)
 }
 
 func makeTunnelConfig(in *TunnelStartRequest, workDir string) option.Options {
@@ -342,25 +372,28 @@ func resolveHostPrefixes(host string) []netip.Prefix {
 
 func (s *TunnelService) Stop(ctx context.Context, _ *hcommon.Empty) (*TunnelResponse, error) {
 	workDir, _ := ensureTunnelWorkDir()
-	if s.box == nil {
+	s.mu.Lock()
+	s.hostsGen++ // invalidate any in-flight async hosts-override write
+	box := s.box
+	s.box = nil
+	s.mu.Unlock()
+	if box == nil {
 		restoreDNSOverride(workDir)
 		return &TunnelResponse{
 			Message: "Not Started",
 		}, nil
 	}
-	err := s.box.Close()
+	err := box.Close()
+	restoreDNSOverride(workDir)
 	if err != nil {
-		restoreDNSOverride(workDir)
 		return &TunnelResponse{
 			Message: err.Error(),
 		}, err
 	}
-	s.box = nil
-	restoreDNSOverride(workDir)
 
 	return &TunnelResponse{
 		Message: "OK",
-	}, err
+	}, nil
 }
 
 func (s *TunnelService) Status(ctx context.Context, _ *hcommon.Empty) (*TunnelResponse, error) {
@@ -371,9 +404,13 @@ func (s *TunnelService) Status(ctx context.Context, _ *hcommon.Empty) (*TunnelRe
 
 func (s *TunnelService) Exit(ctx context.Context, _ *hcommon.Empty) (*TunnelResponse, error) {
 	workDir, _ := ensureTunnelWorkDir()
-	if s.box != nil {
-		s.box.Close()
-		s.box = nil
+	s.mu.Lock()
+	s.hostsGen++ // invalidate any in-flight async hosts-override write
+	box := s.box
+	s.box = nil
+	s.mu.Unlock()
+	if box != nil {
+		box.Close()
 	}
 	restoreDNSOverride(workDir)
 	go func() {

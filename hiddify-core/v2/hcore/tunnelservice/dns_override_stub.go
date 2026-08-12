@@ -2,6 +2,8 @@
 
 package tunnelservice
 
-func applyPublicDNSOverride(workDir string) {}
+func resolvePoisonHostsBlock() (string, bool) { return "", false }
+
+func writePoisonHostsBlock(body string) error { return nil }
 
 func restoreDNSOverride(workDir string) {}

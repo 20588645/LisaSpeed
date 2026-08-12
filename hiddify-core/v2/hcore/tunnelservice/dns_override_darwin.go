@@ -54,15 +54,6 @@ var poisonOverrideHosts = []string{
 	"gist.githubusercontent.com",
 }
 
-// applyPublicDNSOverride installs /etc/hosts overrides for DNS-poisoned
-// domains (resolved via 8.8.8.8). This does NOT replace system DNS, so
-// EasyConnect/corp resolvers keep working for everything else. Hosts file
-// entries take precedence over DNS, so x.com stops resolving to 127.0.0.1.
-func applyPublicDNSOverride(workDir string) {
-	_ = workDir
-	_ = applyPoisonHostsOverride()
-}
-
 func restoreDNSOverride(workDir string) {
 	_ = removePoisonHostsOverride()
 
@@ -96,7 +87,14 @@ func restoreDNSOverride(workDir string) {
 	flushDNSCache()
 }
 
-func applyPoisonHostsOverride() error {
+// resolvePoisonHostsBlock resolves the poison-override domains via 8.8.8.8 and
+// renders the /etc/hosts block without touching the file. This is the slow
+// part (serial dig with per-query timeouts), kept separate from the write so
+// the caller can re-check tunnel state after resolution finishes. This does
+// NOT replace system DNS, so EasyConnect/corp resolvers keep working for
+// everything else; hosts entries take precedence over DNS, so x.com stops
+// resolving to 127.0.0.1. Returns ok=false when nothing resolved.
+func resolvePoisonHostsBlock() (string, bool) {
 	var body strings.Builder
 	body.WriteString(hostsMarkerBegin + "\n")
 	for _, host := range poisonOverrideHosts {
@@ -120,15 +118,21 @@ func applyPoisonHostsOverride() error {
 	}
 	body.WriteString(hostsMarkerEnd + "\n")
 	if strings.Count(body.String(), "\n") <= 2 {
-		return fmt.Errorf("no public A records for poison overrides")
+		return "", false
 	}
+	return body.String(), true
+}
 
+// writePoisonHostsBlock replaces any existing override block in /etc/hosts
+// with a previously resolved one. Fast (no network), so callers may hold a
+// lock across it to serialize against concurrent cleanup.
+func writePoisonHostsBlock(body string) error {
 	raw, err := os.ReadFile(hostsPath)
 	if err != nil {
 		return err
 	}
 	base := stripHostsBlock(string(raw))
-	out := strings.TrimRight(base, "\n") + "\n\n" + body.String()
+	out := strings.TrimRight(base, "\n") + "\n\n" + body
 	if err := os.WriteFile(hostsPath, []byte(out), 0o644); err != nil {
 		return err
 	}
