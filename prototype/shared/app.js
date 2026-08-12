@@ -155,7 +155,7 @@
       el.classList.toggle("is-active", el.getAttribute("data-nav") === id);
     });
     const parentNav = {
-      "home-b": "home",
+      "home-a": "home",
       "home-c": "home",
       "home-d": "home",
       "subscription-detail": "subscriptions",

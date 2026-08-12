@@ -31,8 +31,8 @@ HOME_HEADER = """  <header class="page-head home-head">
   </header>"""
 
 HOME_VARIANTS = [
-    ("home", "A · 居中单列"),
-    ("home-b", "B · 仪表盘"),
+    ("home", "仪表盘 · 已定稿"),
+    ("home-a", "A · 居中单列"),
     ("home-c", "C · 指挥条"),
     ("home-d", "D · 极简"),
 ]
@@ -60,65 +60,56 @@ def connect_button(size: str = "") -> str:
       </button>"""
 
 def page_home(theme: str = "tech") -> str:
-    # Tech home v2: richer hero (status sub-line + duration/exit chips), compact
-    # mode switch with a per-mode hint, up/down/total stats, current-node CTA.
+    # Tech home = adopted dashboard split (prototype layout B, shipped in the
+    # Flutter app): hero card left, exit/traffic/node/subscription cards right.
     if theme == "tech":
         return f"""
 <section class="page page-home" data-page="home">
 {HOME_HEADER}
   {variant_bar("home")}
-  <div class="home-stage">
-    <button type="button" class="pill profile-pill" data-goto="subscriptions">
-      <span class="pill-dot" aria-hidden="true"></span>
-      <span data-profile-label>VMess</span>
-      <span class="pill-chevron" aria-hidden="true">›</span>
-    </button>
-
-    <div class="connect-zone">
-      <button type="button" class="connect-btn" data-connect aria-label="连接切换">
-        <span class="connect-aura" aria-hidden="true"></span>
-        <span class="connect-ripple" aria-hidden="true"></span>
-        <span class="connect-ring" aria-hidden="true"></span>
-        <span class="connect-arc" aria-hidden="true"></span>
-        <span class="connect-disc">
-          <span class="connect-mark">L</span>
-        </span>
+  <div class="home-b-grid">
+    <div class="panel hb-hero">
+      <button type="button" class="pill profile-pill" data-goto="subscriptions">
+        <span class="pill-dot" aria-hidden="true"></span>
+        <span data-profile-label>VMess</span>
+        <span class="pill-chevron" aria-hidden="true">›</span>
       </button>
-      <div class="connect-copy">
+      {connect_button("md")}
+      <div class="connect-copy hb-copy">
         <div class="connect-status" data-conn-label>点击连接</div>
         <div class="connect-sub muted" data-conn-sub>流量未加密 · 点击开始加速</div>
         <div class="connect-meta" data-conn-meta hidden>
           <span class="conn-chip"><span class="conn-chip-k">时长</span><strong data-conn-timer>00:00</strong></span>
-          <span class="conn-chip"><span class="conn-chip-k">出口</span><strong data-conn-exit>US · NTT America</strong></span>
         </div>
       </div>
-    </div>
-
-    <div class="mode-switch mode-switch-lite" role="group" aria-label="连接模式">
-      <div class="seg mode-seg">
+      <div class="seg mode-seg hb-modes" role="group" aria-label="连接模式">
         <button type="button" data-mode="proxy">代理</button>
         <button type="button" data-mode="system">系统代理</button>
         <button type="button" data-mode="vpn">VPN</button>
       </div>
       <p class="mode-hint muted" data-mode-hint>TUN 全局接管 · 所有应用与终端生效</p>
     </div>
-
-    <div class="home-stats">
-      <div class="stat"><span class="stat-k">上行</span><span class="stat-v" data-traffic-up-val>0 B/s</span></div>
-      <div class="stat"><span class="stat-k">下行</span><span class="stat-v" data-traffic-down-val>0 B/s</span></div>
-      <div class="stat"><span class="stat-k">总量</span><span class="stat-v" data-traffic-total>0 B</span></div>
+    <div class="hb-side">
+      <div class="panel hb-card">
+        <div class="hb-k">出口</div>
+        <div class="hb-row"><span class="muted tiny">线路</span><span class="hb-v sm" data-exit-label>—</span></div>
+        <div class="hb-row"><span class="muted tiny">检测 IP</span><span class="hb-v sm hb-ip" data-exit-ip>—</span></div>
+      </div>
+      <div class="panel hb-card">
+        <div class="hb-k">流量</div>
+        <div class="hb-row"><span class="muted tiny">上行</span><span class="hb-v sm" data-traffic-up-val>0 B/s</span></div>
+        <div class="hb-row"><span class="muted tiny">下行</span><span class="hb-v sm" data-traffic-down-val>0 B/s</span></div>
+        <div class="hb-row"><span class="muted tiny">总量</span><span class="hb-v sm" data-traffic-total>0 B</span></div>
+      </div>
+      <button type="button" class="panel hb-card hb-link" data-goto="nodes">
+        <div class="hb-k">当前节点</div>
+        <div class="hb-row"><strong>美国家宽 § 0</strong><span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span></div>
+      </button>
+      <button type="button" class="panel hb-card hb-link" data-goto="subscriptions">
+        <div class="hb-k">订阅</div>
+        <div class="hb-row"><strong>VMess</strong><span class="muted tiny">今日已更新</span></div>
+      </button>
     </div>
-
-    <button type="button" class="btn block node-cta" data-goto="nodes">
-      <span class="node-cta-left">
-        <span class="node-cta-kicker">当前节点</span>
-        <strong data-node-label>美国家宽 § 0</strong>
-      </span>
-      <span class="node-cta-right">
-        <span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span>
-        <span class="pill-chevron" aria-hidden="true">›</span>
-      </span>
-    </button>
   </div>
 </section>
 """
@@ -184,55 +175,56 @@ def page_home(theme: str = "tech") -> str:
 </section>
 """
 
-def page_home_b() -> str:
-    """Layout B — dashboard split: hero card left, info cards right."""
+def page_home_a() -> str:
+    """Layout A — centered single column (the pre-dashboard polished home)."""
     return f"""
-<section class="page page-home-b" data-page="home-b">
+<section class="page page-home-a" data-page="home-a">
 {HOME_HEADER}
-  {variant_bar("home-b")}
-  <div class="home-b-grid">
-    <div class="panel hb-hero">
-      <button type="button" class="pill profile-pill" data-goto="subscriptions">
-        <span class="pill-dot" aria-hidden="true"></span>
-        <span data-profile-label>VMess</span>
-        <span class="pill-chevron" aria-hidden="true">›</span>
-      </button>
-      {connect_button("md")}
-      <div class="connect-copy hb-copy">
+  {variant_bar("home-a")}
+  <div class="home-stage">
+    <button type="button" class="pill profile-pill" data-goto="subscriptions">
+      <span class="pill-dot" aria-hidden="true"></span>
+      <span data-profile-label>VMess</span>
+      <span class="pill-chevron" aria-hidden="true">›</span>
+    </button>
+
+    <div class="connect-zone">
+      {connect_button()}
+      <div class="connect-copy">
         <div class="connect-status" data-conn-label>点击连接</div>
         <div class="connect-sub muted" data-conn-sub>流量未加密 · 点击开始加速</div>
         <div class="connect-meta" data-conn-meta hidden>
           <span class="conn-chip"><span class="conn-chip-k">时长</span><strong data-conn-timer>00:00</strong></span>
+          <span class="conn-chip"><span class="conn-chip-k">出口</span><strong data-conn-exit>US · NTT America</strong></span>
         </div>
       </div>
-      <div class="seg mode-seg hb-modes" role="group" aria-label="连接模式">
+    </div>
+
+    <div class="mode-switch mode-switch-lite" role="group" aria-label="连接模式">
+      <div class="seg mode-seg">
         <button type="button" data-mode="proxy">代理</button>
         <button type="button" data-mode="system">系统代理</button>
         <button type="button" data-mode="vpn">VPN</button>
       </div>
       <p class="mode-hint muted" data-mode-hint>TUN 全局接管 · 所有应用与终端生效</p>
     </div>
-    <div class="hb-side">
-      <div class="panel hb-card">
-        <div class="hb-k">出口</div>
-        <div class="hb-row"><span class="muted tiny">线路</span><span class="hb-v sm" data-exit-label>—</span></div>
-        <div class="hb-row"><span class="muted tiny">检测 IP</span><span class="hb-v sm hb-ip" data-exit-ip>—</span></div>
-      </div>
-      <div class="panel hb-card">
-        <div class="hb-k">流量</div>
-        <div class="hb-row"><span class="muted tiny">上行</span><span class="hb-v sm" data-traffic-up-val>0 B/s</span></div>
-        <div class="hb-row"><span class="muted tiny">下行</span><span class="hb-v sm" data-traffic-down-val>0 B/s</span></div>
-        <div class="hb-row"><span class="muted tiny">总量</span><span class="hb-v sm" data-traffic-total>0 B</span></div>
-      </div>
-      <button type="button" class="panel hb-card hb-link" data-goto="nodes">
-        <div class="hb-k">当前节点</div>
-        <div class="hb-row"><strong>美国家宽 § 0</strong><span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span></div>
-      </button>
-      <button type="button" class="panel hb-card hb-link" data-goto="subscriptions">
-        <div class="hb-k">订阅</div>
-        <div class="hb-row"><strong>VMess</strong><span class="muted tiny">今日已更新</span></div>
-      </button>
+
+    <div class="home-stats">
+      <div class="stat"><span class="stat-k">上行</span><span class="stat-v" data-traffic-up-val>0 B/s</span></div>
+      <div class="stat"><span class="stat-k">下行</span><span class="stat-v" data-traffic-down-val>0 B/s</span></div>
+      <div class="stat"><span class="stat-k">总量</span><span class="stat-v" data-traffic-total>0 B</span></div>
     </div>
+
+    <button type="button" class="btn block node-cta" data-goto="nodes">
+      <span class="node-cta-left">
+        <span class="node-cta-kicker">当前节点</span>
+        <strong data-node-label>美国家宽 § 0</strong>
+      </span>
+      <span class="node-cta-right">
+        <span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span>
+        <span class="pill-chevron" aria-hidden="true">›</span>
+      </span>
+    </button>
   </div>
 </section>
 """
@@ -336,7 +328,7 @@ def page_proxies() -> str:
             f'<button type="button" class="list-row node-row {"is-active" if active else ""}" '
             f'data-action="toast" data-toast="已选择：{name}">'
             f'<div class="list-main"><div class="row gap">{badge}<strong>{name}</strong></div>'
-            f'<div class="muted">{meta} · vmess</div></div>'
+            f'<div class="row gap node-tags"><span class="tag">{meta}</span><span class="tag tag-mono">vmess</span></div></div>'
             f'<span class="latency delay-{tone}"><span class="latency-dot"></span>{delay} ms</span></button>'
         )
     return f"""
@@ -352,7 +344,7 @@ def page_proxies() -> str:
       <button type="button" class="btn primary" data-action="toast" data-toast="正在测速…">测速</button>
     </div>
   </header>
-  <div class="toolbar-note muted">共 5 个节点 · 点击切换</div>
+  <div class="toolbar-note row gap"><span class="count-chip">5</span><span class="muted">个节点 · 点击切换</span></div>
   <div class="list">{rows}</div>
 </section>
 """
@@ -376,7 +368,10 @@ def page_profiles() -> str:
           <span class="tag tag-active">使用中</span>
           <span class="tag">订阅</span>
         </div>
-        <div class="muted">今日已更新 · 剩余流量充足</div>
+        <div class="sub-usage">
+          <div class="usage-bar"><span class="usage-fill" style="width: 38%"></span></div>
+          <div class="muted tiny">已用 4.6 GB / 12 GB · 今日已更新 · 30 天后到期</div>
+        </div>
       </div>
       <div class="row gap actions">
         <button type="button" class="btn tiny" data-action="toast" data-toast="正在更新订阅">更新</button>
@@ -552,7 +547,7 @@ def page_logs() -> str:
   <div class="log-shell panel">
     <div class="log-toolbar">
       <span class="muted tiny">core · app</span>
-      <span class="mono tiny muted">live</span>
+      <span class="live-badge"><span class="live-dot" aria-hidden="true"></span>live</span>
     </div>
     <div class="log-panel">{lines}</div>
   </div>
@@ -628,7 +623,7 @@ def modals() -> str:
 
 def all_pages(theme: str = "tech") -> str:
     home_variants = (
-        [page_home_b(), page_home_c(), page_home_d()] if theme == "tech" else []
+        [page_home_a(), page_home_c(), page_home_d()] if theme == "tech" else []
     )
     return "\n".join([
         page_home(theme),
@@ -1272,6 +1267,38 @@ html[data-conn="connected"] .connect-status { color: var(--ok); }
 }
 .node-cta-right { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; }
 
+/* List/table garnish shared across pages */
+.node-tags { margin-top: 7px; }
+.tag.tag-mono { font-family: var(--mono); letter-spacing: 0.02em; }
+.count-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 7px;
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.sub-usage { display: grid; gap: 7px; margin-top: 2px; }
+.usage-bar {
+  height: 6px; border-radius: 999px; overflow: hidden;
+  background: color-mix(in srgb, var(--muted) 16%, transparent);
+}
+.usage-fill {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+.live-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 12px; color: var(--accent);
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
 /* Home layout variants (prototype exploration) */
 .variant-bar { display: flex; align-items: center; gap: 10px; margin: -4px 0 16px; }
 .variant-tabs {
@@ -1613,6 +1640,73 @@ html[data-theme="tech"][data-color-scheme="light"] .connect-disc {
 html[data-theme="tech"][data-color-scheme="light"] .connect-mark {
   background: linear-gradient(160deg, #102033, var(--accent));
   -webkit-background-clip: text; background-clip: text;
+}
+/* Tech restyle pass — interaction & control polish across all pages */
+[data-theme="tech"] .list-row:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--glow-soft, none);
+}
+[data-theme="tech"] .setting-chevron { transition: transform .18s ease, color .18s ease; }
+[data-theme="tech"] .setting-card:hover .setting-chevron {
+  transform: translateX(3px);
+  color: var(--accent);
+}
+[data-theme="tech"] .btn.primary:hover { filter: brightness(1.06); }
+[data-theme="tech"] .btn.ghost:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+[data-theme="tech"] .form-section-title { display: flex; align-items: center; gap: 8px; }
+[data-theme="tech"] .form-section-title::before {
+  content: "";
+  width: 3px; height: 12px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+}
+[data-theme="tech"] .check.switch input {
+  appearance: none;
+  -webkit-appearance: none;
+  order: 2;
+  width: 36px; height: 20px; margin: 0;
+  border-radius: 999px; position: relative;
+  background: color-mix(in srgb, var(--muted) 26%, transparent);
+  border: 1px solid var(--line);
+  transition: background .2s ease, border-color .2s ease;
+  cursor: pointer; flex: 0 0 auto;
+}
+[data-theme="tech"] .check.switch input::before {
+  content: "";
+  position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text); opacity: 0.75;
+  transition: transform .2s var(--ease, ease), background .2s ease, opacity .2s ease;
+}
+[data-theme="tech"] .check.switch input:checked {
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+[data-theme="tech"] .check.switch input:checked::before {
+  transform: translateX(16px);
+  background: var(--accent); opacity: 1;
+}
+[data-theme="tech"] .log-line:nth-child(even) {
+  background: color-mix(in srgb, var(--bg-elev) 45%, transparent);
+}
+[data-theme="tech"] .log-line:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+[data-theme="tech"] .about-logo .logo-mark.xl {
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--accent) 8%, transparent),
+    var(--glow-soft, 0 0 0 transparent);
+}
+[data-theme="tech"] .main::-webkit-scrollbar { width: 10px; }
+[data-theme="tech"] .main::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+[data-theme="tech"] .main::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--muted) 45%, transparent);
+}
+[data-theme="tech"] :focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  outline-offset: 2px;
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

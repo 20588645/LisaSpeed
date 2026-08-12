@@ -61,7 +61,71 @@
     </div>
     <button type="button" class="btn ghost add-btn" data-open-modal="add-profile"><span class="plus">+</span> 添加订阅</button>
   </header>
-  <div class="variant-bar"><span class="muted tiny">布局方案</span><div class="variant-tabs"><button type="button" class="vtab is-active" data-goto="home">A · 居中单列</button><button type="button" class="vtab" data-goto="home-b">B · 仪表盘</button><button type="button" class="vtab" data-goto="home-c">C · 指挥条</button><button type="button" class="vtab" data-goto="home-d">D · 极简</button></div></div>
+  <div class="variant-bar"><span class="muted tiny">布局方案</span><div class="variant-tabs"><button type="button" class="vtab is-active" data-goto="home">仪表盘 · 已定稿</button><button type="button" class="vtab" data-goto="home-a">A · 居中单列</button><button type="button" class="vtab" data-goto="home-c">C · 指挥条</button><button type="button" class="vtab" data-goto="home-d">D · 极简</button></div></div>
+  <div class="home-b-grid">
+    <div class="panel hb-hero">
+      <button type="button" class="pill profile-pill" data-goto="subscriptions">
+        <span class="pill-dot" aria-hidden="true"></span>
+        <span data-profile-label>VMess</span>
+        <span class="pill-chevron" aria-hidden="true">›</span>
+      </button>
+      <button type="button" class="connect-btn md" data-connect aria-label="连接切换">
+        <span class="connect-aura" aria-hidden="true"></span>
+        <span class="connect-ripple" aria-hidden="true"></span>
+        <span class="connect-ring" aria-hidden="true"></span>
+        <span class="connect-arc" aria-hidden="true"></span>
+        <span class="connect-disc">
+          <span class="connect-mark">L</span>
+        </span>
+      </button>
+      <div class="connect-copy hb-copy">
+        <div class="connect-status" data-conn-label>点击连接</div>
+        <div class="connect-sub muted" data-conn-sub>流量未加密 · 点击开始加速</div>
+        <div class="connect-meta" data-conn-meta hidden>
+          <span class="conn-chip"><span class="conn-chip-k">时长</span><strong data-conn-timer>00:00</strong></span>
+        </div>
+      </div>
+      <div class="seg mode-seg hb-modes" role="group" aria-label="连接模式">
+        <button type="button" data-mode="proxy">代理</button>
+        <button type="button" data-mode="system">系统代理</button>
+        <button type="button" data-mode="vpn">VPN</button>
+      </div>
+      <p class="mode-hint muted" data-mode-hint>TUN 全局接管 · 所有应用与终端生效</p>
+    </div>
+    <div class="hb-side">
+      <div class="panel hb-card">
+        <div class="hb-k">出口</div>
+        <div class="hb-row"><span class="muted tiny">线路</span><span class="hb-v sm" data-exit-label>—</span></div>
+        <div class="hb-row"><span class="muted tiny">检测 IP</span><span class="hb-v sm hb-ip" data-exit-ip>—</span></div>
+      </div>
+      <div class="panel hb-card">
+        <div class="hb-k">流量</div>
+        <div class="hb-row"><span class="muted tiny">上行</span><span class="hb-v sm" data-traffic-up-val>0 B/s</span></div>
+        <div class="hb-row"><span class="muted tiny">下行</span><span class="hb-v sm" data-traffic-down-val>0 B/s</span></div>
+        <div class="hb-row"><span class="muted tiny">总量</span><span class="hb-v sm" data-traffic-total>0 B</span></div>
+      </div>
+      <button type="button" class="panel hb-card hb-link" data-goto="nodes">
+        <div class="hb-k">当前节点</div>
+        <div class="hb-row"><strong>美国家宽 § 0</strong><span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span></div>
+      </button>
+      <button type="button" class="panel hb-card hb-link" data-goto="subscriptions">
+        <div class="hb-k">订阅</div>
+        <div class="hb-row"><strong>VMess</strong><span class="muted tiny">今日已更新</span></div>
+      </button>
+    </div>
+  </div>
+</section>
+
+
+<section class="page page-home-a" data-page="home-a">
+  <header class="page-head home-head">
+    <div>
+      <div class="brand-line"><strong>LisaSpeed</strong> <span class="chip">0.0.1</span></div>
+      <p class="muted home-sub">一键连接 · 当前订阅与模式</p>
+    </div>
+    <button type="button" class="btn ghost add-btn" data-open-modal="add-profile"><span class="plus">+</span> 添加订阅</button>
+  </header>
+  <div class="variant-bar"><span class="muted tiny">布局方案</span><div class="variant-tabs"><button type="button" class="vtab" data-goto="home">仪表盘 · 已定稿</button><button type="button" class="vtab is-active" data-goto="home-a">A · 居中单列</button><button type="button" class="vtab" data-goto="home-c">C · 指挥条</button><button type="button" class="vtab" data-goto="home-d">D · 极简</button></div></div>
   <div class="home-stage">
     <button type="button" class="pill profile-pill" data-goto="subscriptions">
       <span class="pill-dot" aria-hidden="true"></span>
@@ -118,70 +182,6 @@
 </section>
 
 
-<section class="page page-home-b" data-page="home-b">
-  <header class="page-head home-head">
-    <div>
-      <div class="brand-line"><strong>LisaSpeed</strong> <span class="chip">0.0.1</span></div>
-      <p class="muted home-sub">一键连接 · 当前订阅与模式</p>
-    </div>
-    <button type="button" class="btn ghost add-btn" data-open-modal="add-profile"><span class="plus">+</span> 添加订阅</button>
-  </header>
-  <div class="variant-bar"><span class="muted tiny">布局方案</span><div class="variant-tabs"><button type="button" class="vtab" data-goto="home">A · 居中单列</button><button type="button" class="vtab is-active" data-goto="home-b">B · 仪表盘</button><button type="button" class="vtab" data-goto="home-c">C · 指挥条</button><button type="button" class="vtab" data-goto="home-d">D · 极简</button></div></div>
-  <div class="home-b-grid">
-    <div class="panel hb-hero">
-      <button type="button" class="pill profile-pill" data-goto="subscriptions">
-        <span class="pill-dot" aria-hidden="true"></span>
-        <span data-profile-label>VMess</span>
-        <span class="pill-chevron" aria-hidden="true">›</span>
-      </button>
-      <button type="button" class="connect-btn md" data-connect aria-label="连接切换">
-        <span class="connect-aura" aria-hidden="true"></span>
-        <span class="connect-ripple" aria-hidden="true"></span>
-        <span class="connect-ring" aria-hidden="true"></span>
-        <span class="connect-arc" aria-hidden="true"></span>
-        <span class="connect-disc">
-          <span class="connect-mark">L</span>
-        </span>
-      </button>
-      <div class="connect-copy hb-copy">
-        <div class="connect-status" data-conn-label>点击连接</div>
-        <div class="connect-sub muted" data-conn-sub>流量未加密 · 点击开始加速</div>
-        <div class="connect-meta" data-conn-meta hidden>
-          <span class="conn-chip"><span class="conn-chip-k">时长</span><strong data-conn-timer>00:00</strong></span>
-        </div>
-      </div>
-      <div class="seg mode-seg hb-modes" role="group" aria-label="连接模式">
-        <button type="button" data-mode="proxy">代理</button>
-        <button type="button" data-mode="system">系统代理</button>
-        <button type="button" data-mode="vpn">VPN</button>
-      </div>
-      <p class="mode-hint muted" data-mode-hint>TUN 全局接管 · 所有应用与终端生效</p>
-    </div>
-    <div class="hb-side">
-      <div class="panel hb-card">
-        <div class="hb-k">出口</div>
-        <div class="hb-row"><span class="muted tiny">线路</span><span class="hb-v sm" data-exit-label>—</span></div>
-        <div class="hb-row"><span class="muted tiny">检测 IP</span><span class="hb-v sm hb-ip" data-exit-ip>—</span></div>
-      </div>
-      <div class="panel hb-card">
-        <div class="hb-k">流量</div>
-        <div class="hb-row"><span class="muted tiny">上行</span><span class="hb-v sm" data-traffic-up-val>0 B/s</span></div>
-        <div class="hb-row"><span class="muted tiny">下行</span><span class="hb-v sm" data-traffic-down-val>0 B/s</span></div>
-        <div class="hb-row"><span class="muted tiny">总量</span><span class="hb-v sm" data-traffic-total>0 B</span></div>
-      </div>
-      <button type="button" class="panel hb-card hb-link" data-goto="nodes">
-        <div class="hb-k">当前节点</div>
-        <div class="hb-row"><strong>美国家宽 § 0</strong><span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span></div>
-      </button>
-      <button type="button" class="panel hb-card hb-link" data-goto="subscriptions">
-        <div class="hb-k">订阅</div>
-        <div class="hb-row"><strong>VMess</strong><span class="muted tiny">今日已更新</span></div>
-      </button>
-    </div>
-  </div>
-</section>
-
-
 <section class="page page-home-c" data-page="home-c">
   <header class="page-head home-head">
     <div>
@@ -190,7 +190,7 @@
     </div>
     <button type="button" class="btn ghost add-btn" data-open-modal="add-profile"><span class="plus">+</span> 添加订阅</button>
   </header>
-  <div class="variant-bar"><span class="muted tiny">布局方案</span><div class="variant-tabs"><button type="button" class="vtab" data-goto="home">A · 居中单列</button><button type="button" class="vtab" data-goto="home-b">B · 仪表盘</button><button type="button" class="vtab is-active" data-goto="home-c">C · 指挥条</button><button type="button" class="vtab" data-goto="home-d">D · 极简</button></div></div>
+  <div class="variant-bar"><span class="muted tiny">布局方案</span><div class="variant-tabs"><button type="button" class="vtab" data-goto="home">仪表盘 · 已定稿</button><button type="button" class="vtab" data-goto="home-a">A · 居中单列</button><button type="button" class="vtab is-active" data-goto="home-c">C · 指挥条</button><button type="button" class="vtab" data-goto="home-d">D · 极简</button></div></div>
   <div class="panel hc-banner">
     <div class="hc-left">
       <button type="button" class="connect-btn sm" data-connect aria-label="连接切换">
@@ -249,7 +249,7 @@
     </div>
     <button type="button" class="btn ghost add-btn" data-open-modal="add-profile"><span class="plus">+</span> 添加订阅</button>
   </header>
-  <div class="variant-bar"><span class="muted tiny">布局方案</span><div class="variant-tabs"><button type="button" class="vtab" data-goto="home">A · 居中单列</button><button type="button" class="vtab" data-goto="home-b">B · 仪表盘</button><button type="button" class="vtab" data-goto="home-c">C · 指挥条</button><button type="button" class="vtab is-active" data-goto="home-d">D · 极简</button></div></div>
+  <div class="variant-bar"><span class="muted tiny">布局方案</span><div class="variant-tabs"><button type="button" class="vtab" data-goto="home">仪表盘 · 已定稿</button><button type="button" class="vtab" data-goto="home-a">A · 居中单列</button><button type="button" class="vtab" data-goto="home-c">C · 指挥条</button><button type="button" class="vtab is-active" data-goto="home-d">D · 极简</button></div></div>
   <div class="home-d-stage">
     <button type="button" class="pill profile-pill" data-goto="subscriptions">
       <span class="pill-dot" aria-hidden="true"></span>
@@ -300,8 +300,8 @@
       <button type="button" class="btn primary" data-action="toast" data-toast="正在测速…">测速</button>
     </div>
   </header>
-  <div class="toolbar-note muted">共 5 个节点 · 点击切换</div>
-  <div class="list"><button type="button" class="list-row node-row is-active" data-action="toast" data-toast="已选择：美国家宽 § 0"><div class="list-main"><div class="row gap"><span class="node-badge">当前</span><strong>美国家宽 § 0</strong></div><div class="muted">美国 · 家庭 · vmess</div></div><span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span></button><button type="button" class="list-row node-row " data-action="toast" data-toast="已选择：美国宽带 § 1"><div class="list-main"><div class="row gap"><strong>美国宽带 § 1</strong></div><div class="muted">美国 · 机房 · vmess</div></div><span class="latency delay-warn"><span class="latency-dot"></span>241 ms</span></button><button type="button" class="list-row node-row " data-action="toast" data-toast="已选择：日本优化 § 2"><div class="list-main"><div class="row gap"><strong>日本优化 § 2</strong></div><div class="muted">日本 · 优化 · vmess</div></div><span class="latency delay-ok"><span class="latency-dot"></span>98 ms</span></button><button type="button" class="list-row node-row " data-action="toast" data-toast="已选择：新加坡 § 3"><div class="list-main"><div class="row gap"><strong>新加坡 § 3</strong></div><div class="muted">新加坡 · vmess</div></div><span class="latency delay-ok"><span class="latency-dot"></span>126 ms</span></button><button type="button" class="list-row node-row " data-action="toast" data-toast="已选择：香港 § 4"><div class="list-main"><div class="row gap"><strong>香港 § 4</strong></div><div class="muted">香港 · vmess</div></div><span class="latency delay-good"><span class="latency-dot"></span>64 ms</span></button></div>
+  <div class="toolbar-note row gap"><span class="count-chip">5</span><span class="muted">个节点 · 点击切换</span></div>
+  <div class="list"><button type="button" class="list-row node-row is-active" data-action="toast" data-toast="已选择：美国家宽 § 0"><div class="list-main"><div class="row gap"><span class="node-badge">当前</span><strong>美国家宽 § 0</strong></div><div class="row gap node-tags"><span class="tag">美国 · 家庭</span><span class="tag tag-mono">vmess</span></div></div><span class="latency delay-ok"><span class="latency-dot"></span>182 ms</span></button><button type="button" class="list-row node-row " data-action="toast" data-toast="已选择：美国宽带 § 1"><div class="list-main"><div class="row gap"><strong>美国宽带 § 1</strong></div><div class="row gap node-tags"><span class="tag">美国 · 机房</span><span class="tag tag-mono">vmess</span></div></div><span class="latency delay-warn"><span class="latency-dot"></span>241 ms</span></button><button type="button" class="list-row node-row " data-action="toast" data-toast="已选择：日本优化 § 2"><div class="list-main"><div class="row gap"><strong>日本优化 § 2</strong></div><div class="row gap node-tags"><span class="tag">日本 · 优化</span><span class="tag tag-mono">vmess</span></div></div><span class="latency delay-ok"><span class="latency-dot"></span>98 ms</span></button><button type="button" class="list-row node-row " data-action="toast" data-toast="已选择：新加坡 § 3"><div class="list-main"><div class="row gap"><strong>新加坡 § 3</strong></div><div class="row gap node-tags"><span class="tag">新加坡</span><span class="tag tag-mono">vmess</span></div></div><span class="latency delay-ok"><span class="latency-dot"></span>126 ms</span></button><button type="button" class="list-row node-row " data-action="toast" data-toast="已选择：香港 § 4"><div class="list-main"><div class="row gap"><strong>香港 § 4</strong></div><div class="row gap node-tags"><span class="tag">香港</span><span class="tag tag-mono">vmess</span></div></div><span class="latency delay-good"><span class="latency-dot"></span>64 ms</span></button></div>
 </section>
 
 
@@ -322,7 +322,10 @@
           <span class="tag tag-active">使用中</span>
           <span class="tag">订阅</span>
         </div>
-        <div class="muted">今日已更新 · 剩余流量充足</div>
+        <div class="sub-usage">
+          <div class="usage-bar"><span class="usage-fill" style="width: 38%"></span></div>
+          <div class="muted tiny">已用 4.6 GB / 12 GB · 今日已更新 · 30 天后到期</div>
+        </div>
       </div>
       <div class="row gap actions">
         <button type="button" class="btn tiny" data-action="toast" data-toast="正在更新订阅">更新</button>
@@ -550,7 +553,7 @@
   <div class="log-shell panel">
     <div class="log-toolbar">
       <span class="muted tiny">core · app</span>
-      <span class="mono tiny muted">live</span>
+      <span class="live-badge"><span class="live-dot" aria-hidden="true"></span>live</span>
     </div>
     <div class="log-panel"><div class="log-line"><span class="mono muted log-time">10:30:12</span><span class="log-level log-info">PROBE</span><span class="log-msg">探测线路质量</span></div>
 <div class="log-line"><span class="mono muted log-time">10:31:12</span><span class="log-level log-ok">CONNECTED</span><span class="log-msg">隧道已建立</span></div>
