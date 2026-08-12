@@ -318,10 +318,26 @@ class HiddifyCoreService with InfraLogger {
   //
   // Stream<SingboxStatus> watchStatus() => _status;
 
+  /// The checked-in Dart stubs were generated from a newer proto than the Go
+  /// core: there GetSystemInfo is unary and GetSystemInfoStream is the
+  /// streaming variant, but the Go server only serves GetSystemInfo as a
+  /// server-streaming RPC. Calling getSystemInfoStream() hit UNIMPLEMENTED,
+  /// which the stats layer swallowed into an all-zero SystemInfo, so the UI
+  /// showed 0 traffic forever. Bind the streaming call to the method path the
+  /// Go side actually implements.
+  static final _getSystemInfoStreaming = ClientMethod<Empty, SystemInfo>(
+    '/hcore.Core/GetSystemInfo',
+    (Empty value) => value.writeToBuffer(),
+    SystemInfo.fromBuffer,
+  );
+
   ResponseStream<SystemInfo> watchStats() {
     loggy.debug("watching stats");
     try {
-      return core.bgClient.getSystemInfoStream(Empty());
+      return core.bgClient.$createStreamingCall(
+        _getSystemInfoStreaming,
+        Stream.fromIterable([Empty()]),
+      );
     } catch (e) {
       loggy.error("error watching stats: $e");
       rethrow;
