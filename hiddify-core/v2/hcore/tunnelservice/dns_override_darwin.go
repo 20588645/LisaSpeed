@@ -19,8 +19,13 @@ const (
 	hostsPath        = "/etc/hosts"
 )
 
-// Domains commonly poisoned by corporate DNS to 127.0.0.1 / sinkholes.
+// Domains commonly poisoned by corporate DNS to 127.0.0.1 / 0.0.0.0 sinkholes.
+// Only loopback/null poisoning needs this list: such traffic never enters the
+// TUN (it dials lo0), so SNI sniffing cannot rescue it. Fake-public poisoning
+// is already handled by sniff + geoip. Each host is resolved via 8.8.8.8 and
+// skipped if it returns nothing, so extra entries are harmless.
 var poisonOverrideHosts = []string{
+	// X / Twitter
 	"x.com",
 	"www.x.com",
 	"twitter.com",
@@ -31,6 +36,22 @@ var poisonOverrideHosts = []string{
 	"abs.twimg.com",
 	"pbs.twimg.com",
 	"video.twimg.com",
+	// Instagram (apex poisoned to 127.0.0.1)
+	"instagram.com",
+	"www.instagram.com",
+	"i.instagram.com",
+	"graph.instagram.com",
+	// Telegram (t.me poisoned to 127.0.0.1)
+	"t.me",
+	"telegram.org",
+	"www.telegram.org",
+	"web.telegram.org",
+	"api.telegram.org",
+	"core.telegram.org",
+	// GitHub raw/objects (poisoned to 0.0.0.0; breaks browser + git)
+	"raw.githubusercontent.com",
+	"objects.githubusercontent.com",
+	"gist.githubusercontent.com",
 }
 
 // applyPublicDNSOverride installs /etc/hosts overrides for DNS-poisoned

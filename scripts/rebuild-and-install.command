@@ -2,8 +2,9 @@
 # LisaSpeed 本机重新编译并安装到 /Applications
 #
 # 完整同步内容：
-#   1) 重编 hiddify-core → bin/HiddifyCli（隧道 / EasyConnect 共存等 Go 改动）
-#   2) flutter build macos（UI）并把新 HiddifyCli 打进 .app
+#   1) 重编 hiddify-core → bin/HiddifyCli + bin/hiddify-core.dylib
+#      （HiddifyCli=隧道助手；dylib=GUI 侧 core，含启动超时/共存等 Go 改动）
+#   2) flutter build macos（UI），并把新 HiddifyCli 与 dylib 强制打进 .app
 #   3) 覆盖 /Applications，杀掉旧隧道进程后重开
 #
 # 用法：
@@ -27,6 +28,7 @@ FLUTTER_BIN="/Users/ldy/flutter/bin/flutter"
 SRC_APP="$PROJECT_DIR/build/macos/Build/Products/Release/${APP_NAME}.app"
 DEST_APP="/Applications/${APP_NAME}.app"
 CLI_SRC="$CORE_DIR/bin/HiddifyCli"
+DYLIB_SRC="$CORE_DIR/bin/hiddify-core.dylib"
 LOG_FILE="$HOME/Library/Logs/LisaSpeed-rebuild.log"
 PHASE="${1:-full}"
 
@@ -66,6 +68,18 @@ do_build_core() {
     exit 1
   fi
   log "[core] HiddifyCli 就绪：$(ls -la "$CLI_SRC" | awk '{print $5,$6,$7,$8,$9}')"
+
+  # GUI 侧 core = hiddify-core.dylib（启动超时 Stop/Start 分离、EasyConnect 共存等
+  # 改动都在这里）。只编 CLI 会让这些改动进不了 .app，必须一并重编 dylib。
+  # 用 macos-arm64（不带 prepare/go mod tidy）保持离线可编。
+  log "[core] 编译 hiddify-core.dylib（macos-arm64）"
+  make macos-arm64
+  if [[ ! -f "$CORE_DIR/bin/hiddify-core-arm64.dylib" ]]; then
+    echo "[[ERROR]] hiddify-core-arm64.dylib 编译后不存在"
+    exit 1
+  fi
+  cp -f "$CORE_DIR/bin/hiddify-core-arm64.dylib" "$DYLIB_SRC"
+  log "[core] hiddify-core.dylib 就绪：$(ls -la "$DYLIB_SRC" | awk '{print $5,$6,$7,$8,$9}')"
   phase "core-done"
 }
 
@@ -116,6 +130,18 @@ do_compile() {
     log "已写入产物内 HiddifyCli"
   else
     echo "[[ERROR]] 缺少 HiddifyCli，无法产出可用安装包"
+    exit 1
+  fi
+
+  # Xcode 的 Embed Frameworks 用 mtime 判断是否重拷；bin/dylib 若比已嵌入副本旧
+  # 就会被跳过，导致 GUI 侧 core 改动进不了包。这里强制覆盖，确保 dylib 一定更新。
+  if [[ -f "$DYLIB_SRC" ]]; then
+    mkdir -p "$SRC_APP/Contents/Frameworks"
+    cp -f "$DYLIB_SRC" "$SRC_APP/Contents/Frameworks/hiddify-core.dylib"
+    codesign --force --sign - "$SRC_APP/Contents/Frameworks/hiddify-core.dylib" >/dev/null 2>&1 || true
+    log "已写入产物内 hiddify-core.dylib"
+  else
+    echo "[[ERROR]] 缺少 hiddify-core.dylib，无法产出可用安装包"
     exit 1
   fi
 
@@ -173,6 +199,12 @@ EOF
     cp -f "$CLI_SRC" "$DEST_APP/Contents/MacOS/HiddifyCli"
     chmod +x "$DEST_APP/Contents/MacOS/HiddifyCli"
     codesign --force --sign - "$DEST_APP/Contents/MacOS/HiddifyCli" >/dev/null 2>&1 || true
+  fi
+
+  if [[ -f "$DYLIB_SRC" ]]; then
+    mkdir -p "$DEST_APP/Contents/Frameworks"
+    cp -f "$DYLIB_SRC" "$DEST_APP/Contents/Frameworks/hiddify-core.dylib"
+    codesign --force --sign - "$DEST_APP/Contents/Frameworks/hiddify-core.dylib" >/dev/null 2>&1 || true
   fi
 
   xattr -cr "$DEST_APP" 2>/dev/null || true
