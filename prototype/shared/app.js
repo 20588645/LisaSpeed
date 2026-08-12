@@ -342,8 +342,11 @@
     showPage(page && $(`[data-page="${page}"]`) ? page : "home");
     const mode = params.get("mode");
     setMode(["proxy", "system", "vpn"].includes(mode) ? mode : "vpn");
-    if (params.get("conn") === "connected") {
+    const conn = params.get("conn");
+    if (conn === "connected") {
       setConnection("connected", { seedSeconds: 754 });
+    } else if (conn === "connecting") {
+      setConnection("connecting");
     } else {
       setConnection("disconnected");
     }

@@ -48,14 +48,18 @@ def variant_bar(active: str) -> str:
     )
 
 def connect_button(size: str = "") -> str:
+    # Connect control v2: tick ring + radar sweep + power glyph. Every state
+    # stays crisp — no blur filters anywhere (the old in-app design blurred
+    # while connecting).
     cls = f"connect-btn {size}".strip()
     return f"""<button type="button" class="{cls}" data-connect aria-label="连接切换">
         <span class="connect-aura" aria-hidden="true"></span>
+        <span class="connect2-ticks" aria-hidden="true"></span>
+        <span class="connect2-sweep" aria-hidden="true"></span>
+        <span class="connect2-ring" aria-hidden="true"></span>
         <span class="connect-ripple" aria-hidden="true"></span>
-        <span class="connect-ring" aria-hidden="true"></span>
-        <span class="connect-arc" aria-hidden="true"></span>
-        <span class="connect-disc">
-          <span class="connect-mark">L</span>
+        <span class="connect2-disc" aria-hidden="true">
+          <span class="connect2-power"></span>
         </span>
       </button>"""
 
@@ -1266,6 +1270,111 @@ html[data-conn="connected"] .connect-status { color: var(--ok); }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .node-cta-right { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+
+/* Connect control v2 — tick ring + radar sweep + power glyph (crisp in all states) */
+.connect2-ticks {
+  position: absolute; inset: 5%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    color-mix(in srgb, var(--muted) 45%, transparent) 0deg 1.6deg,
+    transparent 1.6deg 6deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
+  opacity: 0.8;
+  transition: opacity .3s ease;
+}
+html[data-conn="connected"] .connect2-ticks {
+  background: repeating-conic-gradient(
+    color-mix(in srgb, var(--accent) 80%, transparent) 0deg 1.6deg,
+    transparent 1.6deg 6deg
+  );
+}
+.connect2-sweep {
+  position: absolute; inset: 5%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    color-mix(in srgb, var(--accent) 85%, transparent) 70deg,
+    var(--accent-2) 110deg,
+    transparent 150deg,
+    transparent 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+html[data-conn="connecting"] .connect2-sweep { opacity: 1; animation: arc-spin 1.1s linear infinite; }
+html[data-conn="connected"] .connect2-sweep { opacity: 0.55; animation: arc-spin 7s linear infinite; }
+.connect2-ring {
+  position: absolute; inset: 16%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+  transition: border-color .3s ease, box-shadow .3s ease;
+}
+html[data-conn="connected"] .connect2-ring {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow:
+    0 0 24px color-mix(in srgb, var(--accent) 20%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.connect2-disc {
+  position: absolute; inset: 23%;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background:
+    radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 52%),
+    linear-gradient(160deg, color-mix(in srgb, var(--bg-panel-solid, var(--bg-elev)) 94%, #fff), var(--bg-elev));
+  border: 1px solid color-mix(in srgb, var(--line) 85%, var(--accent));
+  box-shadow: 0 10px 26px rgba(0,0,0,.22);
+  transition: border-color .3s ease, box-shadow .3s ease;
+}
+.connect-btn:hover .connect2-disc { border-color: color-mix(in srgb, var(--accent) 42%, var(--line)); }
+html[data-conn="connected"] .connect2-disc {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent) 8%, transparent),
+    0 10px 26px rgba(0,0,0,.24);
+}
+.connect2-power {
+  position: relative;
+  width: 30%; height: 30%;
+  color: var(--muted);
+  transition: color .3s ease, filter .3s ease;
+}
+.connect2-power::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 3px solid currentColor;
+  -webkit-mask: conic-gradient(from -32deg, transparent 0deg 64deg, #000 64deg 360deg);
+  mask: conic-gradient(from -32deg, transparent 0deg 64deg, #000 64deg 360deg);
+}
+.connect2-power::after {
+  content: "";
+  position: absolute;
+  top: -14%; left: 50%;
+  transform: translateX(-50%);
+  width: 3px; height: 48%;
+  border-radius: 3px;
+  background: currentColor;
+}
+.connect-btn:hover .connect2-power { color: var(--text); }
+html[data-conn="connecting"] .connect2-power {
+  color: var(--accent-2);
+  animation: power-pulse 1.1s ease-in-out infinite;
+}
+html[data-conn="connected"] .connect2-power {
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 55%, transparent));
+}
+@keyframes power-pulse { 50% { opacity: 0.55; } }
+.connect-btn.sm .connect2-power::before { border-width: 2px; }
+.connect-btn.sm .connect2-power::after { width: 2px; }
+.connect-btn.xl .connect2-power::before { border-width: 3.5px; }
+.connect-btn.xl .connect2-power::after { width: 3.5px; }
 
 /* List/table garnish shared across pages */
 .node-tags { margin-top: 7px; }

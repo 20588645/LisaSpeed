@@ -303,7 +303,8 @@ class _ConnectionButton extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        button.animate(target: enabled ? 0 : 1).blurXY(end: 1).scaleXY(end: .92, curve: Curves.easeIn),
+        // Keep the control crisp while connecting: scale only, no blur.
+        button.animate(target: enabled ? 0 : 1).scaleXY(end: .97, curve: Curves.easeIn),
         const Gap(18),
         ExcludeSemantics(
           child: Column(
