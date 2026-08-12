@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/proxy/active/ip_widget.dart';
 import 'package:hiddify/gen/fonts.gen.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
@@ -17,66 +19,96 @@ class ProxyTile extends HookConsumerWidget with PresLogger {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return ListTile(
-      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      title: Text(
-        proxy.tagDisplay,
-        overflow: TextOverflow.ellipsis,
-        style: PlatformUtils.isWindows ? const TextStyle(fontFamily: FontFamily.emoji) : null,
-      ),
-      leading: IPCountryFlag(
-        countryCode: proxy.ipinfo.countryCode,
-        organization: proxy.ipinfo.org,
-        size: 40,
-        padding: const EdgeInsetsDirectional.only(end: 8),
-      ),
-      subtitle: Text.rich(
-        TextSpan(
-          text: proxy.type,
-          children: [
-            if (proxy.isGroup)
-              TextSpan(
-                text: ' (${proxy.groupSelectedTagDisplay.trim()})',
-                style: Theme.of(context).textTheme.bodySmall,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          onLongPress: () async =>
+              await ref.read(dialogNotifierProvider.notifier).showProxyInfo(outboundInfo: proxy),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: isDark ? 0.42 : 0.78),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: selected
+                    ? ConnectionButtonTheme.brandMint.withValues(alpha: 0.65)
+                    : ConnectionButtonTheme.brandMint.withValues(alpha: isDark ? 0.14 : 0.12),
               ),
-          ],
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: Column(
-        children: [
-          if (proxy.urlTestDelay != 0)
-            Text(
-              proxy.urlTestDelay > 65000 ? "×" : proxy.urlTestDelay.toString(),
-              style: TextStyle(color: delayColor(context, proxy.urlTestDelay)),
             ),
-
-          if (proxy.download > 0) Text("⬩", style: Theme.of(context).textTheme.bodySmall),
-        ],
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  Container(
+                    width: 3,
+                    decoration: BoxDecoration(
+                      color: selected ? ConnectionButtonTheme.brandMint : Colors.transparent,
+                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(14)),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: Row(
+                        children: [
+                          IPCountryFlag(
+                            countryCode: proxy.ipinfo.countryCode,
+                            organization: proxy.ipinfo.org,
+                            size: 36,
+                            padding: const EdgeInsetsDirectional.only(end: 10),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  children: [
+                                    if (selected) ...[
+                                      TechUi.currentBadge(context),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    Flexible(
+                                      child: Text(
+                                        proxy.tagDisplay,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  proxy.isGroup
+                                      ? '${proxy.type} · ${proxy.groupSelectedTagDisplay.trim()}'
+                                      : proxy.type,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (proxy.urlTestDelay != 0) TechUi.latencyPill(context, proxy.urlTestDelay),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
-
-      selected: selected,
-      selectedTileColor: theme.colorScheme.primaryContainer,
-      onTap: onTap,
-      onLongPress: () async => await ref.read(dialogNotifierProvider.notifier).showProxyInfo(outboundInfo: proxy),
-      horizontalTitleGap: 4,
     );
-  }
-
-  Color delayColor(BuildContext context, int delay) {
-    if (Theme.of(context).brightness == Brightness.dark) {
-      return switch (delay) {
-        < 800 => Colors.lightGreen,
-        < 1500 => Colors.orange,
-        _ => Colors.redAccent,
-      };
-    }
-    return switch (delay) {
-      < 800 => Colors.green,
-      < 1500 => Colors.deepOrangeAccent,
-      _ => Colors.red,
-    };
   }
 }

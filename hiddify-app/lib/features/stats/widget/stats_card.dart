@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/core/widget/spaced_list_widget.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 
 typedef PresentableStat = ({Widget label, Widget data, String? semanticLabel});
 
@@ -9,7 +11,7 @@ class StatsCard extends StatelessWidget {
     super.key,
     this.title,
     this.titleStyle,
-    this.padding = const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+    this.padding = const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
     this.labelStyle,
     this.dataStyle,
     required this.stats,
@@ -24,22 +26,31 @@ class StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveTitleStyle = titleStyle ?? Theme.of(context).textTheme.bodySmall;
+    final theme = Theme.of(context);
+    final effectiveTitleStyle = titleStyle ??
+        theme.textTheme.labelSmall?.copyWith(
+          letterSpacing: 0.6,
+          fontWeight: FontWeight.w800,
+          color: theme.colorScheme.onSurfaceVariant,
+        );
     final effectiveLabelStyle =
-        labelStyle ?? Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w300);
-    final effectiveDataStyle =
-        dataStyle ?? Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w300);
+        labelStyle ?? theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w400);
+    final effectiveDataStyle = dataStyle ??
+        theme.textTheme.bodySmall?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: ConnectionButtonTheme.brandMint,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        );
 
-    return Card(
-      margin: EdgeInsets.zero,
-      shadowColor: Colors.transparent,
+    return Container(
+      decoration: TechUi.panelDecoration(context),
       child: Padding(
         padding: padding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (title != null) ...[Text(title!, style: effectiveTitleStyle), const Gap(4)],
+            if (title != null) ...[Text(title!.toUpperCase(), style: effectiveTitleStyle), const Gap(6)],
             ...stats
                 .map((stat) {
                   Widget label = IconTheme.merge(

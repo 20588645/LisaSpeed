@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/preferences/actions_at_closing.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
+import 'package:hiddify/core/widget/tech_dialog.dart';
 import 'package:hiddify/features/window/notifier/window_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -20,7 +21,7 @@ class _WindowClosingDialogState extends ConsumerState<WindowClosingDialog> {
   Widget build(BuildContext context) {
     final t = ref.watch(translationsProvider).requireValue;
 
-    return AlertDialog(
+    return TechDialog.alert(
       title: Text(t.dialogs.windowClosing.alertMessage),
       content: GestureDetector(
         onTap: () => setState(() {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/widget/tech_dialog.dart';
 import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hiddify/utils/custom_loggers.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -27,7 +28,7 @@ class SettingPickerDialog<T> extends HookConsumerWidget with PresLogger {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
 
-    return AlertDialog(
+    return TechDialog.alert(
       title: Text(title),
       content: SingleChildScrollView(
         child: Column(

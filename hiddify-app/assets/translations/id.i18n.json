@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "LisaSpeed",
     "start": "Mulai",
     "version": "Versi",
     "ok": "Oke",
@@ -100,10 +100,19 @@
   "pages": {
     "home": {
       "title": "Beranda",
-      "quickSettings": "Opsi pengaturan cepat"
+      "quickSettings": "Opsi pengaturan cepat",
+      "connectionMode": "Connection mode",
+      "openNodes": "Open node list",
+      "subtitle": "One tap · subscription & mode",
+      "currentMode": "Current",
+      "statsLive": "Live",
+      "statsTotal": "Total",
+      "statsExit": "Exit",
+      "delay": "Latency",
+      "sidebarTag": "Local speed"
     },
     "proxies": {
-      "title": "Proxy",
+      "title": "Nodes",
       "sort": "Urutkan proksi",
       "testDelay": "Uji latensi",
       "empty": "Tidak ada proksi yang tersedia",
@@ -124,11 +133,13 @@
         "result": "Latensi: ${delay}ms",
         "timeout": "Waktu tes latensi habis",
         "testing": "Latensi: sedang menguji..."
-      }
+      },
+      "subtitle": "Pick a route and test latency",
+      "countHint": "${count} nodes · tap to switch"
     },
     "profiles": {
-      "title": "Profil",
-      "add": "Tambah profil",
+      "title": "Subscriptions",
+      "add": "Add subscription",
       "update": "Perbarui profil",
       "viewAllProfiles": "Lihat semua profil",
       "activeProfileName": "Nama profil aktif: \"${name}\".",
@@ -159,10 +170,14 @@
         "delete": {
           "success": "Profil berhasil dihapus"
         }
-      }
+      },
+      "subtitle": "Manage subscriptions and local configs",
+      "tagActive": "Active",
+      "tagRemote": "Remote",
+      "tagLocal": "Local"
     },
     "profileDetails": {
-      "title": "Profil",
+      "title": "Subscription details",
       "lastUpdate": "Terakhir diperbarui",
       "form": {
         "nameHint": "Nama profil",
@@ -175,9 +190,10 @@
       }
     },
     "logs": {
-      "title": "Log",
+      "title": "Diagnostics",
       "shareCoreLogs": "Bagikan log inti",
-      "shareAppLogs": "Bagikan log aplikasi"
+      "shareAppLogs": "Bagikan log aplikasi",
+      "subtitle": "Core and app output"
     },
     "about": {
       "title": "Tentang",
@@ -187,7 +203,19 @@
       "sourceCode": "Kode sumber",
       "telegramChannel": "Saluran Telegram",
       "termsAndConditions": "Syarat dan Ketentuan",
-      "privacyPolicy": "Kebijakan Privasi"
+      "privacyPolicy": "Kebijakan Privasi",
+      "lead": "Local accelerator for macOS",
+      "localUpdate": "Update now",
+      "localUpdateSubtitle": "Build locally and install to Applications",
+      "localUpdateTitle": "Local update",
+      "localUpdateHint": "Stay connected while compiling. Install will quit and relaunch the app.",
+      "localUpdateStart": "Start build",
+      "localUpdateInstall": "Build done · Install now",
+      "localUpdateRunning": "Building…",
+      "localUpdateInstalling": "Installing — app will quit…",
+      "localUpdateFailed": "Update failed",
+      "localUpdateIdle": "Tap below to start a local build",
+      "localUpdateClose": "Close"
     },
     "settings": {
       "title": "Pengaturan",
@@ -237,7 +265,7 @@
         "useXrayCoreWhenPossibleMsg": "Gunakan xray-core saat mengurai tautan langganan. Anda perlu mengimpor ulang tautan untuk mengaktifkan opsi ini."
       },
       "routing": {
-        "title": "Perutean",
+        "title": "Routing",
         "routeRule": {
           "empty": "Belum ada aturan yang ditambahkan\n\nKetuk tombol + untuk membuat aturan baru atau pilih dari aturan yang telah ditentukan sebelumnya",
           "delete": "Hapus aturan",
@@ -415,7 +443,7 @@
         }
       },
       "inbound": {
-        "title": "Masuk",
+        "title": "Connection",
         "serviceMode": "Mode layanan",
         "serviceModes": {
           "proxy": "Hanya layanan proksi",
@@ -543,7 +571,12 @@
           "selectProfile": "Pilih profil",
           "conduitPairingId": "ID pemasangan Conduit"
         }
-      }
+      },
+      "advanced": {
+        "title": "Advanced",
+        "subtitle": "DNS, TLS, and chain extras"
+      },
+      "subtitle": "Common first · advanced tucked away"
     }
   },
   "components": {

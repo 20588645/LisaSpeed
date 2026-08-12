@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/settings/widget/lan_sharing_tile.dart';
 import 'package:hiddify/features/settings/widget/preference_tile.dart';
@@ -15,7 +16,8 @@ class InboundOptionsPage extends HookConsumerWidget with AppLogger {
 
     return Scaffold(
       appBar: AppBar(title: Text(t.pages.settings.inbound.title)),
-      body: ListView(
+      body: TechUi.preferencePanel(
+        context,
         children: [
           ChoicePreferenceWidget(
             selected: ref.watch(ConfigOptions.serviceMode),

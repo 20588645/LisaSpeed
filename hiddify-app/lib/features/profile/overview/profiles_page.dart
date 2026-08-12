@@ -5,6 +5,8 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/failures.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/notifier/profiles_update_notifier.dart';
 import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
@@ -26,36 +28,61 @@ class ProfilesPage extends HookConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.pages.profiles.title),
-        actions: [
-          IconButton(
-            onPressed: () => ref.read(foregroundProfilesUpdateNotifierProvider.notifier).trigger(),
-            icon: const Icon(Icons.update_rounded),
-            tooltip: t.pages.profiles.updateSubscriptions,
+      backgroundColor: Colors.transparent,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TechUi.pageIntro(
+                      context,
+                      eyebrow: 'Subscriptions',
+                      title: t.pages.profiles.title,
+                      subtitle: t.pages.profiles.subtitle,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => ref.read(foregroundProfilesUpdateNotifierProvider.notifier).trigger(),
+                    icon: const Icon(Icons.update_rounded),
+                    tooltip: t.pages.profiles.updateSubscriptions,
+                  ),
+                  IconButton(
+                    onPressed: () => ref.read(dialogNotifierProvider.notifier).showSortProfiles(),
+                    icon: const Icon(Icons.sort_rounded),
+                    tooltip: t.common.sort,
+                  ),
+                  FilledButton.icon(
+                    onPressed: () async => await ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: ConnectionButtonTheme.brandMint,
+                      foregroundColor: const Color(0xFF041016),
+                    ),
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: Text(t.pages.profiles.add),
+                  ),
+                  const Gap(8),
+                ],
+              ),
+            ),
           ),
-          IconButton(
-            onPressed: () => ref.read(dialogNotifierProvider.notifier).showSortProfiles(),
-            icon: const Icon(Icons.sort_rounded),
-            tooltip: t.common.sort,
+          Expanded(
+            child: asyncProfiles.when(
+              data: (data) => ListView.separated(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+                separatorBuilder: (context, index) => const Gap(10),
+                itemBuilder: (context, index) => ProfileTile(profile: data[index]),
+                itemCount: data.length,
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stackTrace) => Text(t.presentShortError(error)),
+            ),
           ),
-          const Gap(8),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async => await ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
-        label: Text(t.pages.profiles.add),
-        icon: const Icon(Icons.add_rounded),
-      ),
-      body: asyncProfiles.when(
-        data: (data) => ListView.separated(
-          padding: const EdgeInsets.all(12).copyWith(bottom: 84),
-          separatorBuilder: (context, index) => const Gap(12),
-          itemBuilder: (context, index) => ProfileTile(profile: data[index]),
-          itemCount: data.length,
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Text(t.presentShortError(error)),
       ),
     );
   }

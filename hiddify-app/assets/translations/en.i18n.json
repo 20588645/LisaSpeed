@@ -1,6 +1,6 @@
-﻿{
+{
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "LisaSpeed",
     "start": "Start",
     "version": "Version",
     "ok": "OK",
@@ -100,10 +100,19 @@
   "pages": {
     "home": {
       "title": "Home",
-      "quickSettings": "Quick setting options"
+      "quickSettings": "Quick setting options",
+      "connectionMode": "Connection mode",
+      "openNodes": "Open node list",
+      "subtitle": "One tap · subscription & mode",
+      "currentMode": "Current",
+      "statsLive": "Live",
+      "statsTotal": "Total",
+      "statsExit": "Exit",
+      "delay": "Latency",
+      "sidebarTag": "Local speed"
     },
     "proxies": {
-      "title": "Proxies",
+      "title": "Nodes",
       "sort": "Sort proxies",
       "testDelay": "Test delay",
       "empty": "No proxies available",
@@ -124,11 +133,13 @@
         "result": "Delay: ${delay}ms",
         "timeout": "Delay test timeout",
         "testing": "Delay: testing..."
-      }
+      },
+      "subtitle": "Pick a route and test latency",
+      "countHint": "${count} nodes · tap to switch"
     },
     "profiles": {
-      "title": "Profiles",
-      "add": "Add profile",
+      "title": "Subscriptions",
+      "add": "Add subscription",
       "update": "Update profile",
       "viewAllProfiles": "View all profiles",
       "activeProfileName": "Active profile name: \"${name}\".",
@@ -159,10 +170,14 @@
         "delete": {
           "success": "Profile deleted successfully"
         }
-      }
+      },
+      "subtitle": "Manage subscriptions and local configs",
+      "tagActive": "Active",
+      "tagRemote": "Remote",
+      "tagLocal": "Local"
     },
     "profileDetails": {
-      "title": "Profile",
+      "title": "Subscription details",
       "lastUpdate": "Last update",
       "form": {
         "nameHint": "Profile name",
@@ -175,9 +190,10 @@
       }
     },
     "logs": {
-      "title": "Logs",
+      "title": "Diagnostics",
       "shareCoreLogs": "Share core logs",
-      "shareAppLogs": "Share app logs"
+      "shareAppLogs": "Share app logs",
+      "subtitle": "Core and app output"
     },
     "about": {
       "title": "About",
@@ -187,7 +203,19 @@
       "sourceCode": "Source code",
       "telegramChannel": "Telegram channel",
       "termsAndConditions": "Terms and conditions",
-      "privacyPolicy": "Privacy policy"
+      "privacyPolicy": "Privacy policy",
+      "lead": "Local accelerator for macOS",
+      "localUpdate": "Update now",
+      "localUpdateSubtitle": "Full local build (app + HiddifyCli tunnel) into Applications",
+      "localUpdateTitle": "Local update",
+      "localUpdateHint": "Rebuilds UI and tunnel core (HiddifyCli). Stay connected while compiling; install quits old processes and relaunches.",
+      "localUpdateStart": "Start build",
+      "localUpdateInstall": "Build done · Install now",
+      "localUpdateRunning": "Full build (core + app)…",
+      "localUpdateInstalling": "Installing — stopping old tunnel and relaunching…",
+      "localUpdateFailed": "Update failed",
+      "localUpdateIdle": "Tap below to start a full local build",
+      "localUpdateClose": "Close"
     },
     "settings": {
       "title": "Settings",
@@ -415,7 +443,7 @@
         }
       },
       "inbound": {
-        "title": "Inbound",
+        "title": "Connection",
         "serviceMode": "Service mode",
         "serviceModes": {
           "proxy": "Proxy service only",
@@ -543,7 +571,12 @@
           "selectProfile": "Select profile",
           "conduitPairingId": "Conduit pairing ID"
         }
-      }
+      },
+      "advanced": {
+        "title": "Advanced",
+        "subtitle": "DNS, TLS, and chain extras"
+      },
+      "subtitle": "Common first · advanced tucked away"
     }
   },
   "components": {

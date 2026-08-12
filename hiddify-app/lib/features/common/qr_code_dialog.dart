@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hiddify/core/widget/tech_dialog.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class QrCodeDialog extends StatelessWidget {
@@ -11,38 +12,21 @@ class QrCodeDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: width,
-            child: QrImageView(data: data, backgroundColor: backgroundColor),
-          ),
-          if (message != null)
-            SizedBox(
-              width: width,
-              child: Material(
-                color: theme.colorScheme.surface,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        message!,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: theme.colorScheme.onSurface),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
+    return TechDialog(
+      title: message,
+      icon: Icons.qr_code_2_rounded,
+      width: width + 48,
+      scrollable: false,
+      showClose: true,
+      content: Center(
+        child: SizedBox(
+          width: width,
+          child: QrImageView(data: data, backgroundColor: backgroundColor),
+        ),
       ),
+      actions: [
+        TechDialogActions.ok(context, onPressed: () => Navigator.of(context).maybePop()),
+      ],
     );
   }
 }

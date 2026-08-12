@@ -11,8 +11,10 @@ import 'package:hiddify/core/notification/in_app_notification_controller.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/core/widget/adaptive_icon.dart';
 import 'package:hiddify/core/widget/adaptive_menu.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
 import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
@@ -52,34 +54,32 @@ class ProfileTile extends HookConsumerWidget {
     };
 
     final showActionButton = profile is RemoteProfileEntity || !isMain;
+    final isRemote = profile is RemoteProfileEntity;
 
-    // final effectiveMargin = isMain ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8) : const EdgeInsets.only(left: 12, right: 12, bottom: 12);
-    // final double effectiveElevation = profile.active ? 12 : 4;
-    // final effectiveOutlineColor = profile.active ? theme.colorScheme.outline : Colors.transparent;
-    return Card(
-      // margin: effectiveMargin,
-      // elevation: effectiveElevation,
+    return Container(
       margin: margin,
-      shape: RoundedRectangleBorder(
-        side: profile.active ? BorderSide(color: theme.colorScheme.outline) : BorderSide.none,
-        borderRadius: ProfileTileConst.cardBorderRadius,
-      ),
-      // color: color ?? theme.colorScheme.secondaryContainer,
-      elevation: profile.active ? 0 : 1,
-
-      // shadowColor: Colors.transparent,
+      decoration: TechUi.panelDecoration(context, selected: profile.active),
+      clipBehavior: Clip.antiAlias,
       child: IntrinsicHeight(
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 48),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (profile.active)
+                Container(
+                  width: 3,
+                  color: ConnectionButtonTheme.brandMint,
+                ),
               if (showActionButton) ...[
                 SizedBox(
                   width: 48,
                   child: Semantics(sortKey: const OrdinalSortKey(1), child: ProfileActionButton(profile, !isMain)),
                 ),
-                if (profile.active) VerticalDivider(width: 1, color: theme.colorScheme.outline) else const Gap(1),
+                VerticalDivider(
+                  width: 1,
+                  color: ConnectionButtonTheme.brandMint.withValues(alpha: 0.18),
+                ),
               ],
               Expanded(
                 child: Semantics(
@@ -102,7 +102,6 @@ class ProfileTile extends HookConsumerWidget {
                         }
                       } else {
                         if (selectActiveMutation.state.isInProgress) return;
-                        // if (profile.active) return;
                         selectActiveMutation.setFuture(
                           ref.read(profilesNotifierProvider.notifier).selectActiveProfile(profile.id),
                         );
@@ -114,9 +113,8 @@ class ProfileTile extends HookConsumerWidget {
                       }
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       child: Column(
-                        // mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -136,34 +134,53 @@ class ProfileTile extends HookConsumerWidget {
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: theme.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
                                           fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
                                         ),
                                         semanticsLabel: t.pages.profiles.activeProfileName(name: profile.name),
                                       ),
                                     ),
-                                    const Icon(Icons.arrow_drop_down_rounded),
+                                    Icon(
+                                      Icons.arrow_drop_down_rounded,
+                                      color: ConnectionButtonTheme.brandMint,
+                                    ),
                                   ],
                                 ),
                               ),
                             )
-                          else
+                          else ...[
+                            Row(
+                              children: [
+                                if (profile.active) ...[
+                                  TechUi.tag(context, t.pages.profiles.tagActive, active: true),
+                                  const SizedBox(width: 6),
+                                ],
+                                TechUi.tag(
+                                  context,
+                                  isRemote ? t.pages.profiles.tagRemote : t.pages.profiles.tagLocal,
+                                ),
+                              ],
+                            ),
+                            const Gap(6),
                             Text(
                               profile.name,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
                                 fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
                               ),
                               semanticsLabel: profile.active
                                   ? t.pages.profiles.activeProfileName(name: profile.name)
                                   : t.pages.profiles.nonActiveProfileName(name: profile.name),
                             ),
+                          ],
                           if (subInfo != null) ...[
-                            const Gap(4),
+                            const Gap(6),
                             RemainingTrafficIndicator(subInfo.ratio),
                             const Gap(4),
                             ProfileSubscriptionInfo(subInfo),
-                            const Gap(4),
+                            const Gap(2),
                           ],
                         ],
                       ),
@@ -382,7 +399,7 @@ class NewTrafficSubscriptionInfo extends HookConsumerWidget {
 
     return Column(
       children: [
-        const Icon(Icons.assessment_rounded, color: Colors.blue),
+        const Icon(Icons.assessment_rounded, color: ConnectionButtonTheme.brandMint),
         Text(t.components.subscriptionInfo.remainingTraffic),
         const SizedBox(height: 4),
         Row(
@@ -438,7 +455,7 @@ class NewDaySubscriptionInfo extends HookConsumerWidget {
     final remaining = remainingText(t, theme);
     return Column(
       children: [
-        const Icon(Icons.timer, color: Colors.blue),
+        const Icon(Icons.timer, color: ConnectionButtonTheme.brandMint),
         Text(t.components.subscriptionInfo.remainingTime),
         const SizedBox(height: 4),
         Row(
@@ -486,7 +503,7 @@ class NewDayTrafficSubscriptionInfo extends HookConsumerWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.assessment_rounded, color: Colors.blue),
+        const Icon(Icons.assessment_rounded, color: ConnectionButtonTheme.brandMint),
         Text(t.components.subscriptionInfo.remainingUsage),
         const SizedBox(height: 4),
         Text(
@@ -532,7 +549,7 @@ class NewSiteSubscriptionInfo extends HookConsumerWidget {
       onTap: () => launchUrl(Uri.parse(subInfo.webPageUrl ?? "")),
       child: Column(
         children: [
-          const Icon(FluentIcons.globe_person_24_filled, size: 24, color: Colors.blue),
+          const Icon(FluentIcons.globe_person_24_filled, size: 24, color: ConnectionButtonTheme.brandMint),
           Text(t.components.subscriptionInfo.profileSite),
           const SizedBox(height: 4),
           Row(
@@ -572,7 +589,18 @@ class RemainingTrafficIndicator extends StatelessWidget {
     //     : ratio < 0.65
     //         ? const Color.fromRGBO(98, 115, 32, 1.0)
     //         : const Color.fromRGBO(139, 30, 36, 1.0);
-    return LinearProgressIndicator(value: ratio, borderRadius: BorderRadius.circular(16), minHeight: 6);
+    final color = ratio < 0.25
+        ? ConnectionButtonTheme.brandMint
+        : ratio < 0.65
+            ? const Color(0xFFF0B429)
+            : const Color(0xFFFF5D6C);
+    return LinearProgressIndicator(
+      value: ratio.clamp(0.0, 1.0),
+      borderRadius: BorderRadius.circular(16),
+      minHeight: 6,
+      color: color,
+      backgroundColor: color.withValues(alpha: 0.16),
+    );
     // return HorizontalPercentIndicator(
     //   height: 6,
 

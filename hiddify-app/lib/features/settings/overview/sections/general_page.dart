@@ -4,6 +4,7 @@ import 'package:hiddify/core/haptic/haptic_service.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
 import 'package:hiddify/features/common/general_pref_tiles.dart';
 import 'package:hiddify/features/log/model/log_level.dart';
@@ -21,7 +22,8 @@ class GeneralPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(t.pages.settings.general.title)),
-      body: ListView(
+      body: TechUi.preferencePanel(
+        context,
         children: [
           const LocalePrefTile(),
           const ThemeModePrefTile(),

@@ -1,8 +1,9 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/widget/shimmer_skeleton.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
+import 'package:hiddify/features/connection/model/connection_status.dart';
+import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/utils/custom_loggers.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,16 +14,18 @@ class ActiveProxyDelayIndicator extends HookConsumerWidget with InfraLogger {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
+    final connection = ref.watch(connectionNotifierProvider).valueOrNull;
     final activeProxy = ref.watch(activeProxyNotifierProvider);
     final theme = Theme.of(context);
+    final accent = ConnectionButtonTheme.accentOf(context);
 
-    if (activeProxy is! AsyncData) {
-      return const SizedBox(); // Avoid building widget if data is not available
+    if (connection is! Connected || activeProxy is! AsyncData) {
+      return const SizedBox(height: 8);
     }
 
-    final proxy = activeProxy.value!;
-    final delay = proxy.urlTestDelay;
+    final delay = activeProxy.value!.urlTestDelay;
     final timeout = delay > 65000;
+    final testing = delay <= 0;
 
     return Center(
       child: InkWell(
@@ -30,43 +33,40 @@ class ActiveProxyDelayIndicator extends HookConsumerWidget with InfraLogger {
           try {
             await ref.read(activeProxyNotifierProvider.notifier).urlTest("");
           } catch (e) {
-            // Handle error here
             loggy.error("Error during URL test: $e");
           }
         },
-        borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          margin: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            color: (timeout ? theme.colorScheme.error : accent).withValues(alpha: 0.12),
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(FluentIcons.wifi_1_24_regular),
+              Text(
+                t.pages.home.delay,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: timeout ? theme.colorScheme.error : accent,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const Gap(8),
-              if (delay > 0)
-                Text.rich(
-                  semanticsLabel: timeout ? t.pages.proxies.delay.timeout : t.pages.proxies.delay.result(delay: delay),
-                  TextSpan(
-                    children: [
-                      if (timeout)
-                        TextSpan(
-                          text: t.common.timeout,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.error,
-                          ),
-                        )
-                      else ...[
-                        TextSpan(
-                          text: delay.toString(),
-                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const TextSpan(text: " ms"),
-                      ],
-                    ],
-                  ),
-                )
-              else
-                Semantics(label: t.pages.proxies.delay.testing, child: const ShimmerSkeleton(width: 48, height: 18)),
+              Text(
+                testing
+                    ? '…'
+                    : timeout
+                        ? t.common.timeout
+                        : '$delay ms',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: timeout ? theme.colorScheme.error : accent,
+                  fontWeight: FontWeight.w700,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
             ],
           ),
         ),

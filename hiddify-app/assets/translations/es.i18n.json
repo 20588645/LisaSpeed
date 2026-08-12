@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "LisaSpeed",
     "start": "Comenzar",
     "version": "Versión",
     "ok": "Aceptar",
@@ -100,10 +100,19 @@
   "pages": {
     "home": {
       "title": "Inicio",
-      "quickSettings": "Opciones de ajustes rápidos"
+      "quickSettings": "Opciones de ajustes rápidos",
+      "connectionMode": "Connection mode",
+      "openNodes": "Open node list",
+      "subtitle": "One tap · subscription & mode",
+      "currentMode": "Current",
+      "statsLive": "Live",
+      "statsTotal": "Total",
+      "statsExit": "Exit",
+      "delay": "Latency",
+      "sidebarTag": "Local speed"
     },
     "proxies": {
-      "title": "Proxies",
+      "title": "Nodes",
       "sort": "Ordenar proxies",
       "testDelay": "Probar latencia",
       "empty": "No hay proxies disponibles",
@@ -124,11 +133,13 @@
         "result": "Latencia: ${delay}ms",
         "timeout": "Tiempo de prueba de latencia agotado",
         "testing": "Latencia: probando..."
-      }
+      },
+      "subtitle": "Pick a route and test latency",
+      "countHint": "${count} nodes · tap to switch"
     },
     "profiles": {
-      "title": "Perfiles",
-      "add": "Añadir perfil",
+      "title": "Subscriptions",
+      "add": "Add subscription",
       "update": "Actualizar perfil",
       "viewAllProfiles": "Ver todos los perfiles",
       "activeProfileName": "Nombre del perfil activo: \"${name}\".",
@@ -159,10 +170,14 @@
         "delete": {
           "success": "Perfil eliminado con éxito"
         }
-      }
+      },
+      "subtitle": "Manage subscriptions and local configs",
+      "tagActive": "Active",
+      "tagRemote": "Remote",
+      "tagLocal": "Local"
     },
     "profileDetails": {
-      "title": "Perfil",
+      "title": "Subscription details",
       "lastUpdate": "Última actualización",
       "form": {
         "nameHint": "Nombre del perfil",
@@ -175,9 +190,10 @@
       }
     },
     "logs": {
-      "title": "Registros",
+      "title": "Diagnostics",
       "shareCoreLogs": "Compartir registros del núcleo",
-      "shareAppLogs": "Compartir registros de la aplicación"
+      "shareAppLogs": "Compartir registros de la aplicación",
+      "subtitle": "Core and app output"
     },
     "about": {
       "title": "Acerca de",
@@ -187,7 +203,19 @@
       "sourceCode": "Código fuente",
       "telegramChannel": "Canal de Telegram",
       "termsAndConditions": "Términos y condiciones",
-      "privacyPolicy": "Política de privacidad"
+      "privacyPolicy": "Política de privacidad",
+      "lead": "Local accelerator for macOS",
+      "localUpdate": "Update now",
+      "localUpdateSubtitle": "Build locally and install to Applications",
+      "localUpdateTitle": "Local update",
+      "localUpdateHint": "Stay connected while compiling. Install will quit and relaunch the app.",
+      "localUpdateStart": "Start build",
+      "localUpdateInstall": "Build done · Install now",
+      "localUpdateRunning": "Building…",
+      "localUpdateInstalling": "Installing — app will quit…",
+      "localUpdateFailed": "Update failed",
+      "localUpdateIdle": "Tap below to start a local build",
+      "localUpdateClose": "Close"
     },
     "settings": {
       "title": "Ajustes",
@@ -237,7 +265,7 @@
         "useXrayCoreWhenPossibleMsg": "Usa xray-core al analizar enlaces de suscripción. Necesitas reimportar el enlace para habilitar esta opción"
       },
       "routing": {
-        "title": "Enrutamiento",
+        "title": "Routing",
         "routeRule": {
           "empty": "No se han añadido reglas todavía\n\nToca el botón + para crear una nueva regla o elige de las reglas predefinidas",
           "delete": "Eliminar regla",
@@ -415,7 +443,7 @@
         }
       },
       "inbound": {
-        "title": "Entrada",
+        "title": "Connection",
         "serviceMode": "Modo de servicio",
         "serviceModes": {
           "proxy": "Solo servicio de proxy",
@@ -543,7 +571,12 @@
           "selectProfile": "Seleccionar perfil",
           "conduitPairingId": "ID de emparejamiento de Conduit"
         }
-      }
+      },
+      "advanced": {
+        "title": "Advanced",
+        "subtitle": "DNS, TLS, and chain extras"
+      },
+      "subtitle": "Common first · advanced tucked away"
     }
   },
   "components": {

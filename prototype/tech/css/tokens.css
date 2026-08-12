@@ -1,0 +1,58 @@
+:root {
+  --radius: 16px;
+  --font: "Manrope", "PingFang SC", "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html[data-color-scheme="dark"] {
+  color-scheme: dark;
+  --bg: #06090f;
+  --bg-elev: #0b1220;
+  --bg-panel: rgba(17, 28, 44, 0.82);
+  --bg-panel-solid: #111c2c;
+  --line: rgba(94, 234, 212, 0.14);
+  --line-strong: rgba(94, 234, 212, 0.28);
+  --text: #eaf3ff;
+  --muted: #8aa0b8;
+  --accent: #2ee6c5;
+  --accent-2: #4d93ff;
+  --danger: #ff5d6c;
+  --ok: #2ee6c5;
+  --warn: #f0b429;
+  --shadow: 0 0 0 1px rgba(46, 230, 197, 0.06), 0 24px 64px rgba(0, 0, 0, 0.5);
+  --grid: rgba(46, 230, 197, 0.045);
+  --glow: 0 0 48px rgba(46, 230, 197, 0.32);
+  --glow-soft: 0 0 24px rgba(46, 230, 197, 0.16);
+  --connect-core: radial-gradient(circle at 32% 28%, rgba(46, 230, 197, 0.28), #0d1828 58%, #0a1320);
+  --connect-ring: rgba(46, 230, 197, 0.45);
+  --page-shell: radial-gradient(1200px 600px at 50% -10%, #152033, #0b0e14 55%, #07090d);
+  --glass: rgba(10, 18, 32, 0.55);
+  --sidebar-wash: linear-gradient(180deg, rgba(46, 230, 197, 0.06), transparent 42%);
+}
+
+html[data-color-scheme="light"] {
+  color-scheme: light;
+  --bg: #f3f7fb;
+  --bg-elev: #ffffff;
+  --bg-panel: rgba(255, 255, 255, 0.86);
+  --bg-panel-solid: #ffffff;
+  --line: rgba(15, 40, 55, 0.1);
+  --line-strong: rgba(13, 159, 136, 0.28);
+  --text: #102033;
+  --muted: #5d738a;
+  --accent: #0c9a84;
+  --accent-2: #2f6fed;
+  --danger: #d93848;
+  --ok: #0c9a84;
+  --warn: #c98500;
+  --shadow: 0 1px 0 rgba(255,255,255,.95), 0 18px 42px rgba(16, 32, 51, 0.08);
+  --grid: rgba(13, 159, 136, 0.06);
+  --glow: 0 0 30px rgba(12, 154, 132, 0.2);
+  --glow-soft: 0 0 16px rgba(12, 154, 132, 0.12);
+  --connect-core: radial-gradient(circle at 32% 28%, rgba(12, 154, 132, 0.16), #fff 62%);
+  --connect-ring: rgba(12, 154, 132, 0.35);
+  --page-shell: radial-gradient(1000px 520px at 50% -8%, #dfeaf3, #cfd8e2 60%, #c5ced8);
+  --glass: rgba(255, 255, 255, 0.72);
+  --sidebar-wash: linear-gradient(180deg, rgba(12, 154, 132, 0.08), transparent 42%);
+}

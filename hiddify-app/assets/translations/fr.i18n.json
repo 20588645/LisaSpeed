@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "LisaSpeed",
     "start": "Commencer",
     "version": "Version",
     "ok": "OK",
@@ -100,10 +100,19 @@
   "pages": {
     "home": {
       "title": "Accueil",
-      "quickSettings": "Options de réglages rapides"
+      "quickSettings": "Options de réglages rapides",
+      "connectionMode": "Connection mode",
+      "openNodes": "Open node list",
+      "subtitle": "One tap · subscription & mode",
+      "currentMode": "Current",
+      "statsLive": "Live",
+      "statsTotal": "Total",
+      "statsExit": "Exit",
+      "delay": "Latency",
+      "sidebarTag": "Local speed"
     },
     "proxies": {
-      "title": "Proxys",
+      "title": "Nodes",
       "sort": "Trier les proxys",
       "testDelay": "Tester le délai",
       "empty": "Aucun proxy disponible",
@@ -124,11 +133,13 @@
         "result": "Latence : ${delay} ms",
         "timeout": "Délai du test de latence expiré",
         "testing": "Latence : test en cours..."
-      }
+      },
+      "subtitle": "Pick a route and test latency",
+      "countHint": "${count} nodes · tap to switch"
     },
     "profiles": {
-      "title": "Profils",
-      "add": "Ajouter un profil",
+      "title": "Subscriptions",
+      "add": "Add subscription",
       "update": "Mettre à jour le profil",
       "viewAllProfiles": "Voir tous les profils",
       "activeProfileName": "Nom du profil actif : \"${name}\".",
@@ -159,10 +170,14 @@
         "delete": {
           "success": "Profil supprimé avec succès"
         }
-      }
+      },
+      "subtitle": "Manage subscriptions and local configs",
+      "tagActive": "Active",
+      "tagRemote": "Remote",
+      "tagLocal": "Local"
     },
     "profileDetails": {
-      "title": "Profil",
+      "title": "Subscription details",
       "lastUpdate": "Dernière mise à jour",
       "form": {
         "nameHint": "Nom du profil",
@@ -175,9 +190,10 @@
       }
     },
     "logs": {
-      "title": "Journaux",
+      "title": "Diagnostics",
       "shareCoreLogs": "Partager les journaux du noyau",
-      "shareAppLogs": "Partager les journaux de l'application"
+      "shareAppLogs": "Partager les journaux de l'application",
+      "subtitle": "Core and app output"
     },
     "about": {
       "title": "À propos",
@@ -187,7 +203,19 @@
       "sourceCode": "Code source",
       "telegramChannel": "Canal Telegram",
       "termsAndConditions": "Conditions d'utilisation",
-      "privacyPolicy": "Politique de confidentialité"
+      "privacyPolicy": "Politique de confidentialité",
+      "lead": "Local accelerator for macOS",
+      "localUpdate": "Update now",
+      "localUpdateSubtitle": "Build locally and install to Applications",
+      "localUpdateTitle": "Local update",
+      "localUpdateHint": "Stay connected while compiling. Install will quit and relaunch the app.",
+      "localUpdateStart": "Start build",
+      "localUpdateInstall": "Build done · Install now",
+      "localUpdateRunning": "Building…",
+      "localUpdateInstalling": "Installing — app will quit…",
+      "localUpdateFailed": "Update failed",
+      "localUpdateIdle": "Tap below to start a local build",
+      "localUpdateClose": "Close"
     },
     "settings": {
       "title": "Paramètres",
@@ -237,7 +265,7 @@
         "useXrayCoreWhenPossibleMsg": "Utilisez xray-core lors de l'analyse des liens d'abonnement. Vous devez réimporter le lien pour activer cette option"
       },
       "routing": {
-        "title": "Routage",
+        "title": "Routing",
         "routeRule": {
           "empty": "Aucune règle ajoutée pour le moment\n\nAppuyez sur le bouton + pour créer une nouvelle règle ou choisissez parmi les règles prédéfinies",
           "delete": "Supprimer la règle",
@@ -415,7 +443,7 @@
         }
       },
       "inbound": {
-        "title": "Entrant",
+        "title": "Connection",
         "serviceMode": "Mode de service",
         "serviceModes": {
           "proxy": "Service proxy uniquement",
@@ -543,7 +571,12 @@
           "selectProfile": "Sélectionner le profil",
           "conduitPairingId": "ID d'appariement Conduit"
         }
-      }
+      },
+      "advanced": {
+        "title": "Advanced",
+        "subtitle": "DNS, TLS, and chain extras"
+      },
+      "subtitle": "Common first · advanced tucked away"
     }
   },
   "components": {

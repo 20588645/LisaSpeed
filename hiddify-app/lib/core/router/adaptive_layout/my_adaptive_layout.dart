@@ -5,9 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/router/adaptive_layout/shell_route_action.dart';
-import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
+import 'package:hiddify/core/router/adaptive_layout/tech_sidebar.dart';
 import 'package:hiddify/core/router/go_router/routing_config_notifier.dart';
-import 'package:hiddify/features/stats/widget/side_bar_stats_overview.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class MyAdaptiveLayout extends HookConsumerWidget {
@@ -17,7 +18,6 @@ class MyAdaptiveLayout extends HookConsumerWidget {
     required this.isMobileBreakpoint,
     required this.showProfilesAction,
   });
-  // managed by go router(Shell Route)
   final StatefulNavigationShell navigationShell;
   final bool isMobileBreakpoint;
   final bool showProfilesAction;
@@ -25,7 +25,6 @@ class MyAdaptiveLayout extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
-    // focus switch management
     final primaryFocusHash = useState<int?>(null);
     final navScopeNode = useFocusScopeNode();
     useEffect(() {
@@ -35,7 +34,6 @@ class MyAdaptiveLayout extends HookConsumerWidget {
         if (event is KeyDownEvent) {
           primaryFocusHash.value = FocusManager.instance.primaryFocus.hashCode;
         } else {
-          // focus node does not change => true.
           if (primaryFocusHash.value == FocusManager.instance.primaryFocus.hashCode) {
             if (branchesScope.values.any((node) => node.hasFocus)) {
               navScopeNode.requestFocus();
@@ -53,38 +51,37 @@ class MyAdaptiveLayout extends HookConsumerWidget {
         HardwareKeyboard.instance.removeHandler(handler);
       };
     }, [isMobileBreakpoint, showProfilesAction, navigationShell.currentIndex]);
+
+    final actions = _actions(t);
+    final destinations = actions.map((e) => (icon: e.icon, label: e.title)).toList();
+
     return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         body: isMobileBreakpoint
-            ? navigationShell
+            ? TechUi.pageShell(context: context, child: navigationShell)
             : Row(
                 children: [
                   FocusScope(
                     node: navScopeNode,
-                    child: NavigationRail(
-                      extended: Breakpoint(context).isDesktop(),
-                      destinations: _navRailDests(_actions(t, showProfilesAction, isMobileBreakpoint)),
-                      selectedIndex: navigationShell.currentIndex,
-                      onDestinationSelected: (index) => _onTap(context, index),
-                      trailing: Breakpoint(context).isDesktop()
-                          ? const Expanded(
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: SizedBox(width: 220, child: SideBarStatsOverview()),
-                              ),
-                            )
-                          : null,
+                    child: TechSidebar(
+                      selectedIndex: navigationShell.currentIndex.clamp(0, 3),
+                      onSelected: (index) => _onTap(context, index),
+                      destinations: destinations,
                     ),
                   ),
-                  Expanded(child: navigationShell),
+                  Expanded(child: TechUi.pageShell(context: context, child: navigationShell)),
                 ],
               ),
         bottomNavigationBar: isMobileBreakpoint
             ? FocusScope(
                 node: navScopeNode,
                 child: NavigationBar(
-                  selectedIndex: navigationShell.currentIndex <= 1 ? navigationShell.currentIndex : 0,
-                  destinations: _navDests(_actions(t, showProfilesAction, isMobileBreakpoint)),
+                  backgroundColor: ConnectionButtonTheme.panelOf(context),
+                  indicatorColor: ConnectionButtonTheme.accentOf(context).withValues(alpha: 0.16),
+                  selectedIndex: navigationShell.currentIndex.clamp(0, 3),
+                  destinations: _navDests(actions),
                   onDestinationSelected: (index) => _onTap(context, index),
                 ),
               )
@@ -93,21 +90,17 @@ class MyAdaptiveLayout extends HookConsumerWidget {
     );
   }
 
-  // shell route action onTap
   void _onTap(BuildContext context, int index) {
     navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
   }
 
-  List<ShellRouteAction> _actions(Translations t, bool showProfilesAction, bool isMobileBreakpoint) => [
-    ShellRouteAction(Icons.power_settings_new_rounded, t.pages.home.title),
-    if (showProfilesAction && !isMobileBreakpoint) ShellRouteAction(Icons.view_list_rounded, t.pages.profiles.title),
+  List<ShellRouteAction> _actions(Translations t) => [
+    ShellRouteAction(Icons.home_rounded, t.pages.home.title),
+    ShellRouteAction(Icons.hub_rounded, t.pages.proxies.title),
+    ShellRouteAction(Icons.subscriptions_rounded, t.pages.profiles.title),
     ShellRouteAction(Icons.settings_rounded, t.pages.settings.title),
-    if (!isMobileBreakpoint) ShellRouteAction(Icons.description_rounded, t.pages.logs.title),
-    if (!isMobileBreakpoint) ShellRouteAction(Icons.info_rounded, t.pages.about.title),
   ];
 
   List<NavigationDestination> _navDests(List<ShellRouteAction> actions) =>
       actions.map((e) => NavigationDestination(icon: Icon(e.icon), label: e.title)).toList();
-  List<NavigationRailDestination> _navRailDests(List<ShellRouteAction> actions) =>
-      actions.map((e) => NavigationRailDestination(icon: Icon(e.icon), label: Text(e.title))).toList();
 }

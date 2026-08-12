@@ -24,6 +24,7 @@ class ChainOptionsPage extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(t.pages.settings.chain.title)),
       body: ListView(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
         children: [
           const ChainTimeline(level: ChainTimelineLevel.app),
           ChainTimeline(

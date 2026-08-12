@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "LisaSpeed",
     "start": "ابدأ",
     "version": "الإصدار",
     "ok": "موافق",
@@ -106,10 +106,19 @@
   "pages": {
     "home": {
       "title": "الرئيسية",
-      "quickSettings": "خيارات الإعدادات السريعة"
+      "quickSettings": "خيارات الإعدادات السريعة",
+      "connectionMode": "Connection mode",
+      "openNodes": "Open node list",
+      "subtitle": "One tap · subscription & mode",
+      "currentMode": "Current",
+      "statsLive": "Live",
+      "statsTotal": "Total",
+      "statsExit": "Exit",
+      "delay": "Latency",
+      "sidebarTag": "Local speed"
     },
     "proxies": {
-      "title": "البروكسيات",
+      "title": "Nodes",
       "sort": "فرز البروكسيات",
       "testDelay": "اختبار التأخير",
       "empty": "لا توجد بروكسيات متاحة",
@@ -130,11 +139,13 @@
         "result": "التأخير: ${delay} مللي ثانية",
         "timeout": "انتهى وقت اختبار التأخير",
         "testing": "التأخير: قيد الاختبار..."
-      }
+      },
+      "subtitle": "Pick a route and test latency",
+      "countHint": "${count} nodes · tap to switch"
     },
     "profiles": {
-      "title": "الملفات الشخصية",
-      "add": "إضافة ملف شخصي",
+      "title": "Subscriptions",
+      "add": "Add subscription",
       "update": "تحديث الملف الشخصي",
       "viewAllProfiles": "عرض جميع الملفات الشخصية",
       "activeProfileName": "اسم الملف النشط: \"${name}\".",
@@ -165,10 +176,14 @@
         "delete": {
           "success": "تم حذف الملف الشخصي بنجاح"
         }
-      }
+      },
+      "subtitle": "Manage subscriptions and local configs",
+      "tagActive": "Active",
+      "tagRemote": "Remote",
+      "tagLocal": "Local"
     },
     "profileDetails": {
-      "title": "الملف الشخصي",
+      "title": "Subscription details",
       "lastUpdate": "آخر تحديث",
       "form": {
         "nameHint": "اسم الملف الشخصي",
@@ -181,9 +196,10 @@
       }
     },
     "logs": {
-      "title": "السجلات",
+      "title": "Diagnostics",
       "shareCoreLogs": "مشاركة سجلات النواة",
-      "shareAppLogs": "مشاركة سجلات التطبيق"
+      "shareAppLogs": "مشاركة سجلات التطبيق",
+      "subtitle": "Core and app output"
     },
     "about": {
       "title": "حول التطبيق",
@@ -193,7 +209,19 @@
       "sourceCode": "الكود المصدري",
       "telegramChannel": "قناة التيليجرام",
       "termsAndConditions": "الشروط والأحكام",
-      "privacyPolicy": "سياسة الخصوصية"
+      "privacyPolicy": "سياسة الخصوصية",
+      "lead": "Local accelerator for macOS",
+      "localUpdate": "Update now",
+      "localUpdateSubtitle": "Build locally and install to Applications",
+      "localUpdateTitle": "Local update",
+      "localUpdateHint": "Stay connected while compiling. Install will quit and relaunch the app.",
+      "localUpdateStart": "Start build",
+      "localUpdateInstall": "Build done · Install now",
+      "localUpdateRunning": "Building…",
+      "localUpdateInstalling": "Installing — app will quit…",
+      "localUpdateFailed": "Update failed",
+      "localUpdateIdle": "Tap below to start a local build",
+      "localUpdateClose": "Close"
     },
     "settings": {
       "title": "الإعدادات",
@@ -243,7 +271,7 @@
         "useXrayCoreWhenPossibleMsg": "استخدم xray-core عند تحليل روابط الاشتراك. تحتاج إلى إعادة استيراد الرابط لتفعيل هذا الخيار"
       },
       "routing": {
-        "title": "التوجيه",
+        "title": "Routing",
         "routeRule": {
           "empty": "لم يتم إضافة قواعد بعد\n\nاضغط على زر + لإنشاء قاعدة جديدة أو اختر من القواعد المحددة مسبقًا",
           "delete": "حذف القاعدة",
@@ -421,7 +449,7 @@
         }
       },
       "inbound": {
-        "title": "الوارد",
+        "title": "Connection",
         "serviceMode": "وضع الخدمة",
         "serviceModes": {
           "proxy": "خدمة البروكسي فقط",
@@ -549,7 +577,12 @@
           "selectProfile": "اختر ملف تعريف",
           "conduitPairingId": "معرف اقتران Conduit"
         }
-      }
+      },
+      "advanced": {
+        "title": "Advanced",
+        "subtitle": "DNS, TLS, and chain extras"
+      },
+      "subtitle": "Common first · advanced tucked away"
     }
   },
   "components": {

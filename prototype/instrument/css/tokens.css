@@ -1,0 +1,45 @@
+:root {
+  --radius: 10px;
+  --font: "IBM Plex Sans", "PingFang SC", "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+
+html[data-color-scheme="light"] {
+  color-scheme: light;
+  --bg: #eef1f4;
+  --bg-elev: #ffffff;
+  --bg-panel: #f7f8fa;
+  --line: #d5dbe3;
+  --text: #1a2332;
+  --muted: #66768a;
+  --accent: #0b5fff;
+  --accent-2: #0b3d5c;
+  --danger: #c62828;
+  --ok: #0f8a5f;
+  --shadow: 0 1px 0 rgba(255,255,255,.8), 0 10px 30px rgba(26,35,50,.08);
+  --grid: rgba(11, 95, 255, 0.06);
+  --glow: none;
+  --connect-core: #ffffff;
+  --connect-ring: #c9d6ea;
+  --page-shell: #222;
+}
+
+html[data-color-scheme="dark"] {
+  color-scheme: dark;
+  --bg: #12161c;
+  --bg-elev: #1a2028;
+  --bg-panel: #1e2530;
+  --line: rgba(220, 230, 245, 0.12);
+  --text: #e8edf4;
+  --muted: #8b97a8;
+  --accent: #4d8aff;
+  --accent-2: #8ab4ff;
+  --danger: #ff6b6b;
+  --ok: #3dd68c;
+  --shadow: 0 0 0 1px rgba(77, 138, 255, 0.08), 0 16px 40px rgba(0,0,0,.45);
+  --grid: rgba(77, 138, 255, 0.07);
+  --glow: none;
+  --connect-core: #232a35;
+  --connect-ring: #3a4556;
+  --page-shell: #0a0c10;
+}

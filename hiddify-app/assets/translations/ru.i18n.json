@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "LisaSpeed",
     "start": "Начать",
     "version": "Версия",
     "ok": "OK",
@@ -104,10 +104,19 @@
   "pages": {
     "home": {
       "title": "Главная",
-      "quickSettings": "Опции быстрых настроек"
+      "quickSettings": "Опции быстрых настроек",
+      "connectionMode": "Connection mode",
+      "openNodes": "Open node list",
+      "subtitle": "One tap · subscription & mode",
+      "currentMode": "Current",
+      "statsLive": "Live",
+      "statsTotal": "Total",
+      "statsExit": "Exit",
+      "delay": "Latency",
+      "sidebarTag": "Local speed"
     },
     "proxies": {
-      "title": "Прокси",
+      "title": "Nodes",
       "sort": "Сортировать прокси",
       "testDelay": "Проверить задержку",
       "empty": "Нет доступных прокси",
@@ -128,11 +137,13 @@
         "result": "Задержка: ${delay} мс",
         "timeout": "Тайм-аут теста задержки",
         "testing": "Задержка: тестирование..."
-      }
+      },
+      "subtitle": "Pick a route and test latency",
+      "countHint": "${count} nodes · tap to switch"
     },
     "profiles": {
-      "title": "Профили",
-      "add": "Добавить профиль",
+      "title": "Subscriptions",
+      "add": "Add subscription",
       "update": "Обновить профиль",
       "viewAllProfiles": "Посмотреть все профили",
       "activeProfileName": "Имя активного профиля: \"${name}\".",
@@ -163,10 +174,14 @@
         "delete": {
           "success": "Профиль успешно удален"
         }
-      }
+      },
+      "subtitle": "Manage subscriptions and local configs",
+      "tagActive": "Active",
+      "tagRemote": "Remote",
+      "tagLocal": "Local"
     },
     "profileDetails": {
-      "title": "Профиль",
+      "title": "Subscription details",
       "lastUpdate": "Последнее обновление",
       "form": {
         "nameHint": "Имя профиля",
@@ -179,9 +194,10 @@
       }
     },
     "logs": {
-      "title": "Логи",
+      "title": "Diagnostics",
       "shareCoreLogs": "Поделиться логами ядра",
-      "shareAppLogs": "Поделиться логами приложения"
+      "shareAppLogs": "Поделиться логами приложения",
+      "subtitle": "Core and app output"
     },
     "about": {
       "title": "О программе",
@@ -191,7 +207,19 @@
       "sourceCode": "Исходный код",
       "telegramChannel": "Канал в Telegram",
       "termsAndConditions": "Условия использования",
-      "privacyPolicy": "Политика конфиденциальности"
+      "privacyPolicy": "Политика конфиденциальности",
+      "lead": "Local accelerator for macOS",
+      "localUpdate": "Update now",
+      "localUpdateSubtitle": "Build locally and install to Applications",
+      "localUpdateTitle": "Local update",
+      "localUpdateHint": "Stay connected while compiling. Install will quit and relaunch the app.",
+      "localUpdateStart": "Start build",
+      "localUpdateInstall": "Build done · Install now",
+      "localUpdateRunning": "Building…",
+      "localUpdateInstalling": "Installing — app will quit…",
+      "localUpdateFailed": "Update failed",
+      "localUpdateIdle": "Tap below to start a local build",
+      "localUpdateClose": "Close"
     },
     "settings": {
       "title": "Настройки",
@@ -241,7 +269,7 @@
         "useXrayCoreWhenPossibleMsg": "Использовать xray-core при обработке ссылок на подписку. Необходимо повторно импортировать ссылку, чтобы включить эту опцию."
       },
       "routing": {
-        "title": "Маршрутизация",
+        "title": "Routing",
         "routeRule": {
           "empty": "Пока нет добавленных правил\n\nНажмите кнопку +, чтобы создать новое правило или выбрать из предопределенных",
           "delete": "Удалить правило",
@@ -419,7 +447,7 @@
         }
       },
       "inbound": {
-        "title": "Входящие",
+        "title": "Connection",
         "serviceMode": "Режим службы",
         "serviceModes": {
           "proxy": "Только прокси-служба",
@@ -547,7 +575,12 @@
           "selectProfile": "Выберите профиль",
           "conduitPairingId": "ID сопряжения Conduit"
         }
-      }
+      },
+      "advanced": {
+        "title": "Advanced",
+        "subtitle": "DNS, TLS, and chain extras"
+      },
+      "subtitle": "Common first · advanced tucked away"
     }
   },
   "components": {

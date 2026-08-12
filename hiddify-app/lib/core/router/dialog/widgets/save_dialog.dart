@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
+import 'package:hiddify/core/widget/tech_dialog.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SaveDialog extends HookConsumerWidget {
@@ -11,7 +12,7 @@ class SaveDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
-    return AlertDialog(
+    return TechDialog.alert(
       title: Text(title),
       content: ConstrainedBox(constraints: AlertDialogConst.boxConstraints, child: Text(description)),
       actions: [

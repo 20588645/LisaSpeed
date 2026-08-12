@@ -8,6 +8,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/core/model/failures.dart';
 import 'package:hiddify/core/notification/in_app_notification_controller.dart';
 import 'package:hiddify/features/profile/details/json_editor.dart';
@@ -82,8 +83,12 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
                 ],
               ),
               body: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
-                  Form(
+                  Container(
+                    decoration: TechUi.panelDecoration(context),
+                    clipBehavior: Clip.antiAlias,
+                    child: Form(
                     key: formKey,
                     child: Column(
                       children: [
@@ -247,7 +252,12 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
                       ],
                     ),
                   ),
-                  SizedBox(
+                  ),
+                  const Gap(12),
+                  Container(
+                    decoration: TechUi.panelDecoration(context),
+                    clipBehavior: Clip.antiAlias,
+                    child: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.7,
                     child: isJson(data.configContent)
                         ? JsonEditor(
@@ -277,6 +287,7 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
                               contentPadding: EdgeInsets.only(left: 5, top: 8, bottom: 8),
                             ),
                           ),
+                  ),
                   ),
                 ],
               ),

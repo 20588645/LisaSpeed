@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/utils/preferences_utils.dart';
+import 'package:hiddify/core/widget/tech_dialog.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 bool _testExperimentalNotice = false;
@@ -23,7 +24,7 @@ class ExperimentalFeatureNoticeDialog extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     final disableNotice = ref.watch(disableExperimentalFeatureNoticeProvider);
 
-    return AlertDialog(
+    return TechDialog.alert(
       title: Text(t.dialogs.experimentalNotice.title),
       content: SingleChildScrollView(
         child: SizedBox(

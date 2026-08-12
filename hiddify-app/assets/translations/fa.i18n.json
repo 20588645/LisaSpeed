@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "هیدیفای",
+    "appTitle": "LisaSpeed",
     "start": "شروع",
     "version": "نسخه",
     "ok": "باشه",
@@ -100,10 +100,19 @@
   "pages": {
     "home": {
       "title": "خانه",
-      "quickSettings": "گزینه‌های تنظیمات سریع"
+      "quickSettings": "گزینه‌های تنظیمات سریع",
+      "connectionMode": "Connection mode",
+      "openNodes": "Open node list",
+      "subtitle": "One tap · subscription & mode",
+      "currentMode": "Current",
+      "statsLive": "Live",
+      "statsTotal": "Total",
+      "statsExit": "Exit",
+      "delay": "Latency",
+      "sidebarTag": "Local speed"
     },
     "proxies": {
-      "title": "پروکسی‌ها",
+      "title": "Nodes",
       "sort": "مرتب‌سازی پروکسی‌ها",
       "testDelay": "تست تأخیر",
       "empty": "هیچ پروکسی موجود نیست",
@@ -124,11 +133,13 @@
         "result": "تأخیر: ${delay} میلی‌ثانیه",
         "timeout": "تست تأخیر ناموفق بود",
         "testing": "تأخیر: در حال تست..."
-      }
+      },
+      "subtitle": "Pick a route and test latency",
+      "countHint": "${count} nodes · tap to switch"
     },
     "profiles": {
-      "title": "پروفایل‌ها",
-      "add": "افزودن پروفایل",
+      "title": "Subscriptions",
+      "add": "Add subscription",
       "update": "به‌روزرسانی پروفایل",
       "viewAllProfiles": "مشاهده همه پروفایل‌ها",
       "activeProfileName": "نام پروفایل فعال: «${name}»",
@@ -159,10 +170,14 @@
         "delete": {
           "success": "پروفایل با موفقیت حذف شد"
         }
-      }
+      },
+      "subtitle": "Manage subscriptions and local configs",
+      "tagActive": "Active",
+      "tagRemote": "Remote",
+      "tagLocal": "Local"
     },
     "profileDetails": {
-      "title": "پروفایل",
+      "title": "Subscription details",
       "lastUpdate": "آخرین به‌روزرسانی",
       "form": {
         "nameHint": "نام پروفایل",
@@ -175,9 +190,10 @@
       }
     },
     "logs": {
-      "title": "گزارش‌ها",
+      "title": "Diagnostics",
       "shareCoreLogs": "اشتراک‌گذاری گزارش‌های هسته",
-      "shareAppLogs": "اشتراک‌گذاری گزارش‌های برنامه"
+      "shareAppLogs": "اشتراک‌گذاری گزارش‌های برنامه",
+      "subtitle": "Core and app output"
     },
     "about": {
       "title": "درباره",
@@ -187,7 +203,19 @@
       "sourceCode": "کد منبع",
       "telegramChannel": "کانال تلگرام",
       "termsAndConditions": "شرایط و ضوابط",
-      "privacyPolicy": "سیاست حفظ حریم خصوصی"
+      "privacyPolicy": "سیاست حفظ حریم خصوصی",
+      "lead": "Local accelerator for macOS",
+      "localUpdate": "Update now",
+      "localUpdateSubtitle": "Build locally and install to Applications",
+      "localUpdateTitle": "Local update",
+      "localUpdateHint": "Stay connected while compiling. Install will quit and relaunch the app.",
+      "localUpdateStart": "Start build",
+      "localUpdateInstall": "Build done · Install now",
+      "localUpdateRunning": "Building…",
+      "localUpdateInstalling": "Installing — app will quit…",
+      "localUpdateFailed": "Update failed",
+      "localUpdateIdle": "Tap below to start a local build",
+      "localUpdateClose": "Close"
     },
     "settings": {
       "title": "تنظیمات",
@@ -237,7 +265,7 @@
         "useXrayCoreWhenPossibleMsg": "هنگام پردازش لینک‌های اشتراک از xray-core استفاده شود. برای فعال‌سازی این گزینه باید لینک اشتراک را مجدداً وارد کنید."
       },
       "routing": {
-        "title": "مسیریابی",
+        "title": "Routing",
         "routeRule": {
           "empty": "هنوز هیچ قانونی اضافه نشده است\n\nبرای ایجاد قانون جدید یا انتخاب از قوانین پیش‌فرض، روی دکمه + ضربه بزنید",
           "delete": "حذف قانون",
@@ -415,7 +443,7 @@
         }
       },
       "inbound": {
-        "title": "ورودی",
+        "title": "Connection",
         "serviceMode": "حالت سرویس",
         "serviceModes": {
           "proxy": "فقط سرویس پروکسی",
@@ -543,7 +571,12 @@
           "selectProfile": "انتخاب پروفایل",
           "conduitPairingId": "شناسه جفت‌سازی Conduit"
         }
-      }
+      },
+      "advanced": {
+        "title": "Advanced",
+        "subtitle": "DNS, TLS, and chain extras"
+      },
+      "subtitle": "Common first · advanced tucked away"
     }
   },
   "components": {

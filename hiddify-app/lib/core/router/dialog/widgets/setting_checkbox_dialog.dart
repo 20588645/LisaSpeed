@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/widget/tech_dialog.dart';
 import 'package:hiddify/features/route_rules/notifier/rule_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protobuf/protobuf.dart';
@@ -32,7 +33,7 @@ class SettingCheckboxDialog extends ConsumerWidget {
     final checkboxNotififier = dialogCheckboxNotifierProvider(selectedValues);
     final current = ref.watch(checkboxNotififier);
 
-    return AlertDialog(
+    return TechDialog.alert(
       title: Text(title),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 300),

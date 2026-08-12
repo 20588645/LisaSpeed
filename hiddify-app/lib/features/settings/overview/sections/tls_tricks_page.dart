@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/optional_range.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -24,7 +25,8 @@ class TlsTricksPage extends HookConsumerWidget {
     final canChangeOption = ref.watch(ConfigOptions.enableTlsFragment);
     return Scaffold(
       appBar: AppBar(title: Text(t.pages.settings.tlsTricks.title)),
-      body: ListView(
+      body: TechUi.preferencePanel(
+        context,
         children: [
           SwitchListTile.adaptive(
             title: Text(t.pages.settings.tlsTricks.enable),

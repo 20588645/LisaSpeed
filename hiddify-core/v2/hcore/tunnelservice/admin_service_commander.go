@@ -69,10 +69,15 @@ func startTunnelRequest(opt *TunnelStartRequest, installService bool) (bool, err
 	}
 	defer conn.Close()
 	c := NewTunnelServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	_, _ = c.Stop(ctx, &hcommon.Empty{})
-	res, err := c.Start(ctx, opt)
+	// Stop and Start must NOT share one short deadline: Stop alone can eat
+	// most of a 5s budget, then Start (TUN + optional hosts override) times out
+	// with DeadlineExceeded → UI "failed to start background core".
+	stopCtx, stopCancel := context.WithTimeout(context.Background(), time.Second*8)
+	_, _ = c.Stop(stopCtx, &hcommon.Empty{})
+	stopCancel()
+	startCtx, startCancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer startCancel()
+	res, err := c.Start(startCtx, opt)
 	if err != nil {
 		log.Printf("could not greet: %+v %+v", res, err)
 

@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
+import 'package:hiddify/core/widget/tech_dialog.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SettingTextDialog extends HookConsumerWidget {
@@ -18,7 +19,7 @@ class SettingTextDialog extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final tController = useTextEditingController(text: value);
-    return AlertDialog(
+    return TechDialog.alert(
       content: ConstrainedBox(
         constraints: AlertDialogConst.boxConstraints,
         child: Form(

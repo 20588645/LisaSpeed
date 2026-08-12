@@ -3,6 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/route_rules/notifier/rules_notifier.dart';
 import 'package:hiddify/features/route_rules/widget/setting_detail_chips.dart';
 import 'package:hiddify/hiddifycore/generated/v2/config/route_rule.pb.dart';
@@ -55,53 +57,68 @@ class RuleTile extends HookConsumerWidget {
     ref.listen(rulesNotifierProvider, (_, _) {
       if (scrollController.offset > 0) scrollController.jumpTo(0);
     });
-    return Material(
-      child: InkWell(
-        onTap: () {
-          context.goNamed('rule', pathParameters: {'orderId': rule.listOrder.toString()});
-        },
-        onLongPress: () async => await handleDelete(context, ref),
-        onSecondaryTapUp: PlatformUtils.isDesktop
-            ? (details) {
-                final offset = details.globalPosition;
-                showMenu(
-                  context: context,
-                  position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, offset.dy),
-                  items: [
-                    PopupMenuItem(
-                      child: Text(t.pages.settings.routing.routeRule.delete),
-                      onTap: () async => await handleDelete(context, ref),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {
+            context.goNamed('rule', pathParameters: {'orderId': rule.listOrder.toString()});
+          },
+          onLongPress: () async => await handleDelete(context, ref),
+          onSecondaryTapUp: PlatformUtils.isDesktop
+              ? (details) {
+                  final offset = details.globalPosition;
+                  showMenu(
+                    context: context,
+                    position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, offset.dy),
+                    items: [
+                      PopupMenuItem(
+                        child: Text(t.pages.settings.routing.routeRule.delete),
+                        onTap: () async => await handleDelete(context, ref),
+                      ),
+                    ],
+                  );
+                }
+              : null,
+          child: Ink(
+            decoration: TechUi.panelDecoration(context, selected: rule.enabled),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  title: Text(
+                    t.pages.settings.routing.routeRule.rule.outbound[rule.outbound.name] ?? rule.outbound.name,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: ConnectionButtonTheme.brandMint,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                );
-              }
-            : null,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              title: Text(
-                t.pages.settings.routing.routeRule.rule.outbound[rule.outbound.name] ?? rule.outbound.name,
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              subtitle: Text(rule.name, style: Theme.of(context).textTheme.bodyLarge),
-              leading: ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle_rounded)),
-              trailing: Switch(
-                value: rule.enabled,
-                onChanged: (value) async =>
-                    await ref.read(rulesNotifierProvider.notifier).updateEnabled(value, rule.listOrder),
-              ),
+                  ),
+                  subtitle: Text(
+                    rule.name,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  leading: ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle_rounded)),
+                  trailing: Switch.adaptive(
+                    activeThumbColor: ConnectionButtonTheme.brandMint,
+                    value: rule.enabled,
+                    onChanged: (value) async =>
+                        await ref.read(rulesNotifierProvider.notifier).updateEnabled(value, rule.listOrder),
+                  ),
+                ),
+                SettingDetailChips<MapEntry>(
+                  values: detailChipsValue().entries.toList(),
+                  scrollController: scrollController,
+                  t: mergeTranslation([
+                    t.pages.settings.routing.routeRule.rule.tileTitle,
+                    t.pages.settings.routing.routeRule.rule.network,
+                    t.pages.settings.routing.routeRule.rule.outbound,
+                  ]),
+                ),
+              ],
             ),
-            SettingDetailChips<MapEntry>(
-              values: detailChipsValue().entries.toList(),
-              scrollController: scrollController,
-              t: mergeTranslation([
-                t.pages.settings.routing.routeRule.rule.tileTitle,
-                t.pages.settings.routing.routeRule.rule.network,
-                t.pages.settings.routing.routeRule.rule.outbound,
-              ]),
-            ),
-          ],
+          ),
         ),
       ),
     );

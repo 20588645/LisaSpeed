@@ -9,23 +9,118 @@ class AppTheme {
   final String fontFamily;
 
   ThemeData lightTheme(ColorScheme? lightColorScheme) {
-    final ColorScheme scheme = lightColorScheme ?? ColorScheme.fromSeed(seedColor: const Color(0xFF293CA0));
+    final ColorScheme scheme =
+        lightColorScheme ??
+        ColorScheme.fromSeed(
+          seedColor: ConnectionButtonTheme.brandNavy,
+        ).copyWith(
+          primary: ConnectionButtonTheme.brandMintLight,
+          secondary: ConnectionButtonTheme.brandBlueLight,
+          surface: ConnectionButtonTheme.bgElevLight,
+        );
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
+      scaffoldBackgroundColor: ConnectionButtonTheme.bgLight,
       fontFamily: fontFamily,
+      navigationRailTheme: NavigationRailThemeData(
+        indicatorColor: ConnectionButtonTheme.brandMintLight.withValues(alpha: 0.18),
+        selectedIconTheme: const IconThemeData(color: ConnectionButtonTheme.brandMintLight),
+        selectedLabelTextStyle: const TextStyle(
+          color: ConnectionButtonTheme.brandMintLight,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        indicatorColor: ConnectionButtonTheme.brandMintLight.withValues(alpha: 0.22),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(fontWeight: FontWeight.w700, color: ConnectionButtonTheme.brandMintLight);
+          }
+          return null;
+        }),
+      ),
+      dividerTheme: DividerThemeData(
+        color: ConnectionButtonTheme.brandMintLight.withValues(alpha: 0.12),
+        thickness: 1,
+        space: 1,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: ConnectionButtonTheme.bgElevLight,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: ConnectionButtonTheme.brandMintLight.withValues(alpha: 0.18)),
+        ),
+        titleTextStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF102033),
+          letterSpacing: -0.2,
+        ),
+      ),
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
     );
   }
 
   ThemeData darkTheme(ColorScheme? darkColorScheme) {
     final ColorScheme scheme =
-        darkColorScheme ?? ColorScheme.fromSeed(seedColor: const Color(0xFF293CA0), brightness: Brightness.dark);
+        darkColorScheme ??
+        ColorScheme.fromSeed(
+          seedColor: ConnectionButtonTheme.brandNavy,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: ConnectionButtonTheme.brandMint,
+          secondary: ConnectionButtonTheme.brandBlue,
+          surface: const Color(0xFF0B1220),
+        );
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: mode.trueBlack ? Colors.black : scheme.background,
+      scaffoldBackgroundColor: mode.trueBlack ? Colors.black : const Color(0xFF06090F),
       fontFamily: fontFamily,
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: const Color(0xFF0B1220),
+        indicatorColor: ConnectionButtonTheme.brandMint.withValues(alpha: 0.16),
+        selectedIconTheme: const IconThemeData(color: ConnectionButtonTheme.brandMint),
+        selectedLabelTextStyle: const TextStyle(
+          color: ConnectionButtonTheme.brandMint,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedIconTheme: IconThemeData(color: scheme.onSurface.withValues(alpha: 0.55)),
+        unselectedLabelTextStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.55)),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: const Color(0xFF0B1220),
+        indicatorColor: ConnectionButtonTheme.brandMint.withValues(alpha: 0.16),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(fontWeight: FontWeight.w700, color: ConnectionButtonTheme.brandMint);
+          }
+          return TextStyle(color: scheme.onSurface.withValues(alpha: 0.55));
+        }),
+      ),
+      dividerTheme: DividerThemeData(
+        color: ConnectionButtonTheme.brandMint.withValues(alpha: 0.14),
+        thickness: 1,
+        space: 1,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: ConnectionButtonTheme.bgElevDark,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: ConnectionButtonTheme.brandMint.withValues(alpha: 0.18)),
+        ),
+        titleTextStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFFEAF3FF),
+          letterSpacing: -0.2,
+        ),
+      ),
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
     );
   }

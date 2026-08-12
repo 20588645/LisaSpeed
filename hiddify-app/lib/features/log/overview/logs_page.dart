@@ -7,6 +7,7 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/failures.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/widget/adaptive_icon.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/log/data/log_data_providers.dart';
 import 'package:hiddify/features/log/model/log_level.dart';
 import 'package:hiddify/features/log/overview/logs_overview_notifier.dart';
@@ -53,7 +54,18 @@ class LogsPage extends HookConsumerWidget with PresLogger {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.pages.logs.title),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.pages.logs.title),
+            Text(
+              t.pages.logs.subtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
         actions: [
           if (state.paused)
             IconButton(
@@ -99,14 +111,17 @@ class LogsPage extends HookConsumerWidget with PresLogger {
                     child: DecoratedBox(
                       decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Row(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                        child: Container(
+                          decoration: TechUi.panelDecoration(context),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Row(
                           children: [
                             Flexible(
                               child: TextFormField(
                                 controller: filterController,
                                 onChanged: notifier.filterMessage,
-                                decoration: InputDecoration(isDense: true, hintText: t.common.filter),
+                                decoration: InputDecoration(isDense: true, hintText: t.common.filter, border: InputBorder.none),
                               ),
                             ),
                             const Gap(16),
@@ -124,6 +139,7 @@ class LogsPage extends HookConsumerWidget with PresLogger {
                               ],
                             ),
                           ],
+                        ),
                         ),
                       ),
                     ),

@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "LisaSpeed",
     "start": "Başlat",
     "version": "Sürüm",
     "ok": "Tamam",
@@ -100,10 +100,19 @@
   "pages": {
     "home": {
       "title": "Ana Sayfa",
-      "quickSettings": "Hızlı ayar seçenekleri"
+      "quickSettings": "Hızlı ayar seçenekleri",
+      "connectionMode": "Connection mode",
+      "openNodes": "Open node list",
+      "subtitle": "One tap · subscription & mode",
+      "currentMode": "Current",
+      "statsLive": "Live",
+      "statsTotal": "Total",
+      "statsExit": "Exit",
+      "delay": "Latency",
+      "sidebarTag": "Local speed"
     },
     "proxies": {
-      "title": "Proxy'ler",
+      "title": "Nodes",
       "sort": "Proxy'leri sırala",
       "testDelay": "Gecikmeyi test et",
       "empty": "Kullanılabilir proxy yok",
@@ -124,11 +133,13 @@
         "result": "Gecikme: ${delay}ms",
         "timeout": "Gecikme testi zaman aşımına uğradı",
         "testing": "Gecikme: test ediliyor..."
-      }
+      },
+      "subtitle": "Pick a route and test latency",
+      "countHint": "${count} nodes · tap to switch"
     },
     "profiles": {
-      "title": "Profiller",
-      "add": "Profil ekle",
+      "title": "Subscriptions",
+      "add": "Add subscription",
       "update": "Profili güncelle",
       "viewAllProfiles": "Tüm profilleri görüntüle",
       "activeProfileName": "Aktif profil adı: \"${name}\".",
@@ -159,10 +170,14 @@
         "delete": {
           "success": "Profil başarıyla silindi"
         }
-      }
+      },
+      "subtitle": "Manage subscriptions and local configs",
+      "tagActive": "Active",
+      "tagRemote": "Remote",
+      "tagLocal": "Local"
     },
     "profileDetails": {
-      "title": "Profil",
+      "title": "Subscription details",
       "lastUpdate": "Son güncelleme",
       "form": {
         "nameHint": "Profil adı",
@@ -175,9 +190,10 @@
       }
     },
     "logs": {
-      "title": "Loglar",
+      "title": "Diagnostics",
       "shareCoreLogs": "Çekirdek loglarını paylaş",
-      "shareAppLogs": "Uygulama loglarını paylaş"
+      "shareAppLogs": "Uygulama loglarını paylaş",
+      "subtitle": "Core and app output"
     },
     "about": {
       "title": "Hakkında",
@@ -187,7 +203,19 @@
       "sourceCode": "Kaynak kodu",
       "telegramChannel": "Telegram kanalı",
       "termsAndConditions": "Şartlar ve Koşullar",
-      "privacyPolicy": "Gizlilik Politikası"
+      "privacyPolicy": "Gizlilik Politikası",
+      "lead": "Local accelerator for macOS",
+      "localUpdate": "Update now",
+      "localUpdateSubtitle": "Build locally and install to Applications",
+      "localUpdateTitle": "Local update",
+      "localUpdateHint": "Stay connected while compiling. Install will quit and relaunch the app.",
+      "localUpdateStart": "Start build",
+      "localUpdateInstall": "Build done · Install now",
+      "localUpdateRunning": "Building…",
+      "localUpdateInstalling": "Installing — app will quit…",
+      "localUpdateFailed": "Update failed",
+      "localUpdateIdle": "Tap below to start a local build",
+      "localUpdateClose": "Close"
     },
     "settings": {
       "title": "Ayarlar",
@@ -237,7 +265,7 @@
         "useXrayCoreWhenPossibleMsg": "Abonelik bağlantılarını ayrıştırırken xray-core kullanın. Bu seçeneği etkinleştirmek için bağlantıyı yeniden içe aktarmanız gerekir."
       },
       "routing": {
-        "title": "Yönlendirme",
+        "title": "Routing",
         "routeRule": {
           "empty": "Henüz kural eklenmedi\n\nYeni bir kural oluşturmak için + düğmesine dokunun veya önceden tanımlanmış kurallardan birini seçin",
           "delete": "Kuralı sil",
@@ -415,7 +443,7 @@
         }
       },
       "inbound": {
-        "title": "Gelen",
+        "title": "Connection",
         "serviceMode": "Servis modu",
         "serviceModes": {
           "proxy": "Yalnızca proxy servisi",
@@ -543,7 +571,12 @@
           "selectProfile": "Profil seçin",
           "conduitPairingId": "Conduit eşleşme ID'si"
         }
-      }
+      },
+      "advanced": {
+        "title": "Advanced",
+        "subtitle": "DNS, TLS, and chain extras"
+      },
+      "subtitle": "Common first · advanced tucked away"
     }
   },
   "components": {

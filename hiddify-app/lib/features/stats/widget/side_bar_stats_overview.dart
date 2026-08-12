@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/core/utils/preferences_utils.dart';
 import 'package:hiddify/core/widget/animated_text.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
@@ -73,12 +74,12 @@ class SideBarStatsOverview extends HookConsumerWidget {
                   title: t.components.stats.trafficLive,
                   stats: [
                     (
-                      label: const Text("↑", style: TextStyle(color: Colors.green)),
+                      label: const Text("↑", style: TextStyle(color: ConnectionButtonTheme.brandMint)),
                       data: Text(stats.uplink.toInt().speed()),
                       semanticLabel: t.components.stats.uplink,
                     ),
                     (
-                      label: Text("↓", style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      label: const Text("↓", style: TextStyle(color: ConnectionButtonTheme.brandBlue)),
                       data: Text(stats.downlink.toInt().speed()),
                       semanticLabel: t.components.stats.downlink,
                     ),
@@ -89,12 +90,12 @@ class SideBarStatsOverview extends HookConsumerWidget {
                   title: t.components.stats.trafficTotal,
                   stats: [
                     (
-                      label: const Text("↑", style: TextStyle(color: Colors.green)),
+                      label: const Text("↑", style: TextStyle(color: ConnectionButtonTheme.brandMint)),
                       data: Text(stats.uplinkTotal.toInt().size()),
                       semanticLabel: t.components.stats.uplink,
                     ),
                     (
-                      label: Text("↓", style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      label: const Text("↓", style: TextStyle(color: ConnectionButtonTheme.brandBlue)),
                       data: Text(stats.downlinkTotal.toInt().size()),
                       semanticLabel: t.components.stats.downlink,
                     ),

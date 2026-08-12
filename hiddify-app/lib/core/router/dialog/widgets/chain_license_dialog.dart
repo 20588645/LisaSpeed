@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
+import 'package:hiddify/core/widget/tech_dialog.dart';
 import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/utils/uri_utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -101,7 +102,7 @@ class ChainLicenseDialog extends HookConsumerWidget {
             ),
           );
 
-    return AlertDialog(
+    return TechDialog.alert(
       title: Text(title),
       content: ConstrainedBox(
         constraints: AlertDialogConst.boxConstraints,

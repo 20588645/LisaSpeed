@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "LisaSpeed",
     "start": "開始",
     "version": "版本",
     "ok": "確定",
@@ -100,10 +100,19 @@
   "pages": {
     "home": {
       "title": "首頁",
-      "quickSettings": "快速設定選項"
+      "quickSettings": "快速設定選項",
+      "connectionMode": "連線模式",
+      "openNodes": "開啟節點列表",
+      "subtitle": "一鍵連接 · 當前訂閱與模式",
+      "currentMode": "目前",
+      "statsLive": "即時",
+      "statsTotal": "總量",
+      "statsExit": "出口",
+      "delay": "延遲",
+      "sidebarTag": "本地加速"
     },
     "proxies": {
-      "title": "代理",
+      "title": "節點",
       "sort": "排序代理",
       "testDelay": "測試延遲",
       "empty": "無可用代理",
@@ -124,11 +133,13 @@
         "result": "延遲：${delay}毫秒",
         "timeout": "延遲測試超時",
         "testing": "延遲：測試中..."
-      }
+      },
+      "subtitle": "選擇線路並測速",
+      "countHint": "共 ${count} 個節點 · 點擊切換"
     },
     "profiles": {
-      "title": "設定檔",
-      "add": "新增設定檔",
+      "title": "訂閱",
+      "add": "新增訂閱",
       "update": "更新設定檔",
       "viewAllProfiles": "檢視所有設定檔",
       "activeProfileName": "目前設定檔：「${name}」",
@@ -159,10 +170,14 @@
         "delete": {
           "success": "設定檔刪除成功"
         }
-      }
+      },
+      "subtitle": "管理訂閱與本地設定",
+      "tagActive": "使用中",
+      "tagRemote": "訂閱",
+      "tagLocal": "本地"
     },
     "profileDetails": {
-      "title": "設定檔",
+      "title": "訂閱詳情",
       "lastUpdate": "最後更新",
       "form": {
         "nameHint": "設定檔名稱",
@@ -175,9 +190,10 @@
       }
     },
     "logs": {
-      "title": "日誌",
+      "title": "診斷",
       "shareCoreLogs": "分享核心日誌",
-      "shareAppLogs": "分享應用程式日誌"
+      "shareAppLogs": "分享應用程式日誌",
+      "subtitle": "核心與應用日誌"
     },
     "about": {
       "title": "關於",
@@ -187,7 +203,19 @@
       "sourceCode": "原始碼",
       "telegramChannel": "Telegram 頻道",
       "termsAndConditions": "條款與條件",
-      "privacyPolicy": "隱私權政策"
+      "privacyPolicy": "隱私權政策",
+      "lead": "macOS 本地加速客戶端",
+      "localUpdate": "立即更新",
+      "localUpdateSubtitle": "本地全量編譯（含隧道 HiddifyCli）並安裝到 Applications",
+      "localUpdateTitle": "本地更新",
+      "localUpdateHint": "會同步編譯 UI 與隧道核心（HiddifyCli）。編譯中可保持連線；安裝時會退出舊進程並自動重開。",
+      "localUpdateStart": "開始編譯",
+      "localUpdateInstall": "編譯完成 · 立即安裝",
+      "localUpdateRunning": "正在全量編譯（core + 應用）…",
+      "localUpdateInstalling": "正在安裝，將結束舊隧道並重啟應用…",
+      "localUpdateFailed": "更新失敗",
+      "localUpdateIdle": "點擊下方按鈕開始本地全量編譯",
+      "localUpdateClose": "關閉"
     },
     "settings": {
       "title": "設定",
@@ -237,7 +265,7 @@
         "useXrayCoreWhenPossibleMsg": "解析訂閱連結時使用 xray-core。您需要重新匯入訂閱連結才能啟用此選項"
       },
       "routing": {
-        "title": "路由",
+        "title": "分流",
         "routeRule": {
           "empty": "尚未新增規則\n\n點擊 + 按鈕建立新規則，或從預設規則中選擇",
           "delete": "刪除規則",
@@ -415,7 +443,7 @@
         }
       },
       "inbound": {
-        "title": "入站",
+        "title": "連線",
         "serviceMode": "服務模式",
         "serviceModes": {
           "proxy": "僅代理服務",
@@ -543,7 +571,12 @@
           "selectProfile": "選擇設定檔",
           "conduitPairingId": "Conduit 配對 ID"
         }
-      }
+      },
+      "advanced": {
+        "title": "進階",
+        "subtitle": "DNS、TLS、鏈路增強"
+      },
+      "subtitle": "常用項靠前 · 進階項收納"
     }
   },
   "components": {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hiddify/singbox/model/singbox_config_enum.dart';
@@ -12,7 +13,8 @@ class DnsOptionsPage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     return Scaffold(
       appBar: AppBar(title: Text(t.pages.settings.dns.title)),
-      body: ListView(
+      body: TechUi.preferencePanel(
+        context,
         children: [
           ValuePreferenceWidget(
             value: ref.watch(ConfigOptions.remoteDnsAddress),
@@ -48,12 +50,6 @@ class DnsOptionsPage extends HookConsumerWidget {
             icon: Icons.sync_alt_rounded,
             presentChoice: (value) => value.present(t),
           ),
-          // SwitchListTile.adaptive(
-          //   title: Text(t.pages.settings.dns.enableDnsRouting),
-          //   secondary: const Icon(Icons.private_connectivity_rounded),
-          //   value: ref.watch(ConfigOptions.enableDnsRouting),
-          //   onChanged: ref.read(ConfigOptions.enableDnsRouting.notifier).update,
-          // ),
         ],
       ),
     );
