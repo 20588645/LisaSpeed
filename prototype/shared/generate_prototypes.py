@@ -215,8 +215,8 @@ def page_home_b() -> str:
     <div class="hb-side">
       <div class="panel hb-card">
         <div class="hb-k">出口</div>
-        <div class="hb-row"><span class="hb-v" data-exit-label>—</span></div>
-        <div class="hb-row"><span class="muted tiny">检测 IP</span><span class="mono tiny" data-exit-ip>—</span></div>
+        <div class="hb-row"><span class="muted tiny">线路</span><span class="hb-v sm" data-exit-label>—</span></div>
+        <div class="hb-row"><span class="muted tiny">检测 IP</span><span class="hb-v sm hb-ip" data-exit-ip>—</span></div>
       </div>
       <div class="panel hb-card">
         <div class="hb-k">流量</div>
@@ -1300,13 +1300,14 @@ html[data-conn="connected"] .connect-status { color: var(--ok); }
 .connect-btn.xl .connect-disc { inset: 28px; }
 .connect-btn.xl .connect-mark { font-size: 42px; }
 
-.home-b-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; max-width: 860px; }
-.hb-hero { display: grid; justify-items: center; gap: 12px; padding: 24px 18px 18px; align-content: start; }
+.home-b-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; max-width: 860px; align-items: stretch; }
+.hb-hero { display: grid; justify-items: center; gap: 12px; padding: 24px 18px 18px; align-content: center; }
 .hb-copy { min-height: 0 !important; }
 .hb-modes { width: 100%; }
 .hb-modes button { min-height: 38px; font-size: 12.5px; }
-.hb-side { display: grid; gap: 12px; align-content: start; }
-.hb-card { display: grid; gap: 8px; padding: 14px 16px; }
+.hb-side { display: grid; gap: 12px; grid-template-rows: repeat(4, minmax(0, 1fr)); }
+.hb-card { display: grid; gap: 8px; padding: 14px 16px; align-content: center; }
+.hb-ip { letter-spacing: 0.02em; }
 .hb-k {
   font-size: 11px; font-weight: 700; color: var(--muted);
   letter-spacing: 0.06em; text-transform: uppercase;
@@ -1588,6 +1589,15 @@ html[data-theme="tech"][data-conn="connected"] .home-stats::before { opacity: 0.
 html[data-theme="tech"]:not([data-conn="connected"]) .home-stats .stat-v { color: var(--muted); }
 html[data-theme="tech"]:not([data-conn="connected"]) .hb-v { color: var(--muted); }
 html[data-theme="tech"][data-conn="connected"] .hd-stats { color: var(--text); }
+html[data-theme="tech"][data-conn="connected"] .hb-ip { color: var(--accent); }
+[data-theme="tech"] .hb-hero { position: relative; overflow: hidden; }
+[data-theme="tech"] .hb-hero::before {
+  content: "";
+  position: absolute; top: 0; left: 12%; right: 12%; height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--accent) 32%, var(--accent-2) 68%, transparent);
+  opacity: 0; transition: opacity .45s ease;
+}
+html[data-theme="tech"][data-conn="connected"] .hb-hero::before { opacity: 0.9; }
 [data-theme="tech"] .page-head h1 { font-weight: 800; }
 [data-theme="tech"] .log-line:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
 [data-theme="tech"] .modal-choice:hover {
