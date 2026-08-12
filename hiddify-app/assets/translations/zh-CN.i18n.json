@@ -110,8 +110,21 @@
       "statsExit": "出口",
       "statsUp": "上行",
       "statsDown": "下行",
+      "statsTraffic": "流量",
       "delay": "延迟",
-      "sidebarTag": "本地加速"
+      "sidebarTag": "本地加速",
+      "currentNode": "当前节点",
+      "exitLine": "线路",
+      "exitIp": "检测 IP",
+      "profileUpdated": "更新",
+      "connDuration": "时长",
+      "connSubIdle": "流量未加密 · 点击开始加速",
+      "connSubConnecting": "正在建立加密隧道…",
+      "connSubConnected": "隧道已建立 · 流量已加密",
+      "connSubDisconnecting": "正在断开连接…",
+      "modeHintProxy": "仅本机代理端口生效 · 不修改系统设置",
+      "modeHintSystem": "接管系统代理 · 浏览器与常规应用生效",
+      "modeHintVpn": "TUN 全局接管 · 所有应用与终端生效"
     },
     "proxies": {
       "title": "节点",

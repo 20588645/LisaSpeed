@@ -110,8 +110,21 @@
       "statsExit": "Exit",
       "statsUp": "Upload",
       "statsDown": "Download",
+      "statsTraffic": "Traffic",
       "delay": "Latency",
-      "sidebarTag": "Local speed"
+      "sidebarTag": "Local speed",
+      "currentNode": "Current node",
+      "exitLine": "Line",
+      "exitIp": "Detected IP",
+      "profileUpdated": "Updated",
+      "connDuration": "Uptime",
+      "connSubIdle": "Traffic unencrypted · tap to accelerate",
+      "connSubConnecting": "Establishing encrypted tunnel…",
+      "connSubConnected": "Tunnel up · traffic encrypted",
+      "connSubDisconnecting": "Disconnecting…",
+      "modeHintProxy": "Local proxy port only · system settings untouched",
+      "modeHintSystem": "Takes over system proxy · browsers & apps apply",
+      "modeHintVpn": "TUN global takeover · all apps & terminals"
     },
     "proxies": {
       "title": "Nodes",
