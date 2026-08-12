@@ -48,18 +48,18 @@ def variant_bar(active: str) -> str:
     )
 
 def connect_button(size: str = "") -> str:
-    # Connect control v2: tick ring + radar sweep + power glyph. Every state
-    # stays crisp — no blur filters anywhere (the old in-app design blurred
-    # while connecting).
+    # Connect control v3: premium glass orb — hairline gradient ring, glass
+    # dome disc with specular depth, a thin comet arc while connecting, and a
+    # softly shimmering full ring when connected. Crisp in every state.
     cls = f"connect-btn {size}".strip()
     return f"""<button type="button" class="{cls}" data-connect aria-label="连接切换">
         <span class="connect-aura" aria-hidden="true"></span>
-        <span class="connect2-ticks" aria-hidden="true"></span>
-        <span class="connect2-sweep" aria-hidden="true"></span>
-        <span class="connect2-ring" aria-hidden="true"></span>
+        <span class="connect3-halo" aria-hidden="true"></span>
+        <span class="connect3-ring" aria-hidden="true"></span>
+        <span class="connect3-orbit" aria-hidden="true"></span>
         <span class="connect-ripple" aria-hidden="true"></span>
-        <span class="connect2-disc" aria-hidden="true">
-          <span class="connect2-power"></span>
+        <span class="connect3-disc" aria-hidden="true">
+          <span class="connect3-power"></span>
         </span>
       </button>"""
 
@@ -1271,110 +1271,138 @@ html[data-conn="connected"] .connect-status { color: var(--ok); }
 }
 .node-cta-right { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; }
 
-/* Connect control v2 — tick ring + radar sweep + power glyph (crisp in all states) */
-.connect2-ticks {
-  position: absolute; inset: 5%;
+/* Connect control v3 — premium glass orb (hairline ring, glass dome, comet arc) */
+.connect3-halo {
+  position: absolute; inset: 3%;
   border-radius: 50%;
-  background: repeating-conic-gradient(
-    color-mix(in srgb, var(--muted) 45%, transparent) 0deg 1.6deg,
-    transparent 1.6deg 6deg
-  );
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
-  opacity: 0.8;
-  transition: opacity .3s ease;
+  pointer-events: none;
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow .6s ease;
 }
-html[data-conn="connected"] .connect2-ticks {
-  background: repeating-conic-gradient(
-    color-mix(in srgb, var(--accent) 80%, transparent) 0deg 1.6deg,
-    transparent 1.6deg 6deg
-  );
+html[data-conn="connected"] .connect3-halo {
+  box-shadow:
+    0 0 34px color-mix(in srgb, var(--accent) 20%, transparent),
+    0 0 90px color-mix(in srgb, var(--accent) 9%, transparent);
 }
-.connect2-sweep {
-  position: absolute; inset: 5%;
+.connect3-ring {
+  position: absolute; inset: 4%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 210deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 36%, transparent) 90deg,
+    color-mix(in srgb, var(--accent-2) 28%, transparent) 200deg,
+    transparent 320deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 0.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 0.5px));
+  opacity: 0.55;
+  transition: opacity .45s ease;
+}
+html[data-conn="connected"] .connect3-ring {
+  opacity: 1;
+  background: conic-gradient(
+    from 0deg,
+    var(--accent),
+    var(--accent-2) 140deg,
+    color-mix(in srgb, var(--accent) 70%, #fff) 220deg,
+    var(--accent) 360deg
+  );
+  animation: arc-spin 14s linear infinite;
+}
+.connect3-orbit {
+  position: absolute; inset: 4%;
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
-    transparent 0deg,
-    color-mix(in srgb, var(--accent) 85%, transparent) 70deg,
-    var(--accent-2) 110deg,
-    transparent 150deg,
-    transparent 360deg
+    transparent 0deg 250deg,
+    color-mix(in srgb, var(--accent-2) 55%, transparent) 320deg,
+    var(--accent) 354deg,
+    transparent 356deg
   );
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
   opacity: 0;
   transition: opacity .3s ease;
 }
-html[data-conn="connecting"] .connect2-sweep { opacity: 1; animation: arc-spin 1.1s linear infinite; }
-html[data-conn="connected"] .connect2-sweep { opacity: 0.55; animation: arc-spin 7s linear infinite; }
-.connect2-ring {
-  position: absolute; inset: 16%;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
-  transition: border-color .3s ease, box-shadow .3s ease;
+html[data-conn="connecting"] .connect3-orbit {
+  opacity: 1;
+  animation: arc-spin 1.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
-html[data-conn="connected"] .connect2-ring {
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  box-shadow:
-    0 0 24px color-mix(in srgb, var(--accent) 20%, transparent),
-    inset 0 0 14px color-mix(in srgb, var(--accent) 10%, transparent);
-}
-.connect2-disc {
-  position: absolute; inset: 23%;
+.connect3-disc {
+  position: absolute; inset: 12%;
   border-radius: 50%;
   display: grid; place-items: center;
   background:
-    radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 52%),
-    linear-gradient(160deg, color-mix(in srgb, var(--bg-panel-solid, var(--bg-elev)) 94%, #fff), var(--bg-elev));
-  border: 1px solid color-mix(in srgb, var(--line) 85%, var(--accent));
-  box-shadow: 0 10px 26px rgba(0,0,0,.22);
-  transition: border-color .3s ease, box-shadow .3s ease;
-}
-.connect-btn:hover .connect2-disc { border-color: color-mix(in srgb, var(--accent) 42%, var(--line)); }
-html[data-conn="connected"] .connect2-disc {
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    radial-gradient(120% 120% at 30% 18%, rgba(255, 255, 255, 0.10), transparent 46%),
+    radial-gradient(150% 150% at 50% 118%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 56%),
+    linear-gradient(165deg, color-mix(in srgb, var(--bg-panel-solid, var(--bg-elev)) 86%, #fff), color-mix(in srgb, var(--bg-elev) 92%, #000));
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
   box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--accent) 8%, transparent),
-    0 10px 26px rgba(0,0,0,.24);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -12px 26px rgba(0, 0, 0, 0.26),
+    0 18px 40px rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: border-color .45s ease, box-shadow .45s ease;
 }
-.connect2-power {
+.connect3-disc::before {
+  content: "";
+  position: absolute; inset: 7%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--text) 7%, transparent);
+  transition: border-color .45s ease;
+}
+.connect-btn:hover .connect3-disc {
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+html[data-conn="connected"] .connect3-disc {
+  border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -12px 28px color-mix(in srgb, var(--accent) 9%, rgba(0, 0, 0, 0.24)),
+    0 18px 44px rgba(0, 0, 0, 0.4),
+    0 0 22px color-mix(in srgb, var(--accent) 13%, transparent);
+}
+html[data-conn="connected"] .connect3-disc::before {
+  border-color: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+.connect3-power {
   position: relative;
-  width: 30%; height: 30%;
-  color: var(--muted);
-  transition: color .3s ease, filter .3s ease;
+  width: 26%; height: 26%;
+  color: color-mix(in srgb, var(--text) 82%, transparent);
+  transition: color .35s ease, filter .35s ease;
 }
-.connect2-power::before {
+.connect3-power::before {
   content: "";
   position: absolute; inset: 0;
   border-radius: 50%;
-  border: 3px solid currentColor;
-  -webkit-mask: conic-gradient(from -32deg, transparent 0deg 64deg, #000 64deg 360deg);
-  mask: conic-gradient(from -32deg, transparent 0deg 64deg, #000 64deg 360deg);
+  border: 2px solid currentColor;
+  -webkit-mask: conic-gradient(from -28deg, transparent 0deg 56deg, #000 56deg 360deg);
+  mask: conic-gradient(from -28deg, transparent 0deg 56deg, #000 56deg 360deg);
 }
-.connect2-power::after {
+.connect3-power::after {
   content: "";
   position: absolute;
-  top: -14%; left: 50%;
+  top: -12%; left: 50%;
   transform: translateX(-50%);
-  width: 3px; height: 48%;
-  border-radius: 3px;
+  width: 2px; height: 46%;
+  border-radius: 2px;
   background: currentColor;
 }
-.connect-btn:hover .connect2-power { color: var(--text); }
-html[data-conn="connecting"] .connect2-power {
+.connect-btn:hover .connect3-power { color: var(--text); }
+html[data-conn="connecting"] .connect3-power {
   color: var(--accent-2);
-  animation: power-pulse 1.1s ease-in-out infinite;
+  animation: power-pulse 1.6s ease-in-out infinite;
 }
-html[data-conn="connected"] .connect2-power {
+html[data-conn="connected"] .connect3-power {
   color: var(--accent);
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 55%, transparent));
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 45%, transparent));
 }
-@keyframes power-pulse { 50% { opacity: 0.55; } }
-.connect-btn.sm .connect2-power::before { border-width: 2px; }
-.connect-btn.sm .connect2-power::after { width: 2px; }
-.connect-btn.xl .connect2-power::before { border-width: 3.5px; }
-.connect-btn.xl .connect2-power::after { width: 3.5px; }
+@keyframes power-pulse { 50% { opacity: 0.65; } }
+.connect-btn.sm .connect3-power::before { border-width: 1.5px; }
+.connect-btn.sm .connect3-power::after { width: 1.5px; }
+.connect-btn.xl .connect3-power::before { border-width: 2.5px; }
+.connect-btn.xl .connect3-power::after { width: 2.5px; }
 
 /* List/table garnish shared across pages */
 .node-tags { margin-top: 7px; }
@@ -1740,15 +1768,23 @@ html[data-theme="tech"][data-conn="connected"] .hb-hero::before { opacity: 0.9; 
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 8%, var(--bg-panel-solid));
 }
-html[data-theme="tech"][data-color-scheme="light"] .connect-disc {
+html[data-theme="tech"][data-color-scheme="light"] .connect3-disc {
   background:
-    radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 48%),
-    linear-gradient(160deg, #ffffff, #f2f6fa);
-  box-shadow: 0 10px 28px rgba(16,32,51,.08);
+    radial-gradient(120% 120% at 30% 18%, rgba(255, 255, 255, 0.95), transparent 52%),
+    radial-gradient(150% 150% at 50% 118%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 56%),
+    linear-gradient(165deg, #ffffff, #eef3f8);
+  border-color: rgba(16, 32, 51, 0.12);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 -10px 20px rgba(16, 32, 51, 0.06),
+    0 14px 30px rgba(16, 32, 51, 0.14),
+    0 2px 6px rgba(16, 32, 51, 0.08);
 }
-html[data-theme="tech"][data-color-scheme="light"] .connect-mark {
-  background: linear-gradient(160deg, #102033, var(--accent));
-  -webkit-background-clip: text; background-clip: text;
+html[data-theme="tech"][data-color-scheme="light"] .connect3-disc::before {
+  border-color: rgba(16, 32, 51, 0.08);
+}
+html[data-theme="tech"][data-color-scheme="light"] .connect3-power {
+  color: color-mix(in srgb, #102033 78%, transparent);
 }
 /* Tech restyle pass — interaction & control polish across all pages */
 [data-theme="tech"] .list-row:hover {
