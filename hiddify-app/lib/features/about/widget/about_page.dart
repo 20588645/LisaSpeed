@@ -99,7 +99,23 @@ class AboutPage extends HookConsumerWidget {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Assets.images.logo.svg(width: 56, height: 56),
+                // Logo with the prototype's soft accent glow ring.
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ConnectionButtonTheme.accentOf(context).withValues(alpha: 0.10),
+                        spreadRadius: 6,
+                      ),
+                      BoxShadow(
+                        color: ConnectionButtonTheme.accentOf(context).withValues(alpha: 0.18),
+                        blurRadius: 24,
+                      ),
+                    ],
+                  ),
+                  child: Assets.images.logo.svg(width: 56, height: 56),
+                ),
                 const Gap(16),
                 Expanded(
                   child: Column(

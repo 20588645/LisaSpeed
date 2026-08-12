@@ -70,11 +70,34 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                          child: Text(
-                            t.pages.proxies.countHint(count: group.items.length),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          child: Row(
+                            children: [
+                              Container(
+                                height: 22,
+                                constraints: const BoxConstraints(minWidth: 22),
+                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: ConnectionButtonTheme.accentOf(context).withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                child: Text(
+                                  '${group.items.length}',
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: ConnectionButtonTheme.accentOf(context),
+                                    fontWeight: FontWeight.w700,
+                                    fontFeatures: const [FontFeature.tabularFigures()],
+                                  ),
+                                ),
+                              ),
+                              const Gap(6),
+                              Text(
+                                t.pages.proxies.countSuffix,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Expanded(

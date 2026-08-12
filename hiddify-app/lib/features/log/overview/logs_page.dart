@@ -160,35 +160,61 @@ class LogsPage extends HookConsumerWidget with PresLogger {
                     itemCount: logs.length,
                     itemBuilder: (context, index) {
                       final log = logs[index];
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (log.level != null)
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        log.level!.name.toUpperCase(),
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.labelMedium?.copyWith(color: log.level!.color),
-                                      ),
-                                      if (log.time != null)
-                                        Text(log.time!.toString(), style: Theme.of(context).textTheme.labelSmall),
-                                    ],
-                                  ),
-                                Text(extractMessage(log.message), style: Theme.of(context).textTheme.bodySmall),
-                              ],
+                      final theme = Theme.of(context);
+                      // Zebra rows + level chips, mirroring the prototype log panel.
+                      final zebra = index.isOdd
+                          ? theme.colorScheme.surfaceContainerHighest.withValues(
+                              alpha: theme.brightness == Brightness.dark ? 0.16 : 0.30,
+                            )
+                          : Colors.transparent;
+                      return Container(
+                        width: double.infinity,
+                        color: zebra,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (log.level != null) ...[
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Builder(builder: (context) {
+                                          final levelColor =
+                                              log.level!.color ?? theme.colorScheme.onSurfaceVariant;
+                                          return Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: levelColor.withValues(alpha: 0.12),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              log.level!.name.toUpperCase(),
+                                              style: theme.textTheme.labelSmall?.copyWith(
+                                                color: levelColor,
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: 0.4,
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                        if (log.time != null)
+                                          Text(log.time!.toString(), style: theme.textTheme.labelSmall),
+                                      ],
+                                    ),
+                                    const Gap(4),
+                                  ],
+                                  Text(extractMessage(log.message), style: theme.textTheme.bodySmall),
+                                ],
+                              ),
                             ),
-                          ),
-                          if (index != 0) const Divider(indent: 16, endIndent: 16, height: 4),
-                        ],
+                            if (index != 0) const Divider(indent: 16, endIndent: 16, height: 1),
+                          ],
+                        ),
                       );
                     },
                   ),

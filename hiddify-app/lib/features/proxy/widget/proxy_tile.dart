@@ -19,7 +19,6 @@ class ProxyTile extends HookConsumerWidget with PresLogger {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -31,15 +30,7 @@ class ProxyTile extends HookConsumerWidget with PresLogger {
           onLongPress: () async =>
               await ref.read(dialogNotifierProvider.notifier).showProxyInfo(outboundInfo: proxy),
           child: Ink(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: isDark ? 0.42 : 0.78),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: selected
-                    ? ConnectionButtonTheme.brandMint.withValues(alpha: 0.65)
-                    : ConnectionButtonTheme.brandMint.withValues(alpha: isDark ? 0.14 : 0.12),
-              ),
-            ),
+            decoration: TechUi.panelDecoration(context, selected: selected),
             child: IntrinsicHeight(
               child: Row(
                 children: [
@@ -84,16 +75,18 @@ class ProxyTile extends HookConsumerWidget with PresLogger {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  proxy.isGroup
-                                      ? '${proxy.type} · ${proxy.groupSelectedTagDisplay.trim()}'
-                                      : proxy.type,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
+                                const SizedBox(height: 6),
+                                // Region/protocol as tag chips, mirroring the prototype rows.
+                                Row(
+                                  children: [
+                                    TechUi.tag(context, proxy.type),
+                                    if (proxy.isGroup && proxy.groupSelectedTagDisplay.trim().isNotEmpty) ...[
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        child: TechUi.tag(context, proxy.groupSelectedTagDisplay.trim()),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ],
                             ),

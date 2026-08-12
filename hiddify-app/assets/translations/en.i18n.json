@@ -150,7 +150,8 @@
         "testing": "Delay: testing..."
       },
       "subtitle": "Pick a route and test latency",
-      "countHint": "${count} nodes · tap to switch"
+      "countHint": "${count} nodes · tap to switch",
+      "countSuffix": "nodes · tap to switch"
     },
     "profiles": {
       "title": "Subscriptions",

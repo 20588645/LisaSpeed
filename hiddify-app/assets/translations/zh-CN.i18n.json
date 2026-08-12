@@ -150,7 +150,8 @@
         "testing": "延迟：测试中..."
       },
       "subtitle": "选择线路并测速",
-      "countHint": "共 ${count} 个节点 · 点击切换"
+      "countHint": "共 ${count} 个节点 · 点击切换",
+      "countSuffix": "个节点 · 点击切换"
     },
     "profiles": {
       "title": "订阅",

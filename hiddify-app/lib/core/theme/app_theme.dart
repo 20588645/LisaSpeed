@@ -45,6 +45,11 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
+      switchTheme: _switchTheme(scheme, ConnectionButtonTheme.brandMintLight),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: ConnectionButtonTheme.brandMintLight,
+        linearTrackColor: ConnectionButtonTheme.brandMintLight.withValues(alpha: 0.14),
+      ),
       dialogTheme: DialogThemeData(
         backgroundColor: ConnectionButtonTheme.bgElevLight,
         surfaceTintColor: Colors.transparent,
@@ -106,6 +111,11 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
+      switchTheme: _switchTheme(scheme, ConnectionButtonTheme.brandMint),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: ConnectionButtonTheme.brandMint,
+        linearTrackColor: ConnectionButtonTheme.brandMint.withValues(alpha: 0.14),
+      ),
       dialogTheme: DialogThemeData(
         backgroundColor: ConnectionButtonTheme.bgElevDark,
         surfaceTintColor: Colors.transparent,
@@ -122,6 +132,26 @@ class AppTheme {
         ),
       ),
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
+    );
+  }
+
+  /// Tech-prototype toggle: accent track/thumb when on, muted when off.
+  static SwitchThemeData _switchTheme(ColorScheme scheme, Color accent) {
+    return SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith(
+        (states) =>
+            states.contains(WidgetState.selected) ? accent : scheme.onSurface.withValues(alpha: 0.7),
+      ),
+      trackColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? accent.withValues(alpha: 0.32)
+            : scheme.onSurface.withValues(alpha: 0.10),
+      ),
+      trackOutlineColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? accent.withValues(alpha: 0.55)
+            : scheme.onSurface.withValues(alpha: 0.16),
+      ),
     );
   }
 
