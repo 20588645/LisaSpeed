@@ -1,9 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
@@ -17,7 +15,9 @@ import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/settings/notifier/config_option/config_option_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// LisaSpeed Tech-style connect control: soft aura + ring + gradient arc + L disc.
+/// LisaSpeed glass-orb connect control, mirroring the tech prototype v3:
+/// hairline gradient ring, comet arc while connecting, glass dome disc with a
+/// power glyph. Crisp in every state — no blur filters.
 class ConnectionButton extends HookConsumerWidget {
   const ConnectionButton({super.key});
 
@@ -28,8 +28,6 @@ class ConnectionButton extends HookConsumerWidget {
     final activeProxy = ref.watch(activeProxyNotifierProvider);
     final delay = activeProxy.valueOrNull?.urlTestDelay ?? 0;
     final requiresReconnect = ref.watch(configOptionNotifierProvider).valueOrNull;
-
-    const buttonTheme = ConnectionButtonTheme.light;
 
     final isConnected = connectionStatus.valueOrNull is Connected &&
         requiresReconnect != true &&
@@ -43,31 +41,40 @@ class ConnectionButton extends HookConsumerWidget {
       _ => false,
     };
 
-    final arcController = useAnimationController(
-      duration: Duration(milliseconds: isConnecting ? 1200 : 10000),
+    // Ring/comet rotation: fast eased orbit while connecting, a slow shimmer
+    // once connected.
+    final rotationController = useAnimationController(
+      duration: Duration(milliseconds: isConnecting ? 1600 : 14000),
     );
     useEffect(() {
+      rotationController.duration = Duration(milliseconds: isConnecting ? 1600 : 14000);
       if (isConnected || isConnecting) {
-        arcController.repeat();
+        rotationController.repeat();
       } else {
-        arcController.stop();
-        arcController.value = 0;
+        rotationController.stop();
+        rotationController.value = 0;
       }
       return null;
     }, [isConnected, isConnecting]);
 
-    // Keep duration in sync when state flips between connecting/connected.
+    // Soft glyph breathing while connecting.
+    final pulseController = useAnimationController(duration: const Duration(milliseconds: 1600));
     useEffect(() {
-      arcController.duration = Duration(milliseconds: isConnecting ? 1200 : 10000);
-      if (arcController.isAnimating) {
-        arcController.repeat();
+      if (isConnecting) {
+        pulseController.repeat(reverse: true);
+      } else {
+        pulseController.stop();
+        pulseController.value = 0;
       }
       return null;
     }, [isConnecting]);
 
-    final secureLabel = (delay <= 0 || delay > 65000 || connectionStatus.value != const Connected())
-        ? ''
-        : '';
+    // One-shot success ripple when the tunnel comes up.
+    final rippleController = useAnimationController(duration: const Duration(milliseconds: 900));
+    useEffect(() {
+      if (isConnected) rippleController.forward(from: 0);
+      return null;
+    }, [isConnected]);
 
     return _ConnectionButton(
       onTap: switch (connectionStatus) {
@@ -105,18 +112,11 @@ class ConnectionButton extends HookConsumerWidget {
         AsyncData(value: final status) => status.present(t),
         _ => '',
       },
-      accent: switch (connectionStatus) {
-        AsyncData(value: Connected()) when requiresReconnect == true => ConnectionButtonTheme.accentOf(context),
-        AsyncData(value: Connected()) when delay <= 0 || delay >= 65000 => ConnectionButtonTheme.accent2Of(context),
-        AsyncData(value: Connected()) => ConnectionButtonTheme.accentOf(context),
-        AsyncData(value: _) => buttonTheme.idleColor!,
-        _ => Colors.red,
-      },
-      accentSecondary: ConnectionButtonTheme.accent2Of(context),
       isConnected: isConnected,
       isConnecting: isConnecting,
-      arcAnimation: arcController,
-      secureLabel: secureLabel,
+      rotation: rotationController,
+      pulse: pulseController,
+      ripple: rippleController,
     );
   }
 }
@@ -126,98 +126,137 @@ class _ConnectionButton extends StatelessWidget {
     required this.onTap,
     required this.enabled,
     required this.label,
-    required this.accent,
-    required this.accentSecondary,
     required this.isConnected,
     required this.isConnecting,
-    required this.arcAnimation,
-    required this.secureLabel,
+    required this.rotation,
+    required this.pulse,
+    required this.ripple,
   });
 
   final VoidCallback onTap;
   final bool enabled;
   final String label;
-  final Color accent;
-  final Color accentSecondary;
   final bool isConnected;
   final bool isConnecting;
-  final Animation<double> arcAnimation;
-  final String secureLabel;
+  final Animation<double> rotation;
+  final Animation<double> pulse;
+  final Animation<double> ripple;
+
+  static const double _box = 168;
+  static const double _ringSize = 160;
+  static const double _discSize = 128;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final faceTop = isDark ? const Color(0xFF152636) : Colors.white;
-    final faceBottom = isDark ? const Color(0xFF0E1A28) : const Color(0xFFF2F6FA);
-    final auraOpacity = isConnected ? 0.55 : (isConnecting ? 0.4 : 0.18);
-    final arcOpacity = isConnected || isConnecting ? 1.0 : 0.72;
+    final accent = ConnectionButtonTheme.accentOf(context);
+    final accent2 = ConnectionButtonTheme.accent2Of(context);
+    final onSurface = theme.colorScheme.onSurface;
 
-    Widget button = Semantics(
+    final faceTop = isDark ? const Color(0xFF17293B) : Colors.white;
+    final faceBottom = isDark ? const Color(0xFF0B141F) : const Color(0xFFEEF3F8);
+    final auraOpacity = isConnected ? 0.5 : (isConnecting ? 0.35 : 0.15);
+
+    final glyphColor = isConnected
+        ? accent
+        : isConnecting
+            ? accent2
+            : onSurface.withValues(alpha: 0.82);
+
+    final Widget button = Semantics(
       button: true,
       enabled: enabled,
       label: label,
       child: SizedBox(
-        width: 168,
-        height: 168,
+        width: _box,
+        height: _box,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Soft aura
+            // Soft ambient aura.
             AnimatedOpacity(
-              duration: const Duration(milliseconds: 280),
+              duration: const Duration(milliseconds: 350),
               opacity: auraOpacity,
               child: Container(
-                width: 168,
-                height: 168,
+                width: _box,
+                height: _box,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      accent.withValues(alpha: isDark ? 0.28 : 0.2),
+                      accent.withValues(alpha: isDark ? 0.26 : 0.18),
                       accent.withValues(alpha: 0),
                     ],
                   ),
                 ),
               ),
             ),
-            // Thin ring
+            // Halo bloom once connected.
             AnimatedContainer(
-              duration: const Duration(milliseconds: 280),
-              width: 148,
-              height: 148,
+              duration: const Duration(milliseconds: 600),
+              width: _ringSize,
+              height: _ringSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: accent.withValues(alpha: isConnected ? 0.55 : 0.22),
-                  width: 1,
-                ),
                 boxShadow: isConnected
                     ? [
-                        BoxShadow(
-                          color: accent.withValues(alpha: 0.18),
-                          blurRadius: 28,
-                        ),
+                        BoxShadow(color: accent.withValues(alpha: 0.20), blurRadius: 34),
+                        BoxShadow(color: accent.withValues(alpha: 0.09), blurRadius: 90),
                       ]
-                    : null,
+                    : const [],
               ),
             ),
-            // Gradient arc (Tech conic rim)
+            // Hairline gradient ring.
             AnimatedBuilder(
-              animation: arcAnimation,
-              builder: (context, _) {
-                return CustomPaint(
-                  size: const Size(148, 148),
-                  painter: _ConnectArcPainter(
-                    rotation: arcAnimation.value * math.pi * 2,
+              animation: rotation,
+              builder: (context, _) => CustomPaint(
+                size: const Size(_ringSize, _ringSize),
+                painter: _HairlineRingPainter(
+                  rotation: isConnected ? rotation.value * 2 * math.pi : 0,
+                  connected: isConnected,
+                  accent: accent,
+                  accent2: accent2,
+                ),
+              ),
+            ),
+            // Comet arc while connecting.
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: isConnecting ? 1 : 0,
+              child: AnimatedBuilder(
+                animation: rotation,
+                builder: (context, _) => CustomPaint(
+                  size: const Size(_ringSize, _ringSize),
+                  painter: _CometArcPainter(
+                    rotation: Curves.easeInOutSine.transform(rotation.value) * 2 * math.pi,
                     accent: accent,
-                    accentSecondary: accentSecondary,
-                    opacity: arcOpacity,
+                    accent2: accent2,
+                    visible: isConnecting,
+                  ),
+                ),
+              ),
+            ),
+            // Success ripple.
+            AnimatedBuilder(
+              animation: ripple,
+              builder: (context, _) {
+                final v = ripple.value;
+                if (v == 0 || v == 1) return const SizedBox();
+                return Container(
+                  width: _ringSize * (0.92 + 0.36 * v),
+                  height: _ringSize * (0.92 + 0.36 * v),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: accent.withValues(alpha: 0.5 * (1 - v)),
+                      width: 1.5,
+                    ),
                   ),
                 );
               },
             ),
-            // Disc + L mark
+            // Glass dome disc.
             Material(
               key: const ValueKey('home_connection_button'),
               color: Colors.transparent,
@@ -225,72 +264,121 @@ class _ConnectionButton extends StatelessWidget {
                 customBorder: const CircleBorder(),
                 onTap: onTap,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 280),
-                  width: 118,
-                  height: 118,
+                  duration: const Duration(milliseconds: 450),
+                  width: _discSize,
+                  height: _discSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      begin: const Alignment(-0.6, -0.8),
-                      end: const Alignment(0.7, 0.9),
-                      colors: [
-                        Color.lerp(faceTop, accent, isConnected ? 0.12 : 0.04)!,
-                        faceBottom,
-                      ],
+                      begin: const Alignment(-0.5, -0.9),
+                      end: const Alignment(0.5, 1.0),
+                      colors: [faceTop, faceBottom],
                     ),
                     border: Border.all(
-                      color: accent.withValues(alpha: isConnected ? 0.5 : 0.28),
-                      width: 1.2,
+                      color: isConnected
+                          ? accent.withValues(alpha: 0.38)
+                          : onSurface.withValues(alpha: 0.10),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
+                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
+                        blurRadius: 40,
+                        offset: const Offset(0, 18),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
                       if (isConnected)
                         BoxShadow(
-                          color: accent.withValues(alpha: 0.12),
-                          blurRadius: 1,
-                          spreadRadius: 4,
+                          color: accent.withValues(alpha: 0.13),
+                          blurRadius: 22,
                         ),
                     ],
                   ),
-                  child: Center(
-                    child: ShaderMask(
-                      blendMode: BlendMode.srcIn,
-                      shaderCallback: (bounds) {
-                        return LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: isConnected
-                              ? [Colors.white, accent]
-                              : isConnecting
-                                  ? [accentSecondary, accent]
-                                  : [
-                                      theme.colorScheme.onSurface,
-                                      Color.lerp(theme.colorScheme.onSurface, accent, 0.55)!,
-                                    ],
-                        ).createShader(bounds);
-                      },
-                      child: Text(
-                        'L',
-                        style: theme.textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -1.2,
-                          height: 1,
-                          color: Colors.white,
-                          shadows: isConnected
-                              ? [
-                                  Shadow(
-                                    color: accent.withValues(alpha: 0.35),
-                                    blurRadius: 10,
-                                  ),
-                                ]
-                              : null,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    fit: StackFit.expand,
+                    children: [
+                      // Specular top-left light.
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            center: const Alignment(-0.4, -0.64),
+                            radius: 1.0,
+                            colors: [
+                              Colors.white.withValues(alpha: isDark ? 0.10 : 0.9),
+                              Colors.white.withValues(alpha: 0),
+                            ],
+                            stops: const [0.0, 0.46],
+                          ),
                         ),
                       ),
-                    ),
+                      // Bottom accent bloom.
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            center: const Alignment(0, 1.2),
+                            radius: 1.1,
+                            colors: [
+                              accent.withValues(alpha: isDark ? 0.13 : 0.10),
+                              accent.withValues(alpha: 0),
+                            ],
+                            stops: const [0.0, 0.56],
+                          ),
+                        ),
+                      ),
+                      // Bottom inner shade (fakes an inset shadow).
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: isDark ? 0.24 : 0.05),
+                              Colors.black.withValues(alpha: 0),
+                            ],
+                            stops: const [0.0, 0.38],
+                          ),
+                        ),
+                      ),
+                      // Machined chamfer ring.
+                      Padding(
+                        padding: const EdgeInsets.all(9),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 450),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isConnected
+                                  ? accent.withValues(alpha: 0.24)
+                                  : onSurface.withValues(alpha: 0.07),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Power glyph.
+                      Center(
+                        child: AnimatedBuilder(
+                          animation: pulse,
+                          builder: (context, _) {
+                            final opacity = isConnecting ? 1 - 0.35 * pulse.value : 1.0;
+                            return CustomPaint(
+                              size: const Size(34, 40),
+                              painter: _PowerGlyphPainter(
+                                color: glyphColor.withValues(alpha: glyphColor.a * opacity),
+                                strokeWidth: 2.4,
+                                glow: isConnected ? accent.withValues(alpha: 0.45) : null,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -303,35 +391,22 @@ class _ConnectionButton extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Keep the control crisp while connecting: scale only, no blur.
-        button.animate(target: enabled ? 0 : 1).scaleXY(end: .97, curve: Curves.easeIn),
-        const Gap(18),
+        // Keep the control crisp while disabled: scale only, no blur.
+        AnimatedScale(
+          scale: enabled ? 1 : 0.97,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeIn,
+          child: button,
+        ),
+        const Gap(16),
         ExcludeSemantics(
-          child: Column(
-            children: [
-              AnimatedText(
-                label,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.2,
-                  color: isConnected ? accent : theme.colorScheme.onSurface,
-                ),
-              ),
-              if (secureLabel.isNotEmpty) ...[
-                const Gap(6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(FontAwesomeIcons.shieldHalved, size: 14, color: theme.colorScheme.secondary),
-                    const Gap(4),
-                    Text(
-                      secureLabel,
-                      style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.secondary),
-                    ),
-                  ],
-                ),
-              ],
-            ],
+          child: AnimatedText(
+            label,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+              color: isConnected ? accent : theme.colorScheme.onSurface,
+            ),
           ),
         ),
       ],
@@ -339,18 +414,20 @@ class _ConnectionButton extends StatelessWidget {
   }
 }
 
-class _ConnectArcPainter extends CustomPainter {
-  _ConnectArcPainter({
+/// 1.5px ring: a faint partial gradient when idle/connecting, a full slowly
+/// shimmering accent gradient once connected.
+class _HairlineRingPainter extends CustomPainter {
+  _HairlineRingPainter({
     required this.rotation,
+    required this.connected,
     required this.accent,
-    required this.accentSecondary,
-    required this.opacity,
+    required this.accent2,
   });
 
   final double rotation;
+  final bool connected;
   final Color accent;
-  final Color accentSecondary;
-  final double opacity;
+  final Color accent2;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -359,28 +436,132 @@ class _ConnectArcPainter extends CustomPainter {
     final rect = Rect.fromCircle(center: center, radius: radius);
     final paint = Paint()
       ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    if (connected) {
+      paint.shader = SweepGradient(
+        transform: GradientRotation(rotation),
+        colors: [
+          accent,
+          accent2,
+          Color.lerp(accent, Colors.white, 0.3)!,
+          accent,
+        ],
+        stops: const [0.0, 0.39, 0.61, 1.0],
+      ).createShader(rect);
+    } else {
+      paint.shader = SweepGradient(
+        transform: const GradientRotation(3.665), // ~210deg
+        colors: [
+          accent.withValues(alpha: 0),
+          accent.withValues(alpha: 0.36),
+          accent2.withValues(alpha: 0.28),
+          accent2.withValues(alpha: 0),
+          accent.withValues(alpha: 0),
+        ],
+        stops: const [0.0, 0.25, 0.55, 0.89, 1.0],
+      ).createShader(rect);
+    }
+    canvas.drawCircle(center, radius, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _HairlineRingPainter old) {
+    return old.rotation != rotation ||
+        old.connected != connected ||
+        old.accent != accent ||
+        old.accent2 != accent2;
+  }
+}
+
+/// Thin comet arc orbiting the ring while the tunnel is being established.
+class _CometArcPainter extends CustomPainter {
+  _CometArcPainter({
+    required this.rotation,
+    required this.accent,
+    required this.accent2,
+    required this.visible,
+  });
+
+  final double rotation;
+  final Color accent;
+  final Color accent2;
+  final bool visible;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (!visible) return;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 1;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round
       ..shader = SweepGradient(
-        transform: GradientRotation(rotation + 3.665), // ~210deg
+        transform: GradientRotation(rotation),
         colors: [
           accent.withValues(alpha: 0),
           accent.withValues(alpha: 0),
-          accent.withValues(alpha: opacity),
-          accentSecondary.withValues(alpha: opacity),
-          accent.withValues(alpha: 0),
+          accent2.withValues(alpha: 0.55),
+          accent,
           accent.withValues(alpha: 0),
         ],
-        stops: const [0.0, 0.11, 0.30, 0.42, 0.53, 1.0],
+        stops: const [0.0, 0.69, 0.89, 0.983, 0.989],
       ).createShader(rect);
     canvas.drawCircle(center, radius, paint);
   }
 
   @override
-  bool shouldRepaint(covariant _ConnectArcPainter oldDelegate) {
-    return oldDelegate.rotation != rotation ||
-        oldDelegate.accent != accent ||
-        oldDelegate.accentSecondary != accentSecondary ||
-        oldDelegate.opacity != opacity;
+  bool shouldRepaint(covariant _CometArcPainter old) {
+    return old.rotation != rotation || old.visible != visible || old.accent != accent;
+  }
+}
+
+/// Standby power glyph: open arc with a stem through the top gap.
+class _PowerGlyphPainter extends CustomPainter {
+  _PowerGlyphPainter({
+    required this.color,
+    required this.strokeWidth,
+    this.glow,
+  });
+
+  final Color color;
+  final double strokeWidth;
+  final Color? glow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = size.width * 0.42;
+    final c = Offset(size.width / 2, size.height - r - strokeWidth);
+    const gapHalf = 28.0 * math.pi / 180;
+    const start = -math.pi / 2 + gapHalf;
+    const sweep = 2 * math.pi - gapHalf * 2;
+    final stemTop = Offset(c.dx, c.dy - r * 1.24);
+    final stemBottom = Offset(c.dx, c.dy - r * 0.32);
+
+    if (glow != null) {
+      final glowPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round
+        ..color = glow!
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+      canvas.drawArc(Rect.fromCircle(center: c, radius: r), start, sweep, false, glowPaint);
+      canvas.drawLine(stemTop, stemBottom, glowPaint);
+    }
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..color = color;
+    canvas.drawArc(Rect.fromCircle(center: c, radius: r), start, sweep, false, paint);
+    canvas.drawLine(stemTop, stemBottom, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PowerGlyphPainter old) {
+    return old.color != color || old.strokeWidth != strokeWidth || old.glow != glow;
   }
 }
