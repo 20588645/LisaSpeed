@@ -142,7 +142,7 @@ func makeTunnelConfig(in *TunnelStartRequest, workDir string) option.Options {
 	}
 
 	return option.Options{
-		Log: &option.LogOptions{Level: "warn"},
+		Log: &option.LogOptions{Level: "warn", Timestamp: true},
 		Inbounds: []option.Inbound{
 			{
 				Type: C.TypeTun,

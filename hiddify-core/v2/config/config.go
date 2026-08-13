@@ -296,10 +296,12 @@ func setClashAPI(options *option.Options, opt *HiddifyOptions) {
 
 func setLog(options *option.Options, opt *HiddifyOptions) {
 	options.Log = &option.LogOptions{
-		Level:        opt.LogLevel,
-		Output:       opt.LogFile,
+		Level:  opt.LogLevel,
+		Output: opt.LogFile,
+		// Timestamps are essential for postmortems: box.log persists across
+		// sessions, and undated errors cannot be correlated with real time.
+		Timestamp:    true,
 		Disabled:     false,
-		Timestamp:    false,
 		DisableColor: true,
 	}
 }
