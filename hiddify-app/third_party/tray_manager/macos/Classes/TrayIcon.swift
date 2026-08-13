@@ -16,6 +16,14 @@ public class TrayIcon: NSView {
     /// Widest readout measured so far (ratchet): the item never shrinks while
     /// the speeds are visible, so ticking digits can't nudge the neighbours.
     var reservedTextWidth: CGFloat = 0
+
+    /// The state icon as supplied by setImage (template mask); kept so the
+    /// speed readout can be composited around it and restored when cleared.
+    var baseImage: NSImage?
+
+    /// Current speed lines; both empty means the plain icon is shown.
+    var speedTop: String = ""
+    var speedBottom: String = ""
     
     public init() {
         super.init(frame: NSRect.zero)
@@ -32,6 +40,13 @@ public class TrayIcon: NSView {
     }
     
     public func setImage(_ image: NSImage, _ imagePosition: String) {
+        baseImage = image
+        if !speedTop.isEmpty || !speedBottom.isEmpty {
+            // Speeds are showing: fold the new state icon into the composite
+            // right away so the item never flashes back to icon-only.
+            renderSpeedComposite()
+            return
+        }
         if let button = statusItem?.button {
             button.image = image
             setImagePosition(imagePosition)
@@ -60,65 +75,94 @@ public class TrayIcon: NSView {
         self.frame = statusItem!.button!.frame
     }
     
-    /// Renders a compact two-line title (e.g. up/down live speeds) next to
-    /// the icon, the way macOS network monitors do. Empty strings clear it.
-    /// While a title is shown the status item keeps a stable width (widest
-    /// realistic readout, ratcheting up if ever exceeded) so the ticking
-    /// numbers never shift the neighbouring menu-bar items.
+    /// Shows a compact two-line readout (up/down live speeds) beside the
+    /// icon, the way macOS network monitors do. Empty strings restore the
+    /// plain icon. Everything — reserved text area, gap, icon — is drawn
+    /// into ONE fixed-size template image, so nothing inside the item can
+    /// drift and the ticking digits never nudge the neighbouring items.
     public func setTitleLines(_ top: String, _ bottom: String) {
         guard let button = statusItem?.button else { return }
+        speedTop = top
+        speedBottom = bottom
         if top.isEmpty && bottom.isEmpty {
             button.attributedTitle = NSAttributedString(string: "")
+            if let icon = baseImage {
+                button.image = icon
+            }
             statusItem?.length = NSStatusItem.variableLength
             reservedTextWidth = 0
             self.frame = button.frame
             return
         }
+        renderSpeedComposite()
+    }
+
+    private func speedAttributes(_ paragraph: NSParagraphStyle) -> [NSAttributedString.Key: Any] {
+        return [
+            .font: NSFont.monospacedDigitSystemFont(ofSize: 9, weight: .medium),
+            .paragraphStyle: paragraph,
+        ]
+    }
+
+    /// One line of the readout as a template mask: digits at full strength,
+    /// the direction arrow dimmed so the numbers carry the emphasis.
+    private func speedLine(_ line: String, _ paragraph: NSParagraphStyle) -> NSAttributedString {
+        let text = NSMutableAttributedString(string: line, attributes: speedAttributes(paragraph))
+        text.addAttribute(
+            .foregroundColor, value: NSColor.black,
+            range: NSRange(location: 0, length: text.length))
+        for arrow in ["↑ ", "↓ "] {
+            let r = (text.string as NSString).range(of: arrow)
+            if r.location != NSNotFound {
+                text.addAttribute(
+                    .foregroundColor, value: NSColor.black.withAlphaComponent(0.5), range: r)
+            }
+        }
+        return text
+    }
+
+    private func renderSpeedComposite() {
+        guard let button = statusItem?.button, let icon = baseImage else { return }
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .right
         paragraph.lineBreakMode = .byClipping
         paragraph.minimumLineHeight = 10
         paragraph.maximumLineHeight = 10
-        // AppKit lays a multi-line button title out from the first line's
-        // baseline, leaving the block a few points above the bar's center;
-        // the negative offset re-centers it (see CodexBar#2345).
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.monospacedDigitSystemFont(ofSize: 9, weight: .medium),
-            .paragraphStyle: paragraph,
-            .baselineOffset: -3.5,
-        ]
-        // Non-breaking space: breathing room between the readout and the
-        // icon (a plain trailing space would hang outside right-aligned
-        // text and render no gap).
-        let gap = "\u{00A0}"
-        let topLine = "\(top)\(gap)"
-        let bottomLine = "\(bottom)\(gap)"
-        let text = NSMutableAttributedString(
-            string: "\(topLine)\n\(bottomLine)", attributes: attributes)
-        // Dim the direction arrows so the digits carry the emphasis.
-        let full = text.string as NSString
-        for arrow in ["↑ ", "↓ "] {
-            var search = NSRange(location: 0, length: full.length)
-            while true {
-                let r = full.range(of: arrow, options: [], range: search)
-                if r.location == NSNotFound { break }
-                text.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: r)
-                let next = r.location + r.length
-                if next >= full.length { break }
-                search = NSRange(location: next, length: full.length - next)
-            }
-        }
-        button.attributedTitle = text
-        // Reserve the widest string each unit tier can produce, then ratchet
+        let attributes = speedAttributes(paragraph)
+        // Reserve the widest string each unit tier can produce, ratcheting
         // if a live line ever measures wider (never clips, never jitters).
         var reserve: CGFloat = 0
-        for candidate in ["↑ 888 KB/s", "↑ 888 MB/s", "↑ 88.8 MB/s", "↑ 8.88 GB/s", topLine, bottomLine] {
-            let sample = candidate.hasSuffix(gap) ? candidate : candidate + gap
-            reserve = max(reserve, NSAttributedString(string: sample, attributes: attributes).size().width)
+        for candidate in ["↑ 888 MB/s", "↑ 88.8 MB/s", "↑ 8.88 GB/s", speedTop, speedBottom] {
+            reserve = max(reserve, NSAttributedString(string: candidate, attributes: attributes).size().width)
         }
         reservedTextWidth = max(reservedTextWidth, ceil(reserve))
-        let iconWidth = button.image?.size.width ?? 18
-        statusItem?.length = reservedTextWidth + iconWidth + 14
+
+        let textWidth = reservedTextWidth
+        let gap: CGFloat = 6
+        let iconSize = icon.size
+        let height: CGFloat = 22
+        let width = textWidth + gap + iconSize.width
+        let topLine = speedLine(speedTop, paragraph)
+        let bottomLine = speedLine(speedBottom, paragraph)
+
+        let composite = NSImage(size: NSSize(width: width, height: height), flipped: false) { rect in
+            let iconRect = NSRect(
+                x: rect.maxX - iconSize.width,
+                y: (rect.height - iconSize.height) / 2,
+                width: iconSize.width,
+                height: iconSize.height)
+            icon.draw(in: iconRect)
+            // 2 × 10pt lines optically centered in the 22pt bar.
+            let blockRect = NSRect(x: 0, y: (rect.height - 20) / 2, width: textWidth, height: 20)
+            topLine.draw(in: NSRect(x: 0, y: blockRect.maxY - 10, width: textWidth, height: 10))
+            bottomLine.draw(in: NSRect(x: 0, y: blockRect.minY, width: textWidth, height: 10))
+            return true
+        }
+        composite.isTemplate = true
+        button.attributedTitle = NSAttributedString(string: "")
+        button.imagePosition = .imageOnly
+        button.image = composite
+        statusItem?.length = NSStatusItem.variableLength
         self.frame = button.frame
     }
     
