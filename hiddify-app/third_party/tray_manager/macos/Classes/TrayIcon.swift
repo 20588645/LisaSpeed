@@ -58,10 +58,14 @@ public class TrayIcon: NSView {
     
     /// Renders a compact two-line title (e.g. up/down live speeds) next to
     /// the icon, the way macOS network monitors do. Empty strings clear it.
+    /// While a title is shown the status item is pinned to a fixed width
+    /// (sized for the widest possible readout) so the ticking numbers never
+    /// shift the neighbouring menu-bar items.
     public func setTitleLines(_ top: String, _ bottom: String) {
         guard let button = statusItem?.button else { return }
         if top.isEmpty && bottom.isEmpty {
             button.attributedTitle = NSAttributedString(string: "")
+            statusItem?.length = NSStatusItem.variableLength
             self.frame = button.frame
             return
         }
@@ -80,6 +84,10 @@ public class TrayIcon: NSView {
         ]
         button.attributedTitle = NSAttributedString(
             string: "\(top)\n\(bottom)", attributes: attributes)
+        let widestLine = NSAttributedString(string: "↑ 888.8 MB/s", attributes: attributes)
+        let textWidth = ceil(widestLine.size().width)
+        let iconWidth = button.image?.size.width ?? 18
+        statusItem?.length = textWidth + iconWidth + 16
         self.frame = button.frame
     }
     
