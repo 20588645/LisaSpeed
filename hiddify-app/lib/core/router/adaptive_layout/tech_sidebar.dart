@@ -5,6 +5,7 @@ import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
+import 'package:hiddify/features/stats/notifier/total_traffic_notifier.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/utils/number_formatters.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -29,6 +30,7 @@ class TechSidebar extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final elev = isDark ? ConnectionButtonTheme.bgElevDark : ConnectionButtonTheme.bgElevLight;
     final stats = ref.watch(statsNotifierProvider).asData?.value ?? SystemInfo.create();
+    final lifetimeTraffic = ref.watch(totalTrafficProvider);
     final mode = ref.watch(ConfigOptions.serviceMode);
 
     return Container(
@@ -142,7 +144,7 @@ class TechSidebar extends ConsumerWidget {
                   const Gap(8),
                   _TrafficRow(
                     label: t.pages.home.statsTotal,
-                    value: (stats.uplinkTotal + stats.downlinkTotal).toInt().size(),
+                    value: (lifetimeTraffic.uplink + lifetimeTraffic.downlink).size(),
                   ),
                   const Gap(8),
                   _TrafficRow(label: t.pages.home.connectionMode, value: mode.presentShort(t)),

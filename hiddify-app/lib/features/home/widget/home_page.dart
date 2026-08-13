@@ -19,6 +19,7 @@ import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/settings/notifier/config_option/config_option_notifier.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
+import 'package:hiddify/features/stats/notifier/total_traffic_notifier.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/utils/number_formatters.dart';
@@ -437,6 +438,7 @@ class _TrafficCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
     final stats = ref.watch(statsNotifierProvider).asData?.value ?? SystemInfo.create();
+    final lifetimeTraffic = ref.watch(totalTrafficProvider);
 
     return _SideCard(
       label: t.pages.home.statsTraffic,
@@ -447,10 +449,11 @@ class _TrafficCard extends ConsumerWidget {
           const Gap(8),
           _KvRow(k: t.pages.home.statsDown, v: stats.downlink.toInt().speed(), dimmed: !isConnected),
           const Gap(8),
+          // Lifetime counter stays lit while disconnected: unlike the live
+          // rates it remains meaningful.
           _KvRow(
             k: t.pages.home.statsTotal,
-            v: (stats.uplinkTotal + stats.downlinkTotal).toInt().size(),
-            dimmed: !isConnected,
+            v: (lifetimeTraffic.uplink + lifetimeTraffic.downlink).size(),
           ),
         ],
       ),
