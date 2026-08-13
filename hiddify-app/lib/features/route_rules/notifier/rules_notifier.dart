@@ -39,6 +39,15 @@ class RulesNotifier extends _$RulesNotifier with AppLogger {
     await _updateFile();
   }
 
+  /// Inserts a rule at the TOP of the list, so quick per-site rules take
+  /// precedence over the broad region presets below them.
+  Future<void> addRuleFirst(Rule rule) async {
+    assert(rule.hasName() && rule.hasOutbound());
+    rule.enabled = true;
+    state = _updateListOrder([rule, ...state]);
+    await _updateFile();
+  }
+
   Future<void> updateRule(Rule rule) async {
     final current = state;
     final index = current.indexWhere((element) => element.listOrder == rule.listOrder);

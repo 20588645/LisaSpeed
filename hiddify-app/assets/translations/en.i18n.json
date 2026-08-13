@@ -479,7 +479,16 @@
           }
         },
         "desc": "Rules & region policy",
-        "ruleList": "Rule list"
+        "ruleList": "Rule list",
+        "ruleListHint": "Rules match top-down; earlier rules win",
+        "quickRule": {
+          "title": "Add site rule",
+          "hint": "When a site misbehaves, add its address and choose how it routes; takes effect immediately",
+          "inputLabel": "URL or domain",
+          "inputHint": "e.g. youtube.com, or paste a full URL",
+          "invalid": "Not a recognizable domain",
+          "action": "Route via"
+        }
       },
       "dns": {
         "title": "DNS",

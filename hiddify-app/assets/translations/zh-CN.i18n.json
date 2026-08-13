@@ -479,7 +479,16 @@
           }
         },
         "desc": "规则列表与地区策略",
-        "ruleList": "规则列表"
+        "ruleList": "规则列表",
+        "ruleListHint": "规则自上而下匹配，靠前的优先生效",
+        "quickRule": {
+          "title": "添加网站规则",
+          "hint": "某个网站打不开或不想走代理时，把它的网址加进来并选择走向，立即生效",
+          "inputLabel": "网址或域名",
+          "inputHint": "例如 youtube.com，或直接粘贴完整网址",
+          "invalid": "无法识别为有效域名",
+          "action": "走向"
+        }
       },
       "dns": {
         "title": "DNS",

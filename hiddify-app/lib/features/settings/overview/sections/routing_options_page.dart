@@ -11,6 +11,7 @@ import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/per_app_proxy/model/per_app_proxy_mode.dart';
 import 'package:hiddify/features/per_app_proxy/overview/per_app_proxy_notifier.dart';
 import 'package:hiddify/features/route_rules/notifier/rules_notifier.dart';
+import 'package:hiddify/features/route_rules/widget/quick_site_rule_dialog.dart';
 import 'package:hiddify/features/route_rules/widget/rule_tile.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/settings/widget/preference_tile.dart';
@@ -160,14 +161,32 @@ class RoutingOptionsPage extends HookConsumerWidget {
 
     final rulesHeader = Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      child: Text(
-        t.pages.settings.routing.ruleList.toUpperCase(),
-        style: theme.textTheme.labelSmall?.copyWith(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.7,
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Text(
+            t.pages.settings.routing.ruleList.toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.7,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const Gap(10),
+          Expanded(
+            child: Text(
+              t.pages.settings.routing.ruleListHint,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 11.5,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+              ),
+            ),
+          ),
+        ],
       ),
     );
 
@@ -205,10 +224,16 @@ class RoutingOptionsPage extends HookConsumerWidget {
                   label: t.pages.settings.routing.predefinedRules.title,
                   onPressed: ref.read(bottomSheetsNotifierProvider.notifier).showPredefinedRules,
                 ),
-                TechUi.primaryButton(
+                TechUi.ghostButton(
                   context,
                   label: t.pages.settings.routing.routeRule.create,
                   onPressed: () => context.goNamed('rule', pathParameters: {'orderId': 'new'}),
+                ),
+                // Self-service entry: paste a site, pick 代理/直连/拦截, done.
+                TechUi.primaryButton(
+                  context,
+                  label: t.pages.settings.routing.quickRule.title,
+                  onPressed: () async => await QuickSiteRuleDialog.show(context),
                 ),
               ],
             ),
