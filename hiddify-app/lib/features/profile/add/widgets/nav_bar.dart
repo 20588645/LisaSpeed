@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -15,7 +16,6 @@ class NavBar extends ConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     final freeSwitch = ref.watch(freeSwitchNotifierProvider);
 
-    final textColor = theme.colorScheme.onSurface;
     return Padding(
       padding: const EdgeInsets.all(
         AddProfileModalConst.navBarGap,
@@ -25,17 +25,25 @@ class NavBar extends ConsumerWidget {
           Row(
             key: const ValueKey('free'),
             children: [
-              Text(t.common.free, style: theme.textTheme.titleMedium!.copyWith(color: textColor)),
+              Text(
+                t.common.free,
+                style: theme.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
+              ),
               const Gap(8),
-              Switch(value: freeSwitch, onChanged: ref.read(freeSwitchNotifierProvider.notifier).onChange),
+              Transform.scale(
+                scale: 0.8,
+                child: Switch(value: freeSwitch, onChanged: ref.read(freeSwitchNotifierProvider.notifier).onChange),
+              ),
             ],
           ),
           const Spacer(),
-          ActionChip(
+          KeyedSubtree(
             key: const ValueKey("help"),
-            label: Text(t.common.help, style: theme.textTheme.labelLarge!.copyWith(color: textColor)),
-            avatar: Icon(Icons.help_outline, color: theme.colorScheme.onSurfaceVariant),
-            onPressed: () async => await ref.read(dialogNotifierProvider.notifier).showNoActiveProfile(),
+            child: TechUi.ghostButton(
+              context,
+              label: t.common.help,
+              onPressed: () async => await ref.read(dialogNotifierProvider.notifier).showNoActiveProfile(),
+            ),
           ),
         ],
       ),

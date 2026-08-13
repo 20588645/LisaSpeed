@@ -82,17 +82,14 @@ class HomePage extends HookConsumerWidget {
                           ],
                         ),
                       ),
-                      OutlinedButton(
+                      // Same ghost-button shell as every other page header.
+                      KeyedSubtree(
                         key: const ValueKey('profile_add_button'),
-                        onPressed: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Theme.of(context).colorScheme.onSurface,
-                          side: BorderSide(color: ConnectionButtonTheme.lineOf(context)),
-                          backgroundColor: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+                        child: TechUi.ghostButton(
+                          context,
+                          label: '+ ${t.pages.profiles.add}',
+                          onPressed: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
                         ),
-                        child: Text('+ ${t.pages.profiles.add}'),
                       ),
                     ],
                   ),
@@ -510,14 +507,13 @@ class _HostQuotaCard extends ConsumerWidget {
         children: [
           _KvRow(k: t.pages.home.hostQuotaUsed, v: '${gb(quota.usedGb)} / ${gb(quota.totalGb)}'),
           const Gap(8),
-          ClipRRect(
+          // Same 6px usage-bar shell as the subscription rows.
+          LinearProgressIndicator(
+            value: ratio,
+            minHeight: 6,
             borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: ratio,
-              minHeight: 5,
-              backgroundColor: ConnectionButtonTheme.lineOf(context),
-              color: barColor,
-            ),
+            backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.16),
+            color: barColor,
           ),
           if (cycle.isNotEmpty) ...[
             const Gap(8),
@@ -659,7 +655,7 @@ class _SideCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Ink(
           width: double.infinity,
           decoration: TechUi.panelDecoration(context),

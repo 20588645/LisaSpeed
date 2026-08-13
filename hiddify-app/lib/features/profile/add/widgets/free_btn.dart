@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/features/common/custom_text_scroll.dart';
 import 'package:hiddify/features/profile/add/model/free_profiles_model.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,19 +19,23 @@ class FreeBtn extends ConsumerWidget {
     final locale = ref.watch(localePreferencesProvider);
     final isFa = locale.name == AppLocale.fa.name;
     final theme = Theme.of(context);
-    final borderRadius = BorderRadius.circular(18);
+    final borderRadius = BorderRadius.circular(11);
 
+    // Same bordered-row language as the modal choice rows above.
     return Material(
+      color: Colors.transparent,
       borderRadius: borderRadius,
       child: InkWell(
         onTap: onTap,
         borderRadius: borderRadius,
+        hoverColor: ConnectionButtonTheme.accentOf(context).withValues(alpha: 0.08),
         child: Container(
           height: 72,
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             borderRadius: borderRadius,
-            border: Border.all(color: theme.colorScheme.outlineVariant),
+            color: ConnectionButtonTheme.panelOf(context),
+            border: Border.all(color: ConnectionButtonTheme.lineOf(context)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,

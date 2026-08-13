@@ -226,7 +226,7 @@ class SettingsPage extends HookConsumerWidget {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                         onTap: () async {
                           await ref.read(resetTunnelNotifierProvider.notifier).run();
                         },
@@ -234,8 +234,8 @@ class SettingsPage extends HookConsumerWidget {
                           decoration: TechUi.panelDecoration(context),
                           child: ListTile(
                             title: Text(t.pages.settings.resetTunnel),
-                            leading: const Icon(Icons.autorenew_rounded, color: ConnectionButtonTheme.brandMint),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            leading: Icon(Icons.autorenew_rounded, color: ConnectionButtonTheme.accentOf(context)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           ),
                         ),
                       ),

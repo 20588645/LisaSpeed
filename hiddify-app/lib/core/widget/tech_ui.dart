@@ -28,14 +28,18 @@ class TechUi {
   static Color dangerOf(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark ? const Color(0xFFFF5D6C) : const Color(0xFFD93848);
 
+  /// Prototype `--warn` (dark f0b429 / light c98500).
+  static Color warnOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFFF0B429) : const Color(0xFFC98500);
+
   static Color delayColor(BuildContext context, int delayMs) {
     final accent = ConnectionButtonTheme.accentOf(context);
     final accent2 = ConnectionButtonTheme.accent2Of(context);
     if (delayMs <= 0 || delayMs > 65000) return Theme.of(context).colorScheme.onSurfaceVariant;
     if (delayMs < 100) return accent;
     if (delayMs < 200) return accent2;
-    if (delayMs < 400) return const Color(0xFFF0B429);
-    return const Color(0xFFFF5D6C);
+    if (delayMs < 400) return warnOf(context);
+    return dangerOf(context);
   }
 
   static Widget latencyPill(BuildContext context, int delayMs) {
@@ -414,11 +418,13 @@ class TechUi {
     return tag(context, label, active: true);
   }
 
-  static BoxDecoration panelDecoration(BuildContext context, {bool selected = false}) {
+  /// Prototype `.panel` / `.setting-card` shell (16px radius). List rows use
+  /// the tighter 14px `.list-row` radius via [listRow].
+  static BoxDecoration panelDecoration(BuildContext context, {bool selected = false, double radius = 16}) {
     final accent = ConnectionButtonTheme.accentOf(context);
     return BoxDecoration(
       color: ConnectionButtonTheme.glassOf(context),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(radius),
       border: Border.all(
         color: selected ? accent : ConnectionButtonTheme.lineOf(context),
       ),
@@ -438,7 +444,7 @@ class TechUi {
     EdgeInsetsGeometry padding = const EdgeInsets.fromLTRB(14, 13, 14, 13),
   }) {
     return Container(
-      decoration: panelDecoration(context, selected: selected),
+      decoration: panelDecoration(context, selected: selected, radius: 14),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [

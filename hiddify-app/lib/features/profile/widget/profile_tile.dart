@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -22,8 +21,6 @@ import 'package:hiddify/gen/fonts.gen.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
-
-import 'package:url_launcher/url_launcher.dart';
 
 class ProfileTile extends HookConsumerWidget {
   const ProfileTile({super.key, required this.profile, this.isMain = false, this.margin = EdgeInsets.zero, this.color});
@@ -477,191 +474,8 @@ class ProfileSubscriptionInfo extends HookConsumerWidget {
   }
 }
 
-// TODO add support url
-class NewTrafficSubscriptionInfo extends HookConsumerWidget {
-  const NewTrafficSubscriptionInfo(this.subInfo, {super.key});
-
-  final SubscriptionInfo subInfo;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = ref.watch(translationsProvider).requireValue;
-
-    return Column(
-      children: [
-        const Icon(Icons.assessment_rounded, color: ConnectionButtonTheme.brandMint),
-        Text(t.components.subscriptionInfo.remainingTraffic),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Directionality(
-              textDirection: TextDirection.ltr,
-              child: Text(
-                subInfo.total >
-                        10 *
-                            1099511627776 //10TB
-                    ? "∞ GiB"
-                    : subInfo.consumption.sizeOf(subInfo.total),
-                semanticsLabel: t.components.subscriptionInfo.remainingTrafficSemanticLabel(
-                  consumed: subInfo.consumption.sizeGB(),
-                  total: subInfo.total.sizeGB(),
-                ),
-                // style: theme.textTheme.body,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-// TODO add support url
-class NewDaySubscriptionInfo extends HookConsumerWidget {
-  const NewDaySubscriptionInfo(this.subInfo, {super.key});
-
-  final SubscriptionInfo subInfo;
-
-  (String, Color?) remainingText(TranslationsEn t, ThemeData theme) {
-    if (subInfo.isExpired) {
-      return (t.components.subscriptionInfo.expired, theme.colorScheme.error);
-    } else if (subInfo.ratio >= 1) {
-      return (t.components.subscriptionInfo.noTraffic, theme.colorScheme.error);
-    } else if (subInfo.remaining.inDays > 365) {
-      return (t.components.subscriptionInfo.remainingDurationNew(duration: "∞"), null);
-    } else {
-      return (t.components.subscriptionInfo.remainingDurationNew(duration: subInfo.remaining.inDays), null);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = ref.watch(translationsProvider).requireValue;
-    final theme = Theme.of(context);
-
-    final remaining = remainingText(t, theme);
-    return Column(
-      children: [
-        const Icon(Icons.timer, color: ConnectionButtonTheme.brandMint),
-        Text(t.components.subscriptionInfo.remainingTime),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Text(
-                remaining.$1,
-                // style: theme.textTheme.bodySmall?.copyWith(color: remaining.$2),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-// TODO add support url
-class NewDayTrafficSubscriptionInfo extends HookConsumerWidget {
-  const NewDayTrafficSubscriptionInfo(this.subInfo, {super.key});
-
-  final SubscriptionInfo subInfo;
-
-  (String, Color?) remainingText(TranslationsEn t, ThemeData theme) {
-    if (subInfo.isExpired) {
-      return (t.components.subscriptionInfo.expired, theme.colorScheme.error);
-    } else if (subInfo.ratio >= 1) {
-      return (t.components.subscriptionInfo.noTraffic, theme.colorScheme.error);
-    } else if (subInfo.remaining.inDays > 365) {
-      return (t.components.subscriptionInfo.remainingDurationNew(duration: "∞"), null);
-    } else {
-      return (t.components.subscriptionInfo.remainingDurationNew(duration: subInfo.remaining.inDays), null);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = ref.watch(translationsProvider).requireValue;
-    final theme = Theme.of(context);
-
-    final remaining = remainingText(t, theme);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.assessment_rounded, color: ConnectionButtonTheme.brandMint),
-        Text(t.components.subscriptionInfo.remainingUsage),
-        const SizedBox(height: 4),
-        Text(
-          remaining.$1,
-          // style: theme.textTheme.bodySmall?.copyWith(color: remaining.$2),
-          overflow: TextOverflow.ellipsis,
-        ),
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Text(
-            subInfo.total >
-                    10 *
-                        1099511627776 //10TB
-                ? "∞ GiB"
-                : subInfo.consumption.sizeOf(subInfo.total),
-            semanticsLabel: t.components.subscriptionInfo.remainingTrafficSemanticLabel(
-              consumed: subInfo.consumption.sizeGB(),
-              total: subInfo.total.sizeGB(),
-            ),
-            // style: theme.textTheme.body,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class NewSiteSubscriptionInfo extends HookConsumerWidget {
-  const NewSiteSubscriptionInfo(this.subInfo, {super.key});
-
-  final SubscriptionInfo subInfo;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = ref.watch(translationsProvider).requireValue;
-    final uri = Uri.parse(subInfo.webPageUrl ?? "");
-    var host = uri.host;
-    if (["telegram.me", "t.me"].contains(host)) {
-      host = "@${uri.path.split("/").last}";
-    }
-    return InkWell(
-      onTap: () => launchUrl(Uri.parse(subInfo.webPageUrl ?? "")),
-      child: Column(
-        children: [
-          const Icon(FluentIcons.globe_person_24_filled, size: 24, color: ConnectionButtonTheme.brandMint),
-          Text(t.components.subscriptionInfo.profileSite),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  host,
-                  // style: theme.textTheme.bodySmall?.copyWith(color: remaining.$2),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// TODO change colors
+/// Prototype `.usage-bar`: 6px full-radius bar on a muted track; the fill
+/// colour tracks usage (accent → warn → danger) with theme-correct shades.
 class RemainingTrafficIndicator extends StatelessWidget {
   const RemainingTrafficIndicator(this.ratio, {super.key});
 
@@ -669,46 +483,17 @@ class RemainingTrafficIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final startColor = ratio < 0.25
-    //     ? const Color.fromRGBO(93, 205, 251, 1.0)
-    //     : ratio < 0.65
-    //         ? const Color.fromRGBO(205, 199, 64, 1.0)
-    //         : const Color.fromRGBO(241, 82, 81, 1.0);
-    // final endColor = ratio < 0.25
-    //     ? const Color.fromRGBO(49, 146, 248, 1.0)
-    //     : ratio < 0.65
-    //         ? const Color.fromRGBO(98, 115, 32, 1.0)
-    //         : const Color.fromRGBO(139, 30, 36, 1.0);
     final color = ratio < 0.25
-        ? ConnectionButtonTheme.brandMint
+        ? ConnectionButtonTheme.accentOf(context)
         : ratio < 0.65
-            ? const Color(0xFFF0B429)
-            : const Color(0xFFFF5D6C);
+            ? TechUi.warnOf(context)
+            : TechUi.dangerOf(context);
     return LinearProgressIndicator(
       value: ratio.clamp(0.0, 1.0),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(999),
       minHeight: 6,
       color: color,
-      backgroundColor: color.withValues(alpha: 0.16),
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.16),
     );
-    // return HorizontalPercentIndicator(
-    //   height: 6,
-
-    //   borderRadius: 16,
-    //   loadingPercent: ratio,
-    //   // inactiveTrackColor: Color.fromRGBO(r, g, b, opacity),
-
-    //   activeTrackColor: [startColor, endColor],
-    // );
-    // return LinearPercentIndicator(
-    //     // percent: ratio,
-    //     // animation: false,
-    //     // padding: EdgeInsets.zero,
-    //     // lineHeight: 6,
-    //     // barRadius: const Radius.circular(16),
-    //     // linearGradient: LinearGradient(
-    //     //   colors: [startColor, endColor],
-    //     // ),
-    //     );
   }
 }

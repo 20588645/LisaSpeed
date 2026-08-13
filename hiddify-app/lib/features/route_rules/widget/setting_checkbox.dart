@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
+import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protobuf/protobuf.dart';
 
@@ -33,9 +34,10 @@ class SettingCheckbox extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(textWithTranslation(selectedValues, ref)),
+    // Same bordered form row as the settings pages.
+    return PreferenceRow(
+      title: title,
+      valueText: textWithTranslation(selectedValues, ref),
       onTap: () async {
         final result = await ref
             .read(dialogNotifierProvider.notifier)

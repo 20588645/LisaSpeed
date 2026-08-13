@@ -8,7 +8,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
@@ -48,8 +47,9 @@ class AddProfileModal extends HookConsumerWidget {
       child: isLoading
           ? const ProfileLoading()
           : switch (currentWidget) {
-              AddProfilePages.options => const AddProfileOptions(),
-              AddProfilePages.manual => const AddProfileManual(),
+              // The manual form lives inline in the options modal now; the
+              // legacy standalone manual page is gone.
+              AddProfilePages.options || AddProfilePages.manual => const AddProfileOptions(),
             },
     );
   }
@@ -286,165 +286,4 @@ class _DashedRRectPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DashedRRectPainter old) => old.color != color;
-}
-
-class AddProfileManual extends HookConsumerWidget {
-  const AddProfileManual({super.key});
-
-  String _genSliderText(Translations t, int sliderValue) {
-    if (sliderValue == 0) {
-      return t.common.auto;
-    } else if (sliderValue < 24) {
-      return t.common.interval.hour(n: sliderValue);
-    }
-    final day = t.common.interval.day(n: sliderValue ~/ 24);
-    final hour = t.common.interval.hour(n: sliderValue % 24);
-    return '$day $hour';
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final t = ref.watch(translationsProvider).requireValue;
-    final formKey = useMemoized(() => GlobalKey<FormState>());
-    final nameTextController = useTextEditingController();
-    final urlTextController = useTextEditingController();
-    final isAutoUpdateDisable = useState<bool>(false);
-    final updateInterval = useState(.0);
-    final sliderFocusNode = useFocusNode(
-      onKeyEvent: (node, event) {
-        if (KeyboardConst.verticalArrows.contains(event.logicalKey) && event is KeyDownEvent) {
-          if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-            node.previousFocus();
-          } else {
-            node.nextFocus();
-          }
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.ignored;
-      },
-    );
-    return Form(
-      key: formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 12),
-            child: Row(
-              children: [
-                Expanded(child: Text(t.common.manually, style: theme.textTheme.headlineMedium)),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => ref.read(addProfilePageNotifierProvider.notifier).goOptions(),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: CustomTextFormField(
-              maxLines: 1,
-              controller: nameTextController,
-              validator: (value) => (value?.isEmpty ?? true) ? t.pages.profileDetails.form.emptyName : null,
-              label: t.common.name,
-              hint: t.pages.profileDetails.form.nameHint,
-            ),
-          ),
-          const Gap(16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: CustomTextFormField(
-              maxLines: 1,
-              controller: urlTextController,
-              validator: (value) => (value != null && !isUrl(value)) ? t.pages.profileDetails.form.invalidUrl : null,
-              label: t.common.url,
-              hint: t.pages.profileDetails.form.urlHint,
-            ),
-          ),
-          const Gap(12),
-          SwitchListTile.adaptive(
-            title: Text(
-              t.pages.profileDetails.form.disableAutoUpdate,
-              style: theme.textTheme.titleSmall!.copyWith(color: theme.colorScheme.onSurface),
-            ),
-            value: isAutoUpdateDisable.value,
-            onChanged: (value) => isAutoUpdateDisable.value = value,
-          ),
-          AnimatedSize(
-            alignment: Alignment.topCenter,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            child: !isAutoUpdateDisable.value
-                ? Column(
-                    children: [
-                      const Divider(indent: 16, endIndent: 16),
-                      const Gap(12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                t.pages.profileDetails.form.autoUpdateInterval,
-                                style: theme.textTheme.titleSmall!.copyWith(color: theme.colorScheme.onSurface),
-                              ),
-                            ),
-                            Text(
-                              _genSliderText(t, updateInterval.value.round()),
-                              style: theme.textTheme.labelSmall!.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Gap(4),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Slider(
-                          focusNode: sliderFocusNode,
-                          value: updateInterval.value,
-                          max: 96,
-                          divisions: 96,
-                          label: updateInterval.value.round().toString(),
-                          onChanged: (double value) => updateInterval.value = value,
-                        ),
-                      ),
-                    ],
-                  )
-                : const SizedBox.shrink(),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: FilledButton(
-                    child: Text(t.common.add),
-                    onPressed: () async {
-                      if (formKey.currentState!.validate()) {
-                        final i = updateInterval.value.toInt();
-                        final interval = i > 0 ? i : null;
-                        await ref
-                            .read(addProfileNotifierProvider.notifier)
-                            .addManual(
-                              url: urlTextController.text.trim(),
-                              userOverride: UserOverride(
-                                name: nameTextController.text.trim(),
-                                isAutoUpdateDisable: isAutoUpdateDisable.value,
-                                updateInterval: interval,
-                              ),
-                            );
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // const Gap(16),
-        ],
-      ),
-    );
-  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
+import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SettingRadio<T> extends ConsumerWidget {
@@ -27,9 +28,10 @@ class SettingRadio<T> extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(textWithTranslation(value)),
+    // Same bordered form row as the settings pages.
+    return PreferenceRow(
+      title: title,
+      valueText: textWithTranslation(value),
       onTap: () async {
         final result = await ref
             .read(dialogNotifierProvider.notifier)

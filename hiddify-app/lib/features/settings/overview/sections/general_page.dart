@@ -208,8 +208,9 @@ class _AppearanceBlock extends ConsumerWidget {
     final accent = ConnectionButtonTheme.accentOf(context);
 
     return Container(
+      // Prototype `.appearance-block`: 16px radius like the panels.
       decoration: TechUi.formRowDecoration(context).copyWith(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(14),
       child: Column(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
@@ -67,28 +68,22 @@ class GenericListPage extends HookConsumerWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-              itemBuilder: (context, index) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Container(
-                  decoration: TechUi.panelDecoration(context),
-                  clipBehavior: Clip.antiAlias,
-                  child: GenericListTile(
-                    value: list[index],
-                    onRemove: () => ref.read(provider.notifier).remove(index),
-                    onUpdate: () async {
-                      final result = await ref
-                          .read(dialogNotifierProvider.notifier)
-                          .showSettingText(
-                            lable: t.pages.settings.routing.routeRule.genericList.update,
-                            value: '${list[index]}',
-                            validator: ruleEnum.validator(t),
-                          );
-                      if (result is String) ref.read(provider.notifier).update(index, result);
-                    },
-                  ),
-                ),
+              separatorBuilder: (context, index) => const Gap(8),
+              itemBuilder: (context, index) => GenericListTile(
+                value: list[index],
+                onRemove: () => ref.read(provider.notifier).remove(index),
+                onUpdate: () async {
+                  final result = await ref
+                      .read(dialogNotifierProvider.notifier)
+                      .showSettingText(
+                        lable: t.pages.settings.routing.routeRule.genericList.update,
+                        value: '${list[index]}',
+                        validator: ruleEnum.validator(t),
+                      );
+                  if (result is String) ref.read(provider.notifier).update(index, result);
+                },
               ),
               itemCount: list.length,
             ),
@@ -108,16 +103,29 @@ class GenericListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
+    final t = ref.watch(translationsProvider).requireValue;
+    // Same `.list-row` shell + tiny row action as the subscriptions list.
+    return TechUi.listRow(
+      context,
       onTap: onUpdate,
-      title: TextScroll(
-        '$value',
-        mode: TextScrollMode.bouncing,
-        velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
-        pauseOnBounce: const Duration(seconds: 2),
-        pauseBetween: const Duration(seconds: 2),
+      child: Row(
+        children: [
+          Expanded(
+            child: DefaultTextStyle.merge(
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              child: TextScroll(
+                '$value',
+                mode: TextScrollMode.bouncing,
+                velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
+                pauseOnBounce: const Duration(seconds: 2),
+                pauseBetween: const Duration(seconds: 2),
+              ),
+            ),
+          ),
+          const Gap(12),
+          TechUi.tinyButton(context, label: t.common.delete, danger: true, onPressed: onRemove),
+        ],
       ),
-      trailing: IconButton(onPressed: onRemove, icon: const Icon(Icons.remove)),
     );
   }
 }

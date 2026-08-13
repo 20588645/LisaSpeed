@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
+import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/utils/platform_utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:installed_apps/app_info.dart';
@@ -14,6 +15,7 @@ class SettingDetailChips<T extends Object> extends HookConsumerWidget {
     this.scrollController,
     this.useEllipsis = false,
     this.isPackageName = false,
+    this.horizontalPadding = 16,
   });
 
   final List<T> values;
@@ -21,6 +23,10 @@ class SettingDetailChips<T extends Object> extends HookConsumerWidget {
   final ScrollController? scrollController;
   final bool useEllipsis;
   final bool isPackageName;
+
+  /// Inset of the chip strip, so callers can line chips up with their row
+  /// padding (list rows use 14, form rows 12).
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -73,7 +79,7 @@ class SettingDetailChips<T extends Object> extends HookConsumerWidget {
                   children: [
                     ListView.separated(
                       controller: controller,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                       itemCount: values.length,
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) => SettingDetailChip<T>(
@@ -95,7 +101,7 @@ class SettingDetailChips<T extends Object> extends HookConsumerWidget {
                 )
               : ListView.separated(
                   controller: controller,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   itemCount: values.length,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) => SettingDetailChip<T>(
@@ -131,7 +137,12 @@ class SettingDetailChip<T extends Object> extends ConsumerWidget {
       return Row(
         children: [
           tText('${value.key}', theme),
-          VerticalDivider(width: 12, color: theme.colorScheme.onSurfaceVariant, indent: 3, endIndent: 3),
+          VerticalDivider(
+            width: 12,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            indent: 3,
+            endIndent: 3,
+          ),
           tText('${value.value}', theme),
         ],
       );
@@ -145,17 +156,27 @@ class SettingDetailChip<T extends Object> extends ConsumerWidget {
     if (useEllipsis && value.length > 20) {
       text = '${value.substring(0, 10)}...${value.substring(value.length - 10)}';
     }
-    return Text(t == null ? text : t![text] ?? text, style: theme.textTheme.labelMedium);
+    return Text(
+      t == null ? text : t![text] ?? text,
+      style: theme.textTheme.labelSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    // Same pill language as `TechUi.tag` (muted fill, full radius).
     return Container(
-      decoration: BoxDecoration(color: theme.colorScheme.surfaceVariant, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
       child: isPackageName
           ? AndroidAppInfo(packageName: '$value')
-          : Padding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), child: valueByType(value, theme)),
+          : Padding(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4), child: valueByType(value, theme)),
     );
   }
 }
@@ -215,26 +236,27 @@ class ScrollBtn extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    const radius = Radius.circular(4);
+    const radius = Radius.circular(999);
     final borderRadius = isStart
         ? const BorderRadiusDirectional.only(topEnd: radius, bottomEnd: radius)
         : const BorderRadiusDirectional.only(topStart: radius, bottomStart: radius);
     return Material(
-      borderRadius: borderRadius,
+      color: Colors.transparent,
       child: InkWell(
         borderRadius: borderRadius.resolve(Directionality.of(context)),
         onTap: onTap,
         child: Container(
-          width: 48,
+          width: 40,
           height: 24,
           decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer,
+            color: ConnectionButtonTheme.panelOf(context),
             borderRadius: borderRadius,
-            boxShadow: [BoxShadow(color: theme.colorScheme.shadow, blurRadius: 12, offset: const Offset(0, 3))],
+            border: Border.all(color: ConnectionButtonTheme.lineOf(context)),
           ),
           child: Icon(
             isStart ? Icons.arrow_left_rounded : Icons.arrow_right_rounded,
-            color: theme.colorScheme.onPrimaryContainer,
+            size: 20,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
@@ -53,71 +54,108 @@ class RuleTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
+    final theme = Theme.of(context);
+    final accent = ConnectionButtonTheme.accentOf(context);
     final scrollController = useScrollController();
     ref.listen(rulesNotifierProvider, (_, _) {
       if (scrollController.offset > 0) scrollController.jumpTo(0);
     });
+    final chips = detailChipsValue();
+
+    // Same `.list-row` shell as the nodes/subscriptions lists — enabled rules
+    // carry the accent border + inset stripe the way active rows do there.
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+      child: GestureDetector(
+        onSecondaryTapUp: PlatformUtils.isDesktop
+            ? (details) {
+                final offset = details.globalPosition;
+                showMenu(
+                  context: context,
+                  position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, offset.dy),
+                  items: [
+                    PopupMenuItem(
+                      child: Text(t.pages.settings.routing.routeRule.delete),
+                      onTap: () async => await handleDelete(context, ref),
+                    ),
+                  ],
+                );
+              }
+            : null,
+        child: TechUi.listRow(
+          context,
+          selected: rule.enabled,
+          padding: EdgeInsets.zero,
           onTap: () {
             context.goNamed('rule', pathParameters: {'orderId': rule.listOrder.toString()});
           },
           onLongPress: () async => await handleDelete(context, ref),
-          onSecondaryTapUp: PlatformUtils.isDesktop
-              ? (details) {
-                  final offset = details.globalPosition;
-                  showMenu(
-                    context: context,
-                    position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, offset.dy),
-                    items: [
-                      PopupMenuItem(
-                        child: Text(t.pages.settings.routing.routeRule.delete),
-                        onTap: () async => await handleDelete(context, ref),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 9, 10, 0),
+                child: Row(
+                  children: [
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: Icon(
+                        Icons.drag_handle_rounded,
+                        size: 20,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
-                    ],
-                  );
-                }
-              : null,
-          child: Ink(
-            decoration: TechUi.panelDecoration(context, selected: rule.enabled),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ListTile(
-                  title: Text(
-                    t.pages.settings.routing.routeRule.rule.outbound[rule.outbound.name] ?? rule.outbound.name,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: ConnectionButtonTheme.brandMint,
-                      fontWeight: FontWeight.w700,
                     ),
-                  ),
-                  subtitle: Text(
-                    rule.name,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  leading: ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle_rounded)),
-                  trailing: Switch.adaptive(
-                    activeThumbColor: ConnectionButtonTheme.brandMint,
-                    value: rule.enabled,
-                    onChanged: (value) async =>
-                        await ref.read(rulesNotifierProvider.notifier).updateEnabled(value, rule.listOrder),
-                  ),
+                    const Gap(10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.pages.settings.routing.routeRule.rule.outbound[rule.outbound.name] ??
+                                rule.outbound.name,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: accent,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          const Gap(2),
+                          Text(
+                            rule.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Gap(8),
+                    Transform.scale(
+                      scale: 0.8,
+                      child: Switch(
+                        value: rule.enabled,
+                        onChanged: (value) async =>
+                            await ref.read(rulesNotifierProvider.notifier).updateEnabled(value, rule.listOrder),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              if (chips.isNotEmpty) ...[
+                const Gap(6),
                 SettingDetailChips<MapEntry>(
-                  values: detailChipsValue().entries.toList(),
+                  values: chips.entries.toList(),
                   scrollController: scrollController,
+                  horizontalPadding: 14,
                   t: mergeTranslation([
                     t.pages.settings.routing.routeRule.rule.tileTitle,
                     t.pages.settings.routing.routeRule.rule.network,
                     t.pages.settings.routing.routeRule.rule.outbound,
                   ]),
                 ),
-              ],
-            ),
+              ] else
+                const Gap(11),
+            ],
           ),
         ),
       ),

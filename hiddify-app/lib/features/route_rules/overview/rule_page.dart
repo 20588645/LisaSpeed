@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
@@ -52,9 +53,10 @@ class RulePage extends HookConsumerWidget {
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
+            child: Builder(
+              builder: (context) {
+                // Same glass form panel + 10px row rhythm as the settings pages.
+                final rows = <Widget>[
             SettingText(
               title: RuleEnum.name.present(t),
               value: ref.watch(ruleNotifierProvider(ruleListOrder).select((value) => value.name)),
@@ -202,8 +204,27 @@ class RulePage extends HookConsumerWidget {
                 pathParameters: {'orderId': ruleListOrder?.toString() ?? 'new', 'ruleEnum': RuleEnum.domainRegex.name},
               ),
             ),
-                ],
-              ),
+                ];
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                  children: [
+                    Container(
+                      decoration: TechUi.panelDecoration(context),
+                      clipBehavior: Clip.antiAlias,
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final (i, row) in rows.indexed) ...[
+                            if (i > 0) const Gap(10),
+                            row,
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
