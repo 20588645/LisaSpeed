@@ -46,6 +46,13 @@ class AppTheme {
         space: 1,
       ),
       switchTheme: _switchTheme(scheme, ConnectionButtonTheme.brandMintLight),
+      inputDecorationTheme: _inputDecorationTheme(
+        accent: ConnectionButtonTheme.brandMintLight,
+        line: const Color(0x1A0F2837),
+        fill: ConnectionButtonTheme.bgElevLight,
+        muted: const Color(0xFF5D738A),
+        danger: const Color(0xFFD93848),
+      ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: ConnectionButtonTheme.brandMintLight,
         linearTrackColor: ConnectionButtonTheme.brandMintLight.withValues(alpha: 0.14),
@@ -112,6 +119,13 @@ class AppTheme {
         space: 1,
       ),
       switchTheme: _switchTheme(scheme, ConnectionButtonTheme.brandMint),
+      inputDecorationTheme: _inputDecorationTheme(
+        accent: ConnectionButtonTheme.brandMint,
+        line: const Color(0x245EEAD0),
+        fill: ConnectionButtonTheme.bgElevDark,
+        muted: const Color(0xFF8AA0B8),
+        danger: const Color(0xFFFF5D6C),
+      ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: ConnectionButtonTheme.brandMint,
         linearTrackColor: ConnectionButtonTheme.brandMint.withValues(alpha: 0.14),
@@ -132,6 +146,35 @@ class AppTheme {
         ),
       ),
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
+    );
+  }
+
+  /// Prototype `.form input`: bordered 10px box on the elevated surface,
+  /// accent border + soft ring on focus.
+  static InputDecorationTheme _inputDecorationTheme({
+    required Color accent,
+    required Color line,
+    required Color fill,
+    required Color muted,
+    required Color danger,
+  }) {
+    OutlineInputBorder border(Color color, [double width = 1]) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: color, width: width),
+    );
+    return InputDecorationTheme(
+      isDense: true,
+      filled: true,
+      fillColor: fill,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      border: border(line),
+      enabledBorder: border(line),
+      focusedBorder: border(accent.withValues(alpha: 0.55), 1.4),
+      errorBorder: border(danger.withValues(alpha: 0.55)),
+      focusedErrorBorder: border(danger.withValues(alpha: 0.75), 1.4),
+      hintStyle: TextStyle(color: muted, fontSize: 13),
+      labelStyle: TextStyle(color: muted, fontSize: 13.5),
+      floatingLabelStyle: TextStyle(color: accent),
     );
   }
 

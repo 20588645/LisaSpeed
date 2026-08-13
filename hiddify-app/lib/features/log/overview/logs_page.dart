@@ -119,7 +119,10 @@ class LogsPage extends HookConsumerWidget with PresLogger {
                                 decoration: InputDecoration(
                                   isDense: true,
                                   hintText: t.common.filter,
+                                  filled: false,
                                   border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
                                 ),
                               ),
                             ),

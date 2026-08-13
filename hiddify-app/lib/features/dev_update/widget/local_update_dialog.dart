@@ -190,7 +190,10 @@ class _LocalUpdateDialogState extends ConsumerState<LocalUpdateDialog> with Infr
                     decoration: InputDecoration(
                       isCollapsed: true,
                       contentPadding: const EdgeInsets.all(12),
+                      filled: false,
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                       hintText: t.pages.about.localUpdateIdle,
                     ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(

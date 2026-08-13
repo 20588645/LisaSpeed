@@ -315,7 +315,10 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
                             expands: true,
                             textAlignVertical: TextAlignVertical.top,
                             decoration: const InputDecoration(
+                              filled: false,
                               border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
                               contentPadding: EdgeInsets.only(left: 5, top: 8, bottom: 8),
                             ),
                           ),
