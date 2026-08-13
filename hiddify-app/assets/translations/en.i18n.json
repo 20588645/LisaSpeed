@@ -124,7 +124,11 @@
       "connSubDisconnecting": "Disconnecting…",
       "modeHintProxy": "Local proxy port only · system settings untouched",
       "modeHintSystem": "Takes over system proxy · browsers & apps apply",
-      "modeHintVpn": "TUN global takeover · all apps & terminals"
+      "modeHintVpn": "TUN global takeover · all apps & terminals",
+      "statsHostQuota": "Host traffic",
+      "hostQuotaUsed": "Used",
+      "hostQuotaCycle": "Reset / expiry",
+      "hostQuotaResetDay": "Day ${day} monthly"
     },
     "proxies": {
       "title": "Nodes",
@@ -305,7 +309,12 @@
         "sectionMisc": "More",
         "appearanceActive": "Active now",
         "trayLiveSpeed": "Live speed in menu bar",
-        "trayLiveSpeedMsg": "Show up/down rates beside the menu bar icon"
+        "trayLiveSpeedMsg": "Show up/down rates beside the menu bar icon",
+        "sectionHostPanel": "LisaHost panel",
+        "hostPanelEnabled": "Host quota on home",
+        "hostPanelEnabledMsg": "Sign in to the LisaHost panel for the real usage quota",
+        "hostPanelEmail": "Panel email",
+        "hostPanelPassword": "Panel password"
       },
       "routing": {
         "title": "Routing",

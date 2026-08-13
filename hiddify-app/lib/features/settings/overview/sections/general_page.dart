@@ -86,6 +86,26 @@ class GeneralPage extends HookConsumerWidget {
                   ),
                   const BatteryOptimizationWidget(),
                 ],
+                TechUi.formSectionTitle(context, t.pages.settings.general.sectionHostPanel),
+                TechUi.formSwitchRow(
+                  context,
+                  title: t.pages.settings.general.hostPanelEnabled,
+                  subtitle: t.pages.settings.general.hostPanelEnabledMsg,
+                  value: ref.watch(Preferences.hostPanelEnabled),
+                  onChanged: ref.read(Preferences.hostPanelEnabled.notifier).update,
+                ),
+                ValuePreferenceWidget<String>(
+                  value: ref.watch(Preferences.hostPanelEmail),
+                  preferences: ref.watch(Preferences.hostPanelEmail.notifier),
+                  title: t.pages.settings.general.hostPanelEmail,
+                  presentValue: (value) => value.isEmpty ? '—' : value,
+                ),
+                ValuePreferenceWidget<String>(
+                  value: ref.watch(Preferences.hostPanelPassword),
+                  preferences: ref.watch(Preferences.hostPanelPassword.notifier),
+                  title: t.pages.settings.general.hostPanelPassword,
+                  presentValue: (value) => value.isEmpty ? '—' : '••••••••',
+                ),
                 TechUi.formSectionTitle(context, t.pages.settings.general.sectionMisc),
                 const EnableAnalyticsPrefTile(),
                 TechUi.formSwitchRow(

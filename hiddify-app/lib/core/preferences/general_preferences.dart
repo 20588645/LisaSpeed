@@ -84,6 +84,13 @@ abstract class Preferences {
   /// Shows live up/down speeds beside the macOS menu-bar icon.
   static final showTraySpeed = PreferencesNotifier.create<bool, bool>("show_tray_speed", true);
 
+  /// LisaHost client-area credentials backing the home host-quota card.
+  static final hostPanelEnabled = PreferencesNotifier.create<bool, bool>("host_panel_enabled", false);
+
+  static final hostPanelEmail = PreferencesNotifier.create<String, String>("host_panel_email", "");
+
+  static final hostPanelPassword = PreferencesNotifier.create<String, String>("host_panel_password", "");
+
   static final disableMemoryLimit = PreferencesNotifier.create<bool, bool>(
     "disable_memory_limit",
     // disable memory limit on desktop by default

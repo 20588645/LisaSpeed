@@ -14,6 +14,8 @@ import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connected_at_notifier.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/home/widget/connection_button.dart';
+import 'package:hiddify/features/host_panel/model/host_quota.dart';
+import 'package:hiddify/features/host_panel/notifier/host_quota_notifier.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
@@ -167,11 +169,13 @@ class _HomeDashboard extends ConsumerWidget {
       isConnecting: isConnecting,
       isDisconnecting: isDisconnecting,
     );
+    final hostQuota = ref.watch(hostQuotaProvider);
     final cards = [
       _ExitCard(isConnected: isConnected),
       _TrafficCard(isConnected: isConnected),
       const _NodeCard(),
       const _ProfileCard(),
+      if (hostQuota != null) _HostQuotaCard(quota: hostQuota),
     ];
 
     if (!wide) {
@@ -455,6 +459,55 @@ class _TrafficCard extends ConsumerWidget {
             k: t.pages.home.statsTotal,
             v: (lifetimeTraffic.uplink + lifetimeTraffic.downlink).size(),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// LisaHost panel quota: real usage billed by the hypervisor, polled from
+/// the client area (independent of the app-side counters above).
+class _HostQuotaCard extends ConsumerWidget {
+  const _HostQuotaCard({required this.quota});
+
+  final HostQuota quota;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(translationsProvider).requireValue;
+    final accent = ConnectionButtonTheme.accentOf(context);
+    final ratio = quota.ratio;
+    final barColor = ratio >= 0.9 ? Theme.of(context).colorScheme.error : accent;
+
+    String gb(double value) => value >= 1024
+        ? '${(value / 1024).toStringAsFixed(2)} TB'
+        : '${value.toStringAsFixed(value < 100 ? 1 : 0)} GB';
+
+    final cycle = [
+      if (quota.resetDay != null) t.pages.home.hostQuotaResetDay(day: quota.resetDay!),
+      if (quota.expiryDate != null) quota.expiryDate!,
+    ].join(' · ');
+
+    return _SideCard(
+      label: t.pages.home.statsHostQuota,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _KvRow(k: t.pages.home.hostQuotaUsed, v: '${gb(quota.usedGb)} / ${gb(quota.totalGb)}'),
+          const Gap(8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: ratio,
+              minHeight: 5,
+              backgroundColor: ConnectionButtonTheme.lineOf(context),
+              color: barColor,
+            ),
+          ),
+          if (cycle.isNotEmpty) ...[
+            const Gap(8),
+            _KvRow(k: t.pages.home.hostQuotaCycle, v: cycle),
+          ],
         ],
       ),
     );

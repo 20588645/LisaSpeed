@@ -124,7 +124,11 @@
       "connSubDisconnecting": "正在断开连接…",
       "modeHintProxy": "仅本机代理端口生效 · 不修改系统设置",
       "modeHintSystem": "接管系统代理 · 浏览器与常规应用生效",
-      "modeHintVpn": "TUN 全局接管 · 所有应用与终端生效"
+      "modeHintVpn": "TUN 全局接管 · 所有应用与终端生效",
+      "statsHostQuota": "主机流量",
+      "hostQuotaUsed": "已用",
+      "hostQuotaCycle": "重置 / 到期",
+      "hostQuotaResetDay": "每月${day}日"
     },
     "proxies": {
       "title": "节点",
@@ -305,7 +309,12 @@
         "sectionMisc": "其他",
         "appearanceActive": "当前生效",
         "trayLiveSpeed": "状态栏显示实时网速",
-        "trayLiveSpeedMsg": "在菜单栏图标旁显示上行 / 下行速率"
+        "trayLiveSpeedMsg": "在菜单栏图标旁显示上行 / 下行速率",
+        "sectionHostPanel": "丽莎主机面板",
+        "hostPanelEnabled": "主页显示主机流量",
+        "hostPanelEnabledMsg": "登录丽莎主机面板，读取真实用量配额",
+        "hostPanelEmail": "面板邮箱",
+        "hostPanelPassword": "面板密码"
       },
       "routing": {
         "title": "分流",
