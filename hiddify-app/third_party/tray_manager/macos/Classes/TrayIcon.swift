@@ -12,6 +12,10 @@ public class TrayIcon: NSView {
     public var onTrayIconRightMouseUp:(() -> Void)?
     
     var statusItem: NSStatusItem?
+
+    /// Widest readout measured so far (ratchet): the item never shrinks while
+    /// the speeds are visible, so ticking digits can't nudge the neighbours.
+    var reservedTextWidth: CGFloat = 0
     
     public init() {
         super.init(frame: NSRect.zero)
@@ -58,14 +62,15 @@ public class TrayIcon: NSView {
     
     /// Renders a compact two-line title (e.g. up/down live speeds) next to
     /// the icon, the way macOS network monitors do. Empty strings clear it.
-    /// While a title is shown the status item is pinned to a fixed width
-    /// (sized for the widest possible readout) so the ticking numbers never
-    /// shift the neighbouring menu-bar items.
+    /// While a title is shown the status item keeps a stable width (widest
+    /// realistic readout, ratcheting up if ever exceeded) so the ticking
+    /// numbers never shift the neighbouring menu-bar items.
     public func setTitleLines(_ top: String, _ bottom: String) {
         guard let button = statusItem?.button else { return }
         if top.isEmpty && bottom.isEmpty {
             button.attributedTitle = NSAttributedString(string: "")
             statusItem?.length = NSStatusItem.variableLength
+            reservedTextWidth = 0
             self.frame = button.frame
             return
         }
@@ -82,12 +87,38 @@ public class TrayIcon: NSView {
             .paragraphStyle: paragraph,
             .baselineOffset: -3.5,
         ]
-        button.attributedTitle = NSAttributedString(
-            string: "\(top)\n\(bottom)", attributes: attributes)
-        let widestLine = NSAttributedString(string: "↑ 888.8 MB/s", attributes: attributes)
-        let textWidth = ceil(widestLine.size().width)
+        // Non-breaking space: breathing room between the readout and the
+        // icon (a plain trailing space would hang outside right-aligned
+        // text and render no gap).
+        let gap = "\u{00A0}"
+        let topLine = "\(top)\(gap)"
+        let bottomLine = "\(bottom)\(gap)"
+        let text = NSMutableAttributedString(
+            string: "\(topLine)\n\(bottomLine)", attributes: attributes)
+        // Dim the direction arrows so the digits carry the emphasis.
+        let full = text.string as NSString
+        for arrow in ["↑ ", "↓ "] {
+            var search = NSRange(location: 0, length: full.length)
+            while true {
+                let r = full.range(of: arrow, options: [], range: search)
+                if r.location == NSNotFound { break }
+                text.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: r)
+                let next = r.location + r.length
+                if next >= full.length { break }
+                search = NSRange(location: next, length: full.length - next)
+            }
+        }
+        button.attributedTitle = text
+        // Reserve the widest string each unit tier can produce, then ratchet
+        // if a live line ever measures wider (never clips, never jitters).
+        var reserve: CGFloat = 0
+        for candidate in ["↑ 888 KB/s", "↑ 888 MB/s", "↑ 88.8 MB/s", "↑ 8.88 GB/s", topLine, bottomLine] {
+            let sample = candidate.hasSuffix(gap) ? candidate : candidate + gap
+            reserve = max(reserve, NSAttributedString(string: sample, attributes: attributes).size().width)
+        }
+        reservedTextWidth = max(reservedTextWidth, ceil(reserve))
         let iconWidth = button.image?.size.width ?? 18
-        statusItem?.length = textWidth + iconWidth + 16
+        statusItem?.length = reservedTextWidth + iconWidth + 14
         self.frame = button.frame
     }
     
