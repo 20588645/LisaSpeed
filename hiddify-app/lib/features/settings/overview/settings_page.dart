@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
@@ -32,42 +33,36 @@ class SettingsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
 
-    final sections = <({String title, IconData icon, String location, Widget? subtitle})>[
+    final sections = <({String title, String desc, String location})>[
       (
         title: t.pages.settings.general.title,
-        icon: Icons.tune_rounded,
+        desc: t.pages.settings.general.desc,
         location: context.namedLocation('general'),
-        subtitle: null,
       ),
       (
         title: t.pages.settings.inbound.title,
-        icon: Icons.lan_rounded,
+        desc: t.pages.settings.inbound.desc,
         location: context.namedLocation('inboundOptions'),
-        subtitle: null,
       ),
       (
         title: t.pages.settings.routing.title,
-        icon: Icons.alt_route_rounded,
+        desc: t.pages.settings.routing.desc,
         location: context.namedLocation('routingOptions'),
-        subtitle: null,
       ),
       (
         title: t.pages.settings.advanced.title,
-        icon: Icons.construction_rounded,
+        desc: t.pages.settings.advanced.subtitle,
         location: context.namedLocation('advancedOptions'),
-        subtitle: Text(t.pages.settings.advanced.subtitle),
       ),
       (
         title: t.pages.logs.title,
-        icon: Icons.terminal_rounded,
+        desc: t.pages.logs.desc,
         location: context.namedLocation('logs'),
-        subtitle: Text(t.pages.logs.subtitle),
       ),
       (
         title: t.pages.about.title,
-        icon: Icons.info_outline_rounded,
+        desc: t.pages.about.desc,
         location: context.namedLocation('about'),
-        subtitle: Text(t.pages.about.lead),
       ),
     ];
 
@@ -92,105 +87,142 @@ class SettingsPage extends HookConsumerWidget {
                   ),
                   MenuAnchor(
                     menuChildren: <Widget>[
-                      SubmenuButton(
-                        menuChildren: <Widget>[
-                          MenuItemButton(
-                            onPressed: () async => await ref
-                                .read(dialogNotifierProvider.notifier)
-                                .showConfirmation(
-                                  title: t.common.msg.import.confirm,
-                                  message: t.dialogs.confirmation.settings.import.msg,
-                                )
-                                .then((shouldImport) async {
-                                  if (shouldImport) {
-                                    await ref.read(configOptionNotifierProvider.notifier).importFromClipboard();
-                                  }
-                                }),
-                            child: Text(t.pages.settings.options.import.clipboard),
-                          ),
-                          MenuItemButton(
-                            onPressed: () async => await ref
-                                .read(dialogNotifierProvider.notifier)
-                                .showConfirmation(
-                                  title: t.common.msg.import.confirm,
-                                  message: t.dialogs.confirmation.settings.import.msg,
-                                )
-                                .then((shouldImport) async {
-                                  if (shouldImport) {
-                                    await ref.read(configOptionNotifierProvider.notifier).importFromJsonFile();
-                                  }
-                                }),
-                            child: Text(t.pages.settings.options.import.file),
-                          ),
-                        ],
-                        child: Text(t.common.import),
-                      ),
-                      SubmenuButton(
-                        menuChildren: <Widget>[
-                          MenuItemButton(
-                            onPressed: () async =>
-                                await ref.read(configOptionNotifierProvider.notifier).exportJsonClipboard(),
-                            child: Text(t.pages.settings.options.export.anonymousToClipboard),
-                          ),
-                          MenuItemButton(
-                            onPressed: () async =>
-                                await ref.read(configOptionNotifierProvider.notifier).exportJsonFile(),
-                            child: Text(t.pages.settings.options.export.anonymousToFile),
-                          ),
-                          const PopupMenuDivider(),
-                          MenuItemButton(
-                            onPressed: () async => await ref
-                                .read(configOptionNotifierProvider.notifier)
-                                .exportJsonClipboard(excludePrivate: false),
-                            child: Text(t.pages.settings.options.export.allToClipboard),
-                          ),
-                          MenuItemButton(
-                            onPressed: () async => await ref
-                                .read(configOptionNotifierProvider.notifier)
-                                .exportJsonFile(excludePrivate: false),
-                            child: Text(t.pages.settings.options.export.allToFile),
-                          ),
-                        ],
-                        child: Text(t.common.export),
-                      ),
-                      const PopupMenuDivider(),
                       MenuItemButton(
-                        child: Text(t.pages.settings.options.reset),
-                        onPressed: () async => await ref.read(configOptionNotifierProvider.notifier).resetOption(),
+                        onPressed: () async => await ref
+                            .read(dialogNotifierProvider.notifier)
+                            .showConfirmation(
+                              title: t.common.msg.import.confirm,
+                              message: t.dialogs.confirmation.settings.import.msg,
+                            )
+                            .then((shouldImport) async {
+                              if (shouldImport) {
+                                await ref.read(configOptionNotifierProvider.notifier).importFromClipboard();
+                              }
+                            }),
+                        child: Text(t.pages.settings.options.import.clipboard),
+                      ),
+                      MenuItemButton(
+                        onPressed: () async => await ref
+                            .read(dialogNotifierProvider.notifier)
+                            .showConfirmation(
+                              title: t.common.msg.import.confirm,
+                              message: t.dialogs.confirmation.settings.import.msg,
+                            )
+                            .then((shouldImport) async {
+                              if (shouldImport) {
+                                await ref.read(configOptionNotifierProvider.notifier).importFromJsonFile();
+                              }
+                            }),
+                        child: Text(t.pages.settings.options.import.file),
                       ),
                     ],
-                    builder: (context, controller, child) => IconButton(
-                      onPressed: () {
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          controller.open();
-                        }
-                      },
-                      icon: const Icon(Icons.more_vert_rounded),
+                    builder: (context, controller, child) => TechUi.ghostButton(
+                      context,
+                      label: t.common.import,
+                      onPressed: () => controller.isOpen ? controller.close() : controller.open(),
                     ),
                   ),
                   const SizedBox(width: 8),
+                  MenuAnchor(
+                    menuChildren: <Widget>[
+                      MenuItemButton(
+                        onPressed: () async =>
+                            await ref.read(configOptionNotifierProvider.notifier).exportJsonClipboard(),
+                        child: Text(t.pages.settings.options.export.anonymousToClipboard),
+                      ),
+                      MenuItemButton(
+                        onPressed: () async =>
+                            await ref.read(configOptionNotifierProvider.notifier).exportJsonFile(),
+                        child: Text(t.pages.settings.options.export.anonymousToFile),
+                      ),
+                      const PopupMenuDivider(),
+                      MenuItemButton(
+                        onPressed: () async => await ref
+                            .read(configOptionNotifierProvider.notifier)
+                            .exportJsonClipboard(excludePrivate: false),
+                        child: Text(t.pages.settings.options.export.allToClipboard),
+                      ),
+                      MenuItemButton(
+                        onPressed: () async => await ref
+                            .read(configOptionNotifierProvider.notifier)
+                            .exportJsonFile(excludePrivate: false),
+                        child: Text(t.pages.settings.options.export.allToFile),
+                      ),
+                    ],
+                    builder: (context, controller, child) => TechUi.ghostButton(
+                      context,
+                      label: t.common.export,
+                      onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TechUi.ghostButton(
+                    context,
+                    label: t.pages.settings.options.reset,
+                    onPressed: () async => await ref.read(configOptionNotifierProvider.notifier).resetOption(),
+                  ),
+                  const SizedBox(width: 20),
                 ],
               ),
             ),
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.only(top: 4, bottom: 24),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               children: [
-                for (var i = 0; i < sections.length; i++)
-                  TechUi.hubCard(
-                    context,
-                    index: i + 1,
-                    icon: sections[i].icon,
-                    title: sections[i].title,
-                    subtitle: sections[i].subtitle,
-                    onTap: () => context.go(sections[i].location),
-                  ),
+                // Prototype `.settings-grid`: two columns of numbered cards.
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final twoColumns = constraints.maxWidth >= 560;
+                    if (!twoColumns) {
+                      return Column(
+                        children: [
+                          for (final (i, section) in sections.indexed) ...[
+                            if (i > 0) const Gap(12),
+                            TechUi.hubCard(
+                              context,
+                              index: i + 1,
+                              title: section.title,
+                              subtitle: Text(section.desc),
+                              onTap: () => context.go(section.location),
+                            ),
+                          ],
+                        ],
+                      );
+                    }
+                    return Column(
+                      children: [
+                        for (var row = 0; row < sections.length; row += 2) ...[
+                          if (row > 0) const Gap(12),
+                          IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                for (var col = 0; col < 2; col++) ...[
+                                  if (col > 0) const Gap(12),
+                                  Expanded(
+                                    child: row + col < sections.length
+                                        ? TechUi.hubCard(
+                                            context,
+                                            index: row + col + 1,
+                                            title: sections[row + col].title,
+                                            subtitle: Text(sections[row + col].desc),
+                                            onTap: () => context.go(sections[row + col].location),
+                                          )
+                                        : const SizedBox(),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
                 if (PlatformUtils.isIOS)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                    padding: const EdgeInsets.only(top: 12),
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
@@ -202,7 +234,7 @@ class SettingsPage extends HookConsumerWidget {
                           decoration: TechUi.panelDecoration(context),
                           child: ListTile(
                             title: Text(t.pages.settings.resetTunnel),
-                            leading: Icon(Icons.autorenew_rounded, color: ConnectionButtonTheme.brandMint),
+                            leading: const Icon(Icons.autorenew_rounded, color: ConnectionButtonTheme.brandMint),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                         ),
@@ -222,7 +254,6 @@ class SettingsSection extends HookConsumerWidget {
   const SettingsSection({
     super.key,
     required this.title,
-    required this.icon,
     this.subtitle,
     required this.namedLocation,
     this.index = 1,
@@ -230,7 +261,6 @@ class SettingsSection extends HookConsumerWidget {
 
   final String title;
   final Widget? subtitle;
-  final IconData icon;
   final String namedLocation;
   final int index;
 
@@ -239,7 +269,6 @@ class SettingsSection extends HookConsumerWidget {
     return TechUi.hubCard(
       context,
       index: index,
-      icon: icon,
       title: title,
       subtitle: subtitle,
       onTap: () => context.go(namedLocation),

@@ -7,6 +7,8 @@ import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/theme/app_theme_mode.dart';
 import 'package:hiddify/core/theme/theme_preferences.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
+import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class LocalePrefTile extends ConsumerWidget {
@@ -17,10 +19,9 @@ class LocalePrefTile extends ConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
 
     final locale = ref.watch(localePreferencesProvider);
-    return ListTile(
-      title: Text(t.pages.settings.general.locale),
-      subtitle: Text(locale.localeName),
-      leading: const Icon(Icons.translate_rounded),
+    return PreferenceRow(
+      title: t.pages.settings.general.locale,
+      valueText: locale.localeName,
       onTap: () async {
         final selectedLocale = await ref
             .read(dialogNotifierProvider.notifier)
@@ -50,10 +51,10 @@ class EnableAnalyticsPrefTile extends ConsumerWidget {
 
     final enabled = ref.watch(analyticsControllerProvider).requireValue;
 
-    return SwitchListTile.adaptive(
-      title: Text(t.pages.settings.general.enableAnalytics),
-      subtitle: Text(t.pages.settings.general.enableAnalyticsMsg, style: Theme.of(context).textTheme.bodySmall),
-      secondary: const Icon(Icons.analytics_rounded),
+    return TechUi.formSwitchRow(
+      context,
+      title: t.pages.settings.general.enableAnalytics,
+      subtitle: t.pages.settings.general.enableAnalyticsMsg,
       value: enabled,
       onChanged: (value) async {
         if (onChanged != null) {
@@ -114,10 +115,9 @@ class ClosingPrefTile extends ConsumerWidget {
 
     final action = ref.watch(Preferences.actionAtClose);
 
-    return ListTile(
-      title: Text(t.pages.settings.general.actionAtClosing),
-      subtitle: Text(action.present(t)),
-      leading: const Icon(Icons.logout_rounded),
+    return PreferenceRow(
+      title: t.pages.settings.general.actionAtClosing,
+      valueText: action.present(t),
       onTap: () async {
         final selectedAction = await ref.read(dialogNotifierProvider.notifier).showActionAtClosing(selected: action);
         if (selectedAction != null) {

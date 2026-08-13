@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/optional_range.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/chain/model/chain_enum.dart';
 import 'package:hiddify/features/chain/notifier/chain_profile_notifier.dart';
 import 'package:hiddify/features/chain/overview/chain_timeline.dart';
@@ -13,20 +15,13 @@ import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ChainOptionsPage extends HookConsumerWidget {
-  const ChainOptionsPage({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = ref.watch(translationsProvider).requireValue;
-    final theme = Theme.of(context);
-    final profiles = ref.watch(profilesNotifierProvider).value ?? [];
-    return Scaffold(
-      appBar: AppBar(title: Text(t.pages.settings.chain.title)),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
-        children: [
-          const ChainTimeline(level: ChainTimelineLevel.app),
+/// Chain timeline blocks shared between the standalone page and the merged
+/// advanced page (prototype folds this into 高级 as 链路增强).
+List<Widget> chainTimelineSections(BuildContext context, WidgetRef ref, Translations t) {
+  final theme = Theme.of(context);
+  final profiles = ref.watch(profilesNotifierProvider).value ?? [];
+  return [
+    const ChainTimeline(level: ChainTimelineLevel.app),
           ChainTimeline(
             level: ChainTimelineLevel.extraSecurity,
             childeren: ref.watch(ConfigOptions.chainStatus).isExtraSecurity()
@@ -195,7 +190,37 @@ class ChainOptionsPage extends HookConsumerWidget {
                   }
                 : [],
           ),
-          const ChainTimeline(level: ChainTimelineLevel.filtering),
+    const ChainTimeline(level: ChainTimelineLevel.filtering),
+  ];
+}
+
+class ChainOptionsPage extends HookConsumerWidget {
+  const ChainOptionsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(translationsProvider).requireValue;
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SafeArea(
+            bottom: false,
+            child: TechUi.subPageHeader(
+              context,
+              eyebrow: 'Chain',
+              title: t.pages.settings.chain.title,
+              subtitle: t.pages.settings.chain.subtitle,
+              onBack: () => context.pop(),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+              children: chainTimelineSections(context, ref, t),
+            ),
+          ),
         ],
       ),
     );

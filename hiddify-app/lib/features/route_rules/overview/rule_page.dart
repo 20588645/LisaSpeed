@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/route_rules/notifier/rule_notifier.dart';
 import 'package:hiddify/features/route_rules/widget/setting_checkbox.dart';
 import 'package:hiddify/features/route_rules/widget/setting_divider.dart';
@@ -26,24 +26,35 @@ class RulePage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     final isRuleEdited = ref.watch(IsRuleEditedProvider(ruleListOrder));
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.pages.settings.routing.routeRule.rule.title),
-        actions: [
-          IconButton(
-            onPressed: isRuleEdited
-                ? () async {
-                    await ref.read(ruleNotifierProvider(ruleListOrder).notifier).save();
-                    if (context.mounted) context.pop();
-                  }
-                : null,
-            icon: const Icon(Icons.check),
+      backgroundColor: Colors.transparent,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SafeArea(
+            bottom: false,
+            child: TechUi.subPageHeader(
+              context,
+              eyebrow: 'Rule',
+              title: t.pages.settings.routing.routeRule.rule.title,
+              onBack: () => context.pop(),
+              actions: [
+                TechUi.primaryButton(
+                  context,
+                  label: t.common.save,
+                  onPressed: isRuleEdited
+                      ? () async {
+                          await ref.read(ruleNotifierProvider(ruleListOrder).notifier).save();
+                          if (context.mounted) context.pop();
+                        }
+                      : null,
+                ),
+              ],
+            ),
           ),
-          const Gap(8),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
             SettingText(
               title: RuleEnum.name.present(t),
               value: ref.watch(ruleNotifierProvider(ruleListOrder).select((value) => value.name)),
@@ -191,8 +202,11 @@ class RulePage extends HookConsumerWidget {
                 pathParameters: {'orderId': ruleListOrder?.toString() ?? 'new', 'ruleEnum': RuleEnum.domainRegex.name},
               ),
             ),
-          ],
-        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

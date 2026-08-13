@@ -2,9 +2,85 @@ import 'package:flutter/material.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/utils/preferences_utils.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/proxy/active/ip_widget.dart';
 import 'package:hiddify/features/settings/notifier/battery_optimization/battery_optimizations_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+/// Prototype form row: bordered 10px-radius row with the label on the left
+/// and the current value + chevron on the right (mirrors `label > select`).
+class PreferenceRow extends StatelessWidget {
+  const PreferenceRow({
+    super.key,
+    required this.title,
+    this.valueText,
+    this.trailing,
+    this.onTap,
+    this.enabled = true,
+  });
+
+  final String title;
+  final String? valueText;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Opacity(
+      opacity: enabled ? 1 : 0.55,
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: TechUi.formRowDecoration(context),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: enabled ? onTap : null,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              child: Row(
+                children: [
+                  Expanded(child: Text(title, style: theme.textTheme.bodyMedium)),
+                  if (valueText != null) ...[
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        valueText!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (trailing != null) ...[
+                    const SizedBox(width: 8),
+                    trailing!,
+                  ],
+                  if (onTap != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      '›',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 16,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class ValuePreferenceWidget<T> extends HookConsumerWidget {
   const ValuePreferenceWidget({
@@ -36,15 +112,11 @@ class ValuePreferenceWidget<T> extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(presentValue?.call(value) ?? value.toString()),
-      leading: icon != null ? Icon(icon) : null,
+    return PreferenceRow(
+      title: title,
+      valueText: presentValue?.call(value) ?? value.toString(),
       trailing: trailing,
-      // material: (context, platform) => MaterialListTileData(
       enabled: enabled,
-
-      // ),
       onTap: () async {
         final inputValue = await ref
             .read(dialogNotifierProvider.notifier)
@@ -75,11 +147,14 @@ class SwitchPreferenceWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = ref.watch(preference);
-    return Switch.adaptive(
-      value: value,
-      onChanged: (val) {
-        (ref.read(preference.notifier) as dynamic).update(val);
-      },
+    return Transform.scale(
+      scale: 0.8,
+      child: Switch(
+        value: value,
+        onChanged: (val) {
+          (ref.read(preference.notifier) as dynamic).update(val);
+        },
+      ),
     );
   }
 }
@@ -113,11 +188,10 @@ class ChoicePreferenceWidget<T> extends HookConsumerWidget {
   final ValueChanged<T>? onChanged;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(presentChoice(selected)),
-      leading: icon != null ? Icon(icon) : null,
-      trailing: showFlag ? flagByTitle(presentChoice(selected), size: 40) : null,
+    return PreferenceRow(
+      title: title,
+      valueText: presentChoice(selected),
+      trailing: showFlag ? flagByTitle(presentChoice(selected), size: 28) : null,
       enabled: enabled,
       onTap: () async {
         final selection = await ref

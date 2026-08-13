@@ -38,7 +38,9 @@ class HomePage extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Center(
+        // Prototype `.page`: left-anchored column capped at 920px.
+        child: Align(
+          alignment: AlignmentDirectional.topStart,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 920),
             child: ListView(
@@ -166,7 +168,7 @@ class _HomeDashboard extends ConsumerWidget {
     );
     final cards = [
       _ExitCard(isConnected: isConnected),
-      const _TrafficCard(),
+      _TrafficCard(isConnected: isConnected),
       const _NodeCard(),
       const _ProfileCard(),
     ];
@@ -184,24 +186,31 @@ class _HomeDashboard extends ConsumerWidget {
       );
     }
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(flex: 23, child: hero),
-          const Gap(14),
-          Expanded(
-            flex: 20,
-            child: Column(
-              children: [
-                for (final (i, card) in cards.indexed) ...[
-                  if (i > 0) const Gap(12),
-                  Expanded(child: card),
-                ],
-              ],
-            ),
+    // Prototype `.home-b-grid`: 1.15fr/1fr columns, 14px gutter, max 860px.
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 860),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(flex: 23, child: hero),
+              const Gap(14),
+              Expanded(
+                flex: 20,
+                child: Column(
+                  children: [
+                    for (final (i, card) in cards.indexed) ...[
+                      if (i > 0) const Gap(12),
+                      Expanded(child: card),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -288,7 +297,7 @@ class _HeroCard extends ConsumerWidget {
                     }
                   },
                 ),
-                const Gap(14),
+                const Gap(12),
                 const ConnectionButton(),
                 const Gap(6),
                 AnimatedSwitcher(
@@ -304,12 +313,12 @@ class _HeroCard extends ConsumerWidget {
                   const Gap(10),
                   _DurationChip(since: connectedAt, label: t.pages.home.connDuration),
                 ],
-                const Gap(18),
-                _ModeSeg(
+                const Gap(16),
+                TechUi.seg<ServiceMode>(
+                  context,
+                  options: ServiceMode.choices,
                   selected: mode,
-                  labels: {
-                    for (final m in ServiceMode.choices) m: m.presentShort(t),
-                  },
+                  label: (m) => m.presentShort(t),
                   onChanged: (m) => ref.read(ConfigOptions.serviceMode.notifier).update(m),
                 ),
                 const Gap(8),
@@ -369,11 +378,7 @@ class _DurationChip extends HookWidget {
           const Gap(6),
           Text(
             value,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: accent,
-              fontWeight: FontWeight.w600,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
+            style: TechUi.mono(context, size: 12, weight: FontWeight.w600, color: accent),
           ),
         ],
       ),
@@ -409,11 +414,12 @@ class _ExitCard extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _KvRow(k: t.pages.home.exitLine, v: line()),
+          _KvRow(k: t.pages.home.exitLine, v: line(), dimmed: !isConnected),
           const Gap(8),
           _KvRow(
             k: t.pages.home.exitIp,
             v: ip.isNotEmpty ? ip : '—',
+            dimmed: !isConnected,
             valueColor: isConnected && ip.isNotEmpty ? accent : null,
           ),
         ],
@@ -423,7 +429,9 @@ class _ExitCard extends ConsumerWidget {
 }
 
 class _TrafficCard extends ConsumerWidget {
-  const _TrafficCard();
+  const _TrafficCard({required this.isConnected});
+
+  final bool isConnected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -435,11 +443,15 @@ class _TrafficCard extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _KvRow(k: t.pages.home.statsUp, v: stats.uplink.toInt().speed()),
+          _KvRow(k: t.pages.home.statsUp, v: stats.uplink.toInt().speed(), dimmed: !isConnected),
           const Gap(8),
-          _KvRow(k: t.pages.home.statsDown, v: stats.downlink.toInt().speed()),
+          _KvRow(k: t.pages.home.statsDown, v: stats.downlink.toInt().speed(), dimmed: !isConnected),
           const Gap(8),
-          _KvRow(k: t.pages.home.statsTotal, v: (stats.uplinkTotal + stats.downlinkTotal).toInt().size()),
+          _KvRow(
+            k: t.pages.home.statsTotal,
+            v: (stats.uplinkTotal + stats.downlinkTotal).toInt().size(),
+            dimmed: !isConnected,
+          ),
         ],
       ),
     );
@@ -588,11 +600,14 @@ class _SideCard extends StatelessWidget {
 }
 
 class _KvRow extends StatelessWidget {
-  const _KvRow({required this.k, required this.v, this.valueColor});
+  const _KvRow({required this.k, required this.v, this.valueColor, this.dimmed = false});
 
   final String k;
   final String v;
   final Color? valueColor;
+
+  /// Prototype greys `.hb-v` values out until the tunnel is up.
+  final bool dimmed;
 
   @override
   Widget build(BuildContext context) {
@@ -613,10 +628,9 @@ class _KvRow extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.right,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: valueColor,
-              fontFeatures: const [FontFeature.tabularFigures()],
+            style: TechUi.mono(
+              context,
+              color: valueColor ?? (dimmed ? Theme.of(context).colorScheme.onSurfaceVariant : null),
             ),
           ),
         ),
@@ -679,62 +693,6 @@ class _ProfilePill extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ModeSeg extends StatelessWidget {
-  const _ModeSeg({
-    required this.selected,
-    required this.labels,
-    required this.onChanged,
-  });
-
-  final ServiceMode selected;
-  final Map<ServiceMode, String> labels;
-  final ValueChanged<ServiceMode> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = ConnectionButtonTheme.accentOf(context);
-    final line = ConnectionButtonTheme.lineOf(context);
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: line),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Row(
-        children: [
-          for (final entry in labels.entries) ...[
-            if (entry.key != labels.keys.first)
-              Container(width: 1, height: 42, color: line),
-            Expanded(
-              child: Material(
-                color: entry.key == selected ? accent : Colors.transparent,
-                child: InkWell(
-                  onTap: () => onChanged(entry.key),
-                  child: SizedBox(
-                    height: 42,
-                    child: Center(
-                      child: Text(
-                        entry.value,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: entry.key == selected
-                              ? const Color(0xFF041016)
-                              : Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ],
       ),
     );
   }

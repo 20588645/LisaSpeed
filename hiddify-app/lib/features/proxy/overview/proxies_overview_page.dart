@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
@@ -38,26 +37,31 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
                       subtitle: t.pages.proxies.subtitle,
                     ),
                   ),
-                  PopupMenuButton<ProxiesSort>(
-                    initialValue: sortBy,
-                    onSelected: ref.read(proxiesSortNotifierProvider.notifier).update,
-                    icon: const Icon(FluentIcons.arrow_sort_24_regular),
-                    tooltip: t.pages.proxies.sort,
-                    itemBuilder: (context) {
-                      return [...ProxiesSort.values.map((e) => PopupMenuItem(value: e, child: Text(e.present(t))))];
-                    },
-                  ),
-                  IconButton(
-                    tooltip: t.pages.proxies.testDelay,
-                    onPressed: () async =>
-                        await ref.read(proxiesOverviewNotifierProvider.notifier).urlTest('select'),
-                    icon: const Icon(FluentIcons.flash_24_filled),
-                    style: IconButton.styleFrom(
-                      foregroundColor: const Color(0xFF041016),
-                      backgroundColor: ConnectionButtonTheme.brandMint,
+                  MenuAnchor(
+                    menuChildren: [
+                      for (final sort in ProxiesSort.values)
+                        MenuItemButton(
+                          onPressed: () => ref.read(proxiesSortNotifierProvider.notifier).update(sort),
+                          trailingIcon: sort == sortBy
+                              ? Icon(Icons.check_rounded, size: 16, color: ConnectionButtonTheme.accentOf(context))
+                              : null,
+                          child: Text(sort.present(t)),
+                        ),
+                    ],
+                    builder: (context, controller, child) => TechUi.ghostButton(
+                      context,
+                      label: t.pages.proxies.sort,
+                      onPressed: () => controller.isOpen ? controller.close() : controller.open(),
                     ),
                   ),
                   const Gap(8),
+                  TechUi.primaryButton(
+                    context,
+                    label: t.pages.proxies.testDelay,
+                    onPressed: () async =>
+                        await ref.read(proxiesOverviewNotifierProvider.notifier).urlTest('select'),
+                  ),
+                  const Gap(20),
                 ],
               ),
             ),
@@ -72,24 +76,7 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                           child: Row(
                             children: [
-                              Container(
-                                height: 22,
-                                constraints: const BoxConstraints(minWidth: 22),
-                                padding: const EdgeInsets.symmetric(horizontal: 6),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: ConnectionButtonTheme.accentOf(context).withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(7),
-                                ),
-                                child: Text(
-                                  '${group.items.length}',
-                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: ConnectionButtonTheme.accentOf(context),
-                                    fontWeight: FontWeight.w700,
-                                    fontFeatures: const [FontFeature.tabularFigures()],
-                                  ),
-                                ),
-                              ),
+                              TechUi.countChip(context, '${group.items.length}'),
                               const Gap(6),
                               Text(
                                 t.pages.proxies.countSuffix,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
-import 'package:hiddify/features/proxy/active/ip_widget.dart';
 import 'package:hiddify/gen/fonts.gen.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/utils/custom_loggers.dart';
@@ -37,21 +36,15 @@ class ProxyTile extends HookConsumerWidget with PresLogger {
                   Container(
                     width: 3,
                     decoration: BoxDecoration(
-                      color: selected ? ConnectionButtonTheme.brandMint : Colors.transparent,
+                      color: selected ? ConnectionButtonTheme.accentOf(context) : Colors.transparent,
                       borderRadius: const BorderRadius.horizontal(left: Radius.circular(14)),
                     ),
                   ),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
                       child: Row(
                         children: [
-                          IPCountryFlag(
-                            countryCode: proxy.ipinfo.countryCode,
-                            organization: proxy.ipinfo.org,
-                            size: 36,
-                            padding: const EdgeInsetsDirectional.only(end: 10),
-                          ),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,11 +68,15 @@ class ProxyTile extends HookConsumerWidget with PresLogger {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 6),
-                                // Region/protocol as tag chips, mirroring the prototype rows.
+                                const SizedBox(height: 7),
+                                // Region + mono protocol tag chips, mirroring the prototype rows.
                                 Row(
                                   children: [
-                                    TechUi.tag(context, proxy.type),
+                                    if (proxy.ipinfo.countryCode.trim().isNotEmpty) ...[
+                                      TechUi.tag(context, proxy.ipinfo.countryCode.trim()),
+                                      const SizedBox(width: 6),
+                                    ],
+                                    TechUi.tag(context, proxy.type, monoFont: true),
                                     if (proxy.isGroup && proxy.groupSelectedTagDisplay.trim().isNotEmpty) ...[
                                       const SizedBox(width: 6),
                                       Flexible(

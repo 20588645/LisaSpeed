@@ -60,31 +60,41 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
               },
             );
             return Scaffold(
-              appBar: AppBar(
-                title: Text(t.pages.profileDetails.title),
-                actions: [
-                  TextButton.icon(
-                    onPressed: isLoading || !data.isDetailsChanged
-                        ? null
-                        : () async {
-                            if (formKey.currentState!.validate()) {
-                              await ref.read(provider.notifier).save().then((success) {
-                                ref
-                                    .read(inAppNotificationControllerProvider)
-                                    .showSuccessToast(t.pages.profiles.msg.save.success);
-                                if (success && context.mounted) context.pop();
-                              });
-                            }
-                          },
-                    icon: const Icon(Icons.check),
-                    label: Text(t.common.save),
-                  ),
-                  const Gap(8),
-                ],
-              ),
-              body: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              backgroundColor: Colors.transparent,
+              body: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  SafeArea(
+                    bottom: false,
+                    child: TechUi.subPageHeader(
+                      context,
+                      eyebrow: 'Edit',
+                      title: t.pages.profileDetails.title,
+                      onBack: () => context.pop(),
+                      actions: [
+                        TechUi.primaryButton(
+                          context,
+                          label: t.common.save,
+                          onPressed: isLoading || !data.isDetailsChanged
+                              ? null
+                              : () async {
+                                  if (formKey.currentState!.validate()) {
+                                    await ref.read(provider.notifier).save().then((success) {
+                                      ref
+                                          .read(inAppNotificationControllerProvider)
+                                          .showSuccessToast(t.pages.profiles.msg.save.success);
+                                      if (success && context.mounted) context.pop();
+                                    });
+                                  }
+                                },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                      children: [
                   Container(
                     decoration: TechUi.panelDecoration(context),
                     clipBehavior: Clip.antiAlias,
@@ -288,6 +298,9 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
                             ),
                           ),
                   ),
+                  ),
+                      ],
+                    ),
                   ),
                 ],
               ),

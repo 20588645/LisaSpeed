@@ -190,7 +190,8 @@
       "subtitle": "Manage subscriptions and local configs",
       "tagActive": "Active",
       "tagRemote": "Remote",
-      "tagLocal": "Local"
+      "tagLocal": "Local",
+      "activate": "Activate"
     },
     "profileDetails": {
       "title": "Subscription details",
@@ -209,7 +210,8 @@
       "title": "Diagnostics",
       "shareCoreLogs": "Share core logs",
       "shareAppLogs": "Share app logs",
-      "subtitle": "Core and app output"
+      "subtitle": "Core and app output",
+      "desc": "Runtime logs & checks"
     },
     "about": {
       "title": "About",
@@ -231,7 +233,12 @@
       "localUpdateInstalling": "Installing — stopping old tunnel and relaunching…",
       "localUpdateFailed": "Update failed",
       "localUpdateIdle": "Tap below to start a full local build",
-      "localUpdateClose": "Close"
+      "localUpdateClose": "Close",
+      "channel": "Channel",
+      "platform": "Platform",
+      "copyInfo": "Copy info",
+      "workingDir": "Working dir",
+      "desc": "Version, updates, working dir"
     },
     "settings": {
       "title": "Settings",
@@ -278,7 +285,12 @@
         "urlTestInterval": "URL test interval",
         "clashApiPort": "Clash API port",
         "useXrayCoreWhenPossible": "Use xray-core when possible",
-        "useXrayCoreWhenPossibleMsg": "Use xray-core during parsing sub links. You need to reimport the sub link to enable this option."
+        "useXrayCoreWhenPossibleMsg": "Use xray-core during parsing sub links. You need to reimport the sub link to enable this option.",
+        "desc": "Language, theme, auto start",
+        "sectionAppearance": "Language & appearance",
+        "sectionStartup": "Startup & closing",
+        "sectionMisc": "More",
+        "appearanceActive": "Active now"
       },
       "routing": {
         "title": "Routing",
@@ -441,7 +453,9 @@
             "name": "Bypass LAN",
             "description": ""
           }
-        }
+        },
+        "desc": "Rules & region policy",
+        "ruleList": "Rule list"
       },
       "dns": {
         "title": "DNS",
@@ -487,7 +501,11 @@
         "lanSharingPassword": "VPN sharing password",
         "copyLink": "Copy link",
         "qrCode": "QR Code",
-        "lanIPError": "Failed to get local IP address"
+        "lanIPError": "Failed to get local IP address",
+        "desc": "Mode, ports, VPN sharing",
+        "sectionMode": "Default mode",
+        "sectionPorts": "Ports",
+        "sectionSharing": "LAN sharing"
       },
       "tlsTricks": {
         "title": "TLS tricks",

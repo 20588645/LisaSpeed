@@ -142,9 +142,11 @@ class _ConnectionButton extends StatelessWidget {
   final Animation<double> pulse;
   final Animation<double> ripple;
 
-  static const double _box = 168;
-  static const double _ringSize = 160;
-  static const double _discSize = 128;
+  // Prototype `.connect-btn.md` (dashboard hero): 118px box, ring inset 4%,
+  // disc inset 12%.
+  static const double _box = 118;
+  static const double _ringSize = 108.5;
+  static const double _discSize = 89.5;
 
   @override
   Widget build(BuildContext context) {
@@ -346,9 +348,9 @@ class _ConnectionButton extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // Machined chamfer ring.
+                      // Machined chamfer ring (prototype inset 7% of disc).
                       Padding(
-                        padding: const EdgeInsets.all(9),
+                        padding: const EdgeInsets.all(_discSize * 0.07),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 450),
                           decoration: BoxDecoration(
@@ -361,17 +363,17 @@ class _ConnectionButton extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // Power glyph.
+                      // Power glyph (prototype 26% of the disc).
                       Center(
                         child: AnimatedBuilder(
                           animation: pulse,
                           builder: (context, _) {
                             final opacity = isConnecting ? 1 - 0.35 * pulse.value : 1.0;
                             return CustomPaint(
-                              size: const Size(34, 40),
+                              size: const Size(24, 28),
                               painter: _PowerGlyphPainter(
                                 color: glyphColor.withValues(alpha: glyphColor.a * opacity),
-                                strokeWidth: 2.4,
+                                strokeWidth: 2,
                                 glow: isConnected ? accent.withValues(alpha: 0.45) : null,
                               ),
                             );
@@ -398,11 +400,13 @@ class _ConnectionButton extends StatelessWidget {
           curve: Curves.easeIn,
           child: button,
         ),
-        const Gap(16),
+        const Gap(12),
         ExcludeSemantics(
           child: AnimatedText(
             label,
-            style: theme.textTheme.titleLarge?.copyWith(
+            // Prototype `.connect-status`: 19px / w700.
+            style: TextStyle(
+              fontSize: 19,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.2,
               color: isConnected ? accent : theme.colorScheme.onSurface,

@@ -21,6 +21,7 @@ import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
 import 'package:hiddify/gen/fonts.gen.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart' show DateFormat;
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -53,144 +54,236 @@ class ProfileTile extends HookConsumerWidget {
       _ => null,
     };
 
-    final showActionButton = profile is RemoteProfileEntity || !isMain;
     final isRemote = profile is RemoteProfileEntity;
+    final accent = ConnectionButtonTheme.accentOf(context);
 
-    return Container(
-      margin: margin,
-      decoration: TechUi.panelDecoration(context, selected: profile.active),
-      clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (profile.active)
-                Container(
-                  width: 3,
-                  color: ConnectionButtonTheme.brandMint,
-                ),
-              if (showActionButton) ...[
-                SizedBox(
-                  width: 48,
-                  child: Semantics(sortKey: const OrdinalSortKey(1), child: ProfileActionButton(profile, !isMain)),
-                ),
-                VerticalDivider(
-                  width: 1,
-                  color: ConnectionButtonTheme.brandMint.withValues(alpha: 0.18),
-                ),
-              ],
-              Expanded(
-                child: Semantics(
-                  button: true,
-                  sortKey: isMain ? const OrdinalSortKey(0) : null,
-                  focused: isMain,
-                  liveRegion: isMain,
-                  namesRoute: isMain,
-                  label: isMain ? t.pages.profiles.viewAllProfiles : null,
-                  child: InkWell(
-                    borderRadius: showActionButton
-                        ? ProfileTileConst.endBorderRadius(Directionality.of(context))
-                        : ProfileTileConst.cardBorderRadius,
-                    onTap: () {
-                      if (isMain) {
+    if (isMain) {
+      return Container(
+        margin: margin,
+        decoration: TechUi.panelDecoration(context, selected: profile.active),
+        clipBehavior: Clip.antiAlias,
+        child: IntrinsicHeight(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (profile.active) Container(width: 3, color: accent),
+                if (isRemote) ...[
+                  SizedBox(
+                    width: 48,
+                    child: Semantics(sortKey: const OrdinalSortKey(1), child: ProfileActionButton(profile, false)),
+                  ),
+                  VerticalDivider(width: 1, color: accent.withValues(alpha: 0.18)),
+                ],
+                Expanded(
+                  child: Semantics(
+                    button: true,
+                    sortKey: const OrdinalSortKey(0),
+                    focused: true,
+                    liveRegion: true,
+                    namesRoute: true,
+                    label: t.pages.profiles.viewAllProfiles,
+                    child: InkWell(
+                      borderRadius: isRemote
+                          ? ProfileTileConst.endBorderRadius(Directionality.of(context))
+                          : ProfileTileConst.cardBorderRadius,
+                      onTap: () {
                         if (Breakpoint(context).isMobile()) {
                           ref.read(bottomSheetsNotifierProvider.notifier).showProfilesOverview();
                         } else {
                           context.goNamed('profiles');
                         }
-                      } else {
-                        if (selectActiveMutation.state.isInProgress) return;
-                        selectActiveMutation.setFuture(
-                          ref.read(profilesNotifierProvider.notifier).selectActiveProfile(profile.id),
-                        );
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.goNamed('home');
-                        }
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (isMain)
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Material(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.transparent,
-                                clipBehavior: Clip.antiAlias,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        profile.name,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: theme.textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
-                                        ),
-                                        semanticsLabel: t.pages.profiles.activeProfileName(name: profile.name),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      profile.name,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
                                       ),
+                                      semanticsLabel: t.pages.profiles.activeProfileName(name: profile.name),
                                     ),
-                                    Icon(
-                                      Icons.arrow_drop_down_rounded,
-                                      color: ConnectionButtonTheme.brandMint,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          else ...[
-                            Row(
-                              children: [
-                                if (profile.active) ...[
-                                  TechUi.tag(context, t.pages.profiles.tagActive, active: true),
-                                  const SizedBox(width: 6),
+                                  ),
+                                  Icon(Icons.arrow_drop_down_rounded, color: accent),
                                 ],
-                                TechUi.tag(
-                                  context,
-                                  isRemote ? t.pages.profiles.tagRemote : t.pages.profiles.tagLocal,
-                                ),
-                              ],
-                            ),
-                            const Gap(6),
-                            Text(
-                              profile.name,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
                               ),
-                              semanticsLabel: profile.active
-                                  ? t.pages.profiles.activeProfileName(name: profile.name)
-                                  : t.pages.profiles.nonActiveProfileName(name: profile.name),
                             ),
+                            if (subInfo != null) ...[
+                              const Gap(6),
+                              RemainingTrafficIndicator(subInfo.ratio),
+                              const Gap(4),
+                              ProfileSubscriptionInfo(subInfo),
+                              const Gap(2),
+                            ],
                           ],
-                          if (subInfo != null) ...[
-                            const Gap(6),
-                            RemainingTrafficIndicator(subInfo.ratio),
-                            const Gap(4),
-                            ProfileSubscriptionInfo(subInfo),
-                            const Gap(2),
-                          ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+      );
+    }
+
+    void activate() {
+      if (profile.active) return;
+      if (selectActiveMutation.state.isInProgress) return;
+      selectActiveMutation.setFuture(
+        ref.read(profilesNotifierProvider.notifier).selectActiveProfile(profile.id),
+      );
+    }
+
+    Future<void> deleteWithConfirm() async {
+      final deleteConfirmed = await ref
+          .read(dialogNotifierProvider.notifier)
+          .showConfirmation(
+            title: t.dialogs.confirmation.profile.delete.title,
+            message: t.dialogs.confirmation.profile.delete.msg,
+          );
+      if (!deleteConfirmed) return;
+      await ref.read(profilesNotifierProvider.notifier).deleteProfile(profile);
+    }
+
+    // Prototype `.profile-row`: content stack on the left, tiny action
+    // buttons pinned top-right, usage bar + meta line under the title.
+    return Container(
+      margin: margin,
+      decoration: TechUi.panelDecoration(context, selected: profile.active),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          if (profile.active)
+            Positioned(top: 0, bottom: 0, left: 0, child: Container(width: 3, color: accent)),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: ProfileTileConst.cardBorderRadius,
+              onTap: activate,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  profile.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
+                                  ),
+                                  semanticsLabel: profile.active
+                                      ? t.pages.profiles.activeProfileName(name: profile.name)
+                                      : t.pages.profiles.nonActiveProfileName(name: profile.name),
+                                ),
+                              ),
+                              if (profile.active) ...[
+                                const SizedBox(width: 8),
+                                TechUi.tag(context, t.pages.profiles.tagActive, active: true),
+                              ],
+                              const SizedBox(width: 6),
+                              TechUi.tag(
+                                context,
+                                isRemote ? t.pages.profiles.tagRemote : t.pages.profiles.tagLocal,
+                              ),
+                            ],
+                          ),
+                          if (subInfo != null) ...[
+                            const Gap(9),
+                            RemainingTrafficIndicator(subInfo.ratio),
+                            const Gap(7),
+                            ProfileSubscriptionInfo(subInfo),
+                          ] else ...[
+                            const Gap(6),
+                            Text(
+                              '${t.pages.home.profileUpdated} ${DateFormat('MM-dd HH:mm').format(profile.lastUpdate)}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    // Prototype row actions: 激活 / 更新 / 编辑 / 删除.
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!profile.active) ...[
+                          TechUi.tinyButton(context, label: t.pages.profiles.activate, onPressed: activate),
+                          const SizedBox(width: 8),
+                        ],
+                        if (isRemote) ...[
+                          TechUi.tinyButton(
+                            context,
+                            label: t.common.update,
+                            onPressed: () {
+                              if (ref.read(updateProfileNotifierProvider(profile.id)).isLoading) {
+                                return;
+                              }
+                              ref
+                                  .read(updateProfileNotifierProvider(profile.id).notifier)
+                                  .updateProfile(profile as RemoteProfileEntity);
+                            },
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        TechUi.tinyButton(
+                          context,
+                          label: t.common.edit,
+                          onPressed: () {
+                            context.goNamed('profileDetails', pathParameters: {'id': profile.id});
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        TechUi.tinyButton(
+                          context,
+                          label: t.common.delete,
+                          danger: true,
+                          onPressed: deleteWithConfirm,
+                        ),
+                        const SizedBox(width: 8),
+                        ProfileActionsMenu(profile, (context, toggleVisibility, _) {
+                          return TechUi.iconButton(
+                            context,
+                            icon: Icons.more_horiz_rounded,
+                            tooltip: MaterialLocalizations.of(context).showMenuTooltip,
+                            onPressed: toggleVisibility,
+                          );
+                        }, shareOnly: true),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -244,87 +337,96 @@ class ProfileActionButton extends HookConsumerWidget {
 }
 
 class ProfileActionsMenu extends HookConsumerWidget {
-  const ProfileActionsMenu(this.profile, this.builder, {super.key, this.child});
+  const ProfileActionsMenu(this.profile, this.builder, {super.key, this.child, this.shareOnly = false});
 
   final ProfileEntity profile;
   final AdaptiveMenuBuilder builder;
   final Widget? child;
 
+  /// Row actions cover update/edit/delete already; the overflow menu then
+  /// only exposes the share options.
+  final bool shareOnly;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
 
-    final menuItems = [
-      if (profile case RemoteProfileEntity())
+    final shareItems = [
+      if (profile case RemoteProfileEntity(:final url, :final name)) ...[
         AdaptiveMenuItem(
-          title: t.common.update,
-          leadingIcon: const Icon(Icons.update_rounded),
-          onTap: () {
-            if (ref.read(updateProfileNotifierProvider(profile.id)).isLoading) {
-              return;
+          title: t.pages.profiles.share.urlToClipboard,
+          onTap: () async {
+            final link = LinkParser.generateSubShareLink(url, name);
+            if (link.isNotEmpty) {
+              await Clipboard.setData(ClipboardData(text: link));
+              if (context.mounted) {
+                ref
+                    .read(inAppNotificationControllerProvider)
+                    .showSuccessToast(t.common.msg.export.clipboard.success);
+              }
             }
-            ref.read(updateProfileNotifierProvider(profile.id).notifier).updateProfile(profile as RemoteProfileEntity);
           },
         ),
+        AdaptiveMenuItem(
+          title: t.pages.profiles.share.showUrlQr,
+          onTap: () async {
+            final link = LinkParser.generateSubShareLink(url, name);
+            if (link.isNotEmpty) {
+              await ref.read(dialogNotifierProvider.notifier).showQrCode(link, message: name);
+            }
+          },
+        ),
+      ],
       AdaptiveMenuItem(
-        title: t.common.share,
-        leadingIcon: Icon(AdaptiveIcon(context).share),
-        subItems: [
-          if (profile case RemoteProfileEntity(:final url, :final name)) ...[
-            AdaptiveMenuItem(
-              title: t.pages.profiles.share.urlToClipboard,
-              onTap: () async {
-                final link = LinkParser.generateSubShareLink(url, name);
-                if (link.isNotEmpty) {
-                  await Clipboard.setData(ClipboardData(text: link));
-                  if (context.mounted) {
-                    ref
-                        .read(inAppNotificationControllerProvider)
-                        .showSuccessToast(t.common.msg.export.clipboard.success);
-                  }
-                }
-              },
-            ),
-            AdaptiveMenuItem(
-              title: t.pages.profiles.share.showUrlQr,
-              onTap: () async {
-                final link = LinkParser.generateSubShareLink(url, name);
-                if (link.isNotEmpty) {
-                  await ref.read(dialogNotifierProvider.notifier).showQrCode(link, message: name);
-                }
-              },
-            ),
-          ],
-          AdaptiveMenuItem(
-            title: t.pages.profiles.share.jsonToClipboard,
-            onTap: () async => await ref.read(profilesNotifierProvider.notifier).exportConfigToClipboard(profile),
-          ),
-        ],
-      ),
-      AdaptiveMenuItem(
-        leadingIcon: const Icon(Icons.edit_rounded),
-        title: t.common.edit,
-        onTap: () {
-          if (Breakpoint(context).isMobile()) context.pop();
-          context.goNamed('profileDetails', pathParameters: {'id': profile.id});
-        },
-      ),
-      // if (!profile.active)
-      AdaptiveMenuItem(
-        leadingIcon: const Icon(Icons.delete_outline_rounded),
-        title: t.common.delete,
-        onTap: () async => await ref
-            .read(dialogNotifierProvider.notifier)
-            .showConfirmation(
-              title: t.dialogs.confirmation.profile.delete.title,
-              message: t.dialogs.confirmation.profile.delete.msg,
-            )
-            .then((deleteConfirmed) async {
-              if (!deleteConfirmed) return;
-              await ref.read(profilesNotifierProvider.notifier).deleteProfile(profile);
-            }),
+        title: t.pages.profiles.share.jsonToClipboard,
+        onTap: () async => await ref.read(profilesNotifierProvider.notifier).exportConfigToClipboard(profile),
       ),
     ];
+
+    final menuItems = shareOnly
+        ? shareItems
+        : [
+            if (profile case RemoteProfileEntity())
+              AdaptiveMenuItem(
+                title: t.common.update,
+                leadingIcon: const Icon(Icons.update_rounded),
+                onTap: () {
+                  if (ref.read(updateProfileNotifierProvider(profile.id)).isLoading) {
+                    return;
+                  }
+                  ref
+                      .read(updateProfileNotifierProvider(profile.id).notifier)
+                      .updateProfile(profile as RemoteProfileEntity);
+                },
+              ),
+            AdaptiveMenuItem(
+              title: t.common.share,
+              leadingIcon: Icon(AdaptiveIcon(context).share),
+              subItems: shareItems,
+            ),
+            AdaptiveMenuItem(
+              leadingIcon: const Icon(Icons.edit_rounded),
+              title: t.common.edit,
+              onTap: () {
+                if (Breakpoint(context).isMobile()) context.pop();
+                context.goNamed('profileDetails', pathParameters: {'id': profile.id});
+              },
+            ),
+            AdaptiveMenuItem(
+              leadingIcon: const Icon(Icons.delete_outline_rounded),
+              title: t.common.delete,
+              onTap: () async => await ref
+                  .read(dialogNotifierProvider.notifier)
+                  .showConfirmation(
+                    title: t.dialogs.confirmation.profile.delete.title,
+                    message: t.dialogs.confirmation.profile.delete.msg,
+                  )
+                  .then((deleteConfirmed) async {
+                    if (!deleteConfirmed) return;
+                    await ref.read(profilesNotifierProvider.notifier).deleteProfile(profile);
+                  }),
+            ),
+          ];
 
     return AdaptiveMenu(builder: builder, items: menuItems, child: child);
   }
