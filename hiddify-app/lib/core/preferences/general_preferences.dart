@@ -81,6 +81,9 @@ abstract class Preferences {
 
   static final silentStart = PreferencesNotifier.create<bool, bool>("silent_start", false);
 
+  /// Shows live up/down speeds beside the macOS menu-bar icon.
+  static final showTraySpeed = PreferencesNotifier.create<bool, bool>("show_tray_speed", true);
+
   static final disableMemoryLimit = PreferencesNotifier.create<bool, bool>(
     "disable_memory_limit",
     // disable memory limit on desktop by default

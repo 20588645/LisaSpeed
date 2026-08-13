@@ -303,7 +303,9 @@
         "sectionAppearance": "Language & appearance",
         "sectionStartup": "Startup & closing",
         "sectionMisc": "More",
-        "appearanceActive": "Active now"
+        "appearanceActive": "Active now",
+        "trayLiveSpeed": "Live speed in menu bar",
+        "trayLiveSpeedMsg": "Show up/down rates beside the menu bar icon"
       },
       "routing": {
         "title": "Routing",

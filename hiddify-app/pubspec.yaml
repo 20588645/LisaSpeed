@@ -121,6 +121,12 @@ dependencies:
   win32: ^5.12.0
   humanizer: ^3.0.1
 
+dependency_overrides:
+  # Vendored fork: adds a two-line attributed tray title (setTitleLines)
+  # used for the macOS menu-bar live speed readout.
+  tray_manager:
+    path: third_party/tray_manager
+
 dev_dependencies:
   # flutter_test:
   #   sdk: flutter

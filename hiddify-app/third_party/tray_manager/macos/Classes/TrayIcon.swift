@@ -1,0 +1,106 @@
+//
+//  TrayIcon.swift
+//  tray_manager
+//
+//  Created by Lijy91 on 2022/5/15.
+//
+
+public class TrayIcon: NSView {
+    public var onTrayIconMouseDown:(() -> Void)?
+    public var onTrayIconMouseUp:(() -> Void)?
+    public var onTrayIconRightMouseDown:(() -> Void)?
+    public var onTrayIconRightMouseUp:(() -> Void)?
+    
+    var statusItem: NSStatusItem?
+    
+    public init() {
+        super.init(frame: NSRect.zero)
+        statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength)
+        statusItem?.button?.addSubview(self)
+    }
+    
+    override init(frame frameRect: NSRect) {
+        super.init(frame:frameRect);
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    public func setImage(_ image: NSImage, _ imagePosition: String) {
+        if let button = statusItem?.button {
+            button.image = image
+            setImagePosition(imagePosition)
+        }
+
+
+        self.frame = statusItem!.button!.frame
+    }
+    
+    public func setImagePosition(_ imagePosition: String) {
+        if let button = statusItem?.button {
+            button.imagePosition = imagePosition == "right" ? NSControl.ImagePosition.imageRight : NSControl.ImagePosition.imageLeft
+        }
+        self.frame = statusItem!.button!.frame
+    }
+    
+    public func removeImage() {
+        statusItem?.button?.image = nil
+        self.frame = statusItem!.button!.frame
+    }
+    
+    public func setTitle(_ title: String) {
+        if let button = statusItem?.button {
+            button.title  = title
+        }
+        self.frame = statusItem!.button!.frame
+    }
+    
+    /// Renders a compact two-line title (e.g. up/down live speeds) next to
+    /// the icon, the way macOS network monitors do. Empty strings clear it.
+    public func setTitleLines(_ top: String, _ bottom: String) {
+        guard let button = statusItem?.button else { return }
+        if top.isEmpty && bottom.isEmpty {
+            button.attributedTitle = NSAttributedString(string: "")
+            self.frame = button.frame
+            return
+        }
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .right
+        paragraph.lineBreakMode = .byClipping
+        paragraph.minimumLineHeight = 10
+        paragraph.maximumLineHeight = 10
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.monospacedDigitSystemFont(ofSize: 9, weight: .medium),
+            .paragraphStyle: paragraph,
+            .baselineOffset: -1,
+        ]
+        button.attributedTitle = NSAttributedString(
+            string: "\(top)\n\(bottom)", attributes: attributes)
+        self.frame = button.frame
+    }
+    
+    public func setToolTip(_ toolTip: String) {
+        if let button = statusItem?.button {
+            button.toolTip  = toolTip
+        }
+    }
+    
+    public override func mouseDown(with event: NSEvent) {
+        statusItem?.button?.highlight(true)
+        self.onTrayIconMouseDown!()
+    }
+    
+    public override func mouseUp(with event: NSEvent) {
+        statusItem?.button?.highlight(false)
+        self.onTrayIconMouseUp!()
+    }
+    
+    public override func rightMouseDown(with event: NSEvent) {
+        self.onTrayIconRightMouseDown!()
+    }
+    
+    public override func rightMouseUp(with event: NSEvent) {
+        self.onTrayIconRightMouseUp!()
+    }
+}

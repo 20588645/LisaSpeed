@@ -19,6 +19,7 @@ import 'package:hiddify/features/per_app_proxy/overview/per_app_proxy_service_no
 import 'package:hiddify/features/profile/notifier/profiles_update_notifier.dart';
 import 'package:hiddify/features/shortcut/shortcut_wrapper.dart';
 import 'package:hiddify/features/system_tray/notifier/system_tray_notifier.dart';
+import 'package:hiddify/features/system_tray/notifier/tray_speed_notifier.dart';
 import 'package:hiddify/features/window/widget/window_wrapper.dart';
 import 'package:hiddify/hiddifycore/hiddify_core_service_provider.dart';
 import 'package:hiddify/utils/utils.dart';
@@ -65,6 +66,7 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
     ref.listen(foregroundProfilesUpdateNotifierProvider, (_, _) {});
     if (PlatformUtils.isAndroid) ref.listen(perAppProxyServiceProvider, (_, _) {});
     if (PlatformUtils.isDesktop) ref.listen(systemTrayNotifierProvider, (_, _) {});
+    if (PlatformUtils.isMacOS) ref.listen(traySpeedNotifierProvider, (_, _) {});
 
     // updating ActiveBreakpointNotifier value
     useEffect(() {

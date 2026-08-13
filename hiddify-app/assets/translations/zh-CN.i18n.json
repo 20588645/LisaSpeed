@@ -303,7 +303,9 @@
         "sectionAppearance": "语言与外观",
         "sectionStartup": "启动与关闭",
         "sectionMisc": "其他",
-        "appearanceActive": "当前生效"
+        "appearanceActive": "当前生效",
+        "trayLiveSpeed": "状态栏显示实时网速",
+        "trayLiveSpeedMsg": "在菜单栏图标旁显示上行 / 下行速率"
       },
       "routing": {
         "title": "分流",

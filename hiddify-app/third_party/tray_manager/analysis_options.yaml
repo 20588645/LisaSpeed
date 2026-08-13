@@ -1,0 +1,7 @@
+# Vendored into LisaSpeed: upstream includes package:mostly_reasonable_lints,
+# which is not fetched for path dependencies. Keep the analyzer quiet here.
+analyzer:
+  errors:
+    unused_import: ignore
+    unnecessary_import: ignore
+    deprecated_member_use: ignore

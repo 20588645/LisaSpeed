@@ -62,6 +62,14 @@ class GeneralPage extends HookConsumerWidget {
                     value: ref.watch(Preferences.silentStart),
                     onChanged: ref.read(Preferences.silentStart.notifier).update,
                   ),
+                  if (PlatformUtils.isMacOS)
+                    TechUi.formSwitchRow(
+                      context,
+                      title: t.pages.settings.general.trayLiveSpeed,
+                      subtitle: t.pages.settings.general.trayLiveSpeedMsg,
+                      value: ref.watch(Preferences.showTraySpeed),
+                      onChanged: ref.read(Preferences.showTraySpeed.notifier).update,
+                    ),
                 ],
                 if (PlatformUtils.isAndroid) ...[
                   TechUi.formSwitchRow(

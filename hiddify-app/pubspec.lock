@@ -1831,11 +1831,10 @@ packages:
   tray_manager:
     dependency: "direct main"
     description:
-      name: tray_manager
-      sha256: ad18c4cd73003097d182884bacb0578ad2865f3ab842a0ad00f6d043ed49eaf0
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.0"
+      path: "third_party/tray_manager"
+      relative: true
+    source: path
+    version: "0.5.0+lisaspeed.1"
   type_plus:
     dependency: transitive
     description:
