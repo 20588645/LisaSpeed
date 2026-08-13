@@ -303,7 +303,7 @@
         "clashApiPort": "Clash API 端口",
         "useXrayCoreWhenPossible": "尽可能使用 xray-core",
         "useXrayCoreWhenPossibleMsg": "解析订阅链接时使用 xray-core。您需要重新导入订阅链接才能启用此选项",
-        "desc": "语言、主题、开机自启",
+        "desc": "语言、主题、开机自启、主机面板",
         "sectionAppearance": "语言与外观",
         "sectionStartup": "启动与关闭",
         "sectionMisc": "其他",
@@ -526,7 +526,7 @@
         "copyLink": "复制链接",
         "qrCode": "二维码",
         "lanIPError": "获取本地 IP 地址失败",
-        "desc": "模式偏好、端口、VPN 共享",
+        "desc": "连接模式、端口、局域网共享",
         "sectionMode": "默认模式",
         "sectionPorts": "端口",
         "sectionSharing": "局域网共享"
@@ -632,7 +632,9 @@
       },
       "advanced": {
         "title": "高级",
-        "subtitle": "DNS、TLS、链路增强"
+        "subtitle": "深度选项：内核、DNS、TLS、调试",
+        "sectionCore": "内核与网络",
+        "sectionDebug": "调试与维护"
       },
       "subtitle": "常用项靠前 · 高级项收纳"
     }

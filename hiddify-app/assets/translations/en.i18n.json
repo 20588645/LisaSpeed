@@ -303,7 +303,7 @@
         "clashApiPort": "Clash API port",
         "useXrayCoreWhenPossible": "Use xray-core when possible",
         "useXrayCoreWhenPossibleMsg": "Use xray-core during parsing sub links. You need to reimport the sub link to enable this option.",
-        "desc": "Language, theme, auto start",
+        "desc": "Language, theme, auto start, host panel",
         "sectionAppearance": "Language & appearance",
         "sectionStartup": "Startup & closing",
         "sectionMisc": "More",
@@ -526,7 +526,7 @@
         "copyLink": "Copy link",
         "qrCode": "QR Code",
         "lanIPError": "Failed to get local IP address",
-        "desc": "Mode, ports, VPN sharing",
+        "desc": "Mode, ports, LAN sharing",
         "sectionMode": "Default mode",
         "sectionPorts": "Ports",
         "sectionSharing": "LAN sharing"
@@ -632,7 +632,9 @@
       },
       "advanced": {
         "title": "Advanced",
-        "subtitle": "DNS, TLS, and chain extras"
+        "subtitle": "Deep options: core, DNS, TLS, debug",
+        "sectionCore": "Core & network",
+        "sectionDebug": "Debug & maintenance"
       },
       "subtitle": "Common first · advanced tucked away"
     }

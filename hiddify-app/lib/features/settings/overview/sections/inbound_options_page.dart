@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/settings/widget/lan_sharing_tile.dart';
@@ -33,6 +34,8 @@ class InboundOptionsPage extends HookConsumerWidget with AppLogger {
             child: TechUi.preferencePanel(
               context,
               children: [
+                // Daily-driver options only; deep networking knobs (strict
+                // route, TUN implementation, extra ports…) live in 高级.
                 TechUi.formSectionTitle(context, t.pages.settings.inbound.sectionMode, first: true),
                 ChoicePreferenceWidget(
                   selected: ref.watch(ConfigOptions.serviceMode),
@@ -43,16 +46,9 @@ class InboundOptionsPage extends HookConsumerWidget with AppLogger {
                 ),
                 TechUi.formSwitchRow(
                   context,
-                  title: t.pages.settings.inbound.strictRoute,
-                  value: ref.watch(ConfigOptions.strictRoute),
-                  onChanged: ref.read(ConfigOptions.strictRoute.notifier).update,
-                ),
-                ChoicePreferenceWidget(
-                  selected: ref.watch(ConfigOptions.tunImplementation),
-                  preferences: ref.watch(ConfigOptions.tunImplementation.notifier),
-                  choices: TunImplementation.values,
-                  title: t.pages.settings.inbound.tunImplementation,
-                  presentChoice: (value) => value.name,
+                  title: t.pages.settings.general.autoIpCheck,
+                  value: ref.watch(Preferences.autoCheckIp),
+                  onChanged: ref.read(Preferences.autoCheckIp.notifier).update,
                 ),
                 TechUi.formSectionTitle(context, t.pages.settings.inbound.sectionPorts),
                 ValuePreferenceWidget(
@@ -63,35 +59,6 @@ class InboundOptionsPage extends HookConsumerWidget with AppLogger {
                   digitsOnly: true,
                   validateInput: isPort,
                   trailing: SwitchPreferenceWidget(preference: ConfigOptions.enableMixedPort),
-                ),
-                if (PlatformUtils.isLinux)
-                  ValuePreferenceWidget(
-                    value: ref.watch(ConfigOptions.tproxyPort),
-                    preferences: ref.watch(ConfigOptions.tproxyPort.notifier),
-                    title: t.pages.settings.inbound.tproxyPort,
-                    inputToValue: int.tryParse,
-                    digitsOnly: true,
-                    validateInput: isPort,
-                    trailing: SwitchPreferenceWidget(preference: ConfigOptions.enableTproxyPort),
-                  ),
-                if (PlatformUtils.isLinux || PlatformUtils.isMacOS)
-                  ValuePreferenceWidget(
-                    value: ref.watch(ConfigOptions.redirectPort),
-                    preferences: ref.watch(ConfigOptions.redirectPort.notifier),
-                    title: t.pages.settings.inbound.redirectPort,
-                    inputToValue: int.tryParse,
-                    digitsOnly: true,
-                    validateInput: isPort,
-                    trailing: SwitchPreferenceWidget(preference: ConfigOptions.enableRedirectPort),
-                  ),
-                ValuePreferenceWidget(
-                  value: ref.watch(ConfigOptions.directPort),
-                  preferences: ref.watch(ConfigOptions.directPort.notifier),
-                  title: t.pages.settings.inbound.directPort,
-                  inputToValue: int.tryParse,
-                  digitsOnly: true,
-                  validateInput: isPort,
-                  trailing: SwitchPreferenceWidget(preference: ConfigOptions.enableDirectPort),
                 ),
                 TechUi.formSectionTitle(context, t.pages.settings.inbound.sectionSharing),
                 const LanSharingPreferenceWidget(),
