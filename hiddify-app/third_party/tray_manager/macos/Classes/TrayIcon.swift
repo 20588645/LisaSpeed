@@ -70,10 +70,13 @@ public class TrayIcon: NSView {
         paragraph.lineBreakMode = .byClipping
         paragraph.minimumLineHeight = 10
         paragraph.maximumLineHeight = 10
+        // AppKit lays a multi-line button title out from the first line's
+        // baseline, leaving the block a few points above the bar's center;
+        // the negative offset re-centers it (see CodexBar#2345).
         let attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.monospacedDigitSystemFont(ofSize: 9, weight: .medium),
             .paragraphStyle: paragraph,
-            .baselineOffset: -1,
+            .baselineOffset: -3.5,
         ]
         button.attributedTitle = NSAttributedString(
             string: "\(top)\n\(bottom)", attributes: attributes)
