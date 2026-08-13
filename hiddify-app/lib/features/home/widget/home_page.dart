@@ -38,67 +38,82 @@ class HomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
 
+    // Header and dashboard share one centered 860px cap: the add button
+    // pins to the top-right of the content block, flush with the card
+    // column, and the dashboard floats centered in the leftover space
+    // (scrolls from the top when the window is too short).
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        // Prototype `.page`: left-anchored column capped at 920px.
-        child: Align(
-          alignment: AlignmentDirectional.topStart,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 920),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(28, 18, 28, 40),
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                t.common.appTitle,
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.4,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 18, 28, 0),
+          child: Column(
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 860),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  t.common.appTitle,
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.4,
+                                  ),
                                 ),
-                              ),
-                              const Gap(8),
-                              const AppVersionLabel(),
-                            ],
-                          ),
-                          const Gap(6),
-                          Text(
-                            t.pages.home.subtitle,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                const Gap(8),
+                                const AppVersionLabel(),
+                              ],
                             ),
-                          ),
-                        ],
+                            const Gap(6),
+                            Text(
+                              t.pages.home.subtitle,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      OutlinedButton(
+                        key: const ValueKey('profile_add_button'),
+                        onPressed: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Theme.of(context).colorScheme.onSurface,
+                          side: BorderSide(color: ConnectionButtonTheme.lineOf(context)),
+                          backgroundColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+                        ),
+                        child: Text('+ ${t.pages.profiles.add}'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(top: 20, bottom: 28),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 860),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) => _HomeDashboard(wide: constraints.maxWidth >= 680),
+                        ),
                       ),
                     ),
-                    OutlinedButton(
-                      key: const ValueKey('profile_add_button'),
-                      onPressed: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onSurface,
-                        side: BorderSide(color: ConnectionButtonTheme.lineOf(context)),
-                        backgroundColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
-                      ),
-                      child: Text('+ ${t.pages.profiles.add}'),
-                    ),
-                  ],
+                  ),
                 ),
-                const Gap(20),
-                LayoutBuilder(
-                  builder: (context, constraints) => _HomeDashboard(wide: constraints.maxWidth >= 680),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
