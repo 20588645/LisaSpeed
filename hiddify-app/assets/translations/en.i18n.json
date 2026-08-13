@@ -191,7 +191,17 @@
       "tagActive": "Active",
       "tagRemote": "Remote",
       "tagLocal": "Local",
-      "activate": "Activate"
+      "activate": "Activate",
+      "addModal": {
+        "clipboardTitle": "From clipboard",
+        "clipboardDesc": "Read a subscription link or shared text",
+        "fileTitle": "Import from file",
+        "fileDesc": "Common subscription and config files",
+        "qrTitle": "Scan QR code",
+        "qrDesc": "Scan a shared subscription QR code",
+        "manualTitle": "Add manually",
+        "confirmAdd": "Confirm add"
+      }
     },
     "profileDetails": {
       "title": "Subscription details",
@@ -204,7 +214,10 @@
         "disableAutoUpdate": "Disable auto update",
         "autoUpdateInterval": "Auto update interval",
         "loading": "Adding profile..."
-      }
+      },
+      "sectionBasic": "Basics",
+      "sectionUpdate": "Update policy",
+      "sectionContent": "Config content"
     },
     "logs": {
       "title": "Diagnostics",

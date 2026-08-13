@@ -103,6 +103,13 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
                     child: Column(
                       children: [
                         Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                          child: Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: TechUi.formSectionTitle(context, t.pages.profileDetails.sectionBasic, first: true),
+                          ),
+                        ),
+                        Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           child: CustomTextFormField(
                             maxLines: 1,
@@ -138,6 +145,17 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
                           ),
                         const Divider(indent: 16, endIndent: 16),
                         if (data.profile case RemoteProfileEntity(:final options)) ...[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                            child: Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: TechUi.formSectionTitle(
+                                context,
+                                t.pages.profileDetails.sectionUpdate,
+                                first: true,
+                              ),
+                            ),
+                          ),
                           SwitchListTile.adaptive(
                             title: Text(
                               t.pages.profileDetails.form.disableAutoUpdate,
@@ -263,7 +281,11 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
                     ),
                   ),
                   ),
-                  const Gap(12),
+                  const Gap(14),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: TechUi.formSectionTitle(context, t.pages.profileDetails.sectionContent, first: true),
+                  ),
                   Container(
                     decoration: TechUi.panelDecoration(context),
                     clipBehavior: Clip.antiAlias,

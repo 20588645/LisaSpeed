@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/route_rules/notifier/generic_list_notifier.dart';
 import 'package:hiddify/features/route_rules/notifier/rule_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -30,49 +31,69 @@ class GenericListPage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(ruleEnum.present(t)),
-        actions: [
-          IconButton(
-            onPressed: list.isEmpty
-                ? null
-                : () async {
-                    final result = await ref
-                        .read(dialogNotifierProvider.notifier)
-                        .showConfirmation(
-                          title: t.pages.settings.routing.routeRule.genericList.clearList,
-                          message: t.pages.settings.routing.routeRule.genericList.clearListMsg,
-                        );
-                    if (result == true) ref.read(provider.notifier).reset();
-                  },
-            icon: const Icon(Icons.clear_all),
-          ),
-          const Gap(8),
-        ],
-      ),
-      floatingActionButton: list.isNotEmpty
-          ? FloatingActionButton(onPressed: addNewValue, child: const Icon(Icons.add_rounded))
-          : FloatingActionButton.extended(
-              onPressed: addNewValue,
-              label: Text(t.pages.settings.routing.routeRule.genericList.addNew),
-              icon: const Icon(Icons.add_rounded),
+      backgroundColor: Colors.transparent,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SafeArea(
+            bottom: false,
+            child: TechUi.subPageHeader(
+              context,
+              eyebrow: 'Rule',
+              title: ruleEnum.present(t),
+              onBack: () => context.pop(),
+              actions: [
+                TechUi.ghostButton(
+                  context,
+                  label: t.common.clear,
+                  onPressed: list.isEmpty
+                      ? null
+                      : () async {
+                          final result = await ref
+                              .read(dialogNotifierProvider.notifier)
+                              .showConfirmation(
+                                title: t.pages.settings.routing.routeRule.genericList.clearList,
+                                message: t.pages.settings.routing.routeRule.genericList.clearListMsg,
+                              );
+                          if (result == true) ref.read(provider.notifier).reset();
+                        },
+                ),
+                TechUi.primaryButton(
+                  context,
+                  label: t.pages.settings.routing.routeRule.genericList.addNew,
+                  onPressed: addNewValue,
+                ),
+              ],
             ),
-      body: ListView.builder(
-        itemBuilder: (context, index) => GenericListTile(
-          value: list[index],
-          onRemove: () => ref.read(provider.notifier).remove(index),
-          onUpdate: () async {
-            final result = await ref
-                .read(dialogNotifierProvider.notifier)
-                .showSettingText(
-                  lable: t.pages.settings.routing.routeRule.genericList.update,
-                  value: '${list[index]}',
-                  validator: ruleEnum.validator(t),
-                );
-            if (result is String) ref.read(provider.notifier).update(index, result);
-          },
-        ),
-        itemCount: list.length,
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+              itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Container(
+                  decoration: TechUi.panelDecoration(context),
+                  clipBehavior: Clip.antiAlias,
+                  child: GenericListTile(
+                    value: list[index],
+                    onRemove: () => ref.read(provider.notifier).remove(index),
+                    onUpdate: () async {
+                      final result = await ref
+                          .read(dialogNotifierProvider.notifier)
+                          .showSettingText(
+                            lable: t.pages.settings.routing.routeRule.genericList.update,
+                            value: '${list[index]}',
+                            validator: ruleEnum.validator(t),
+                          );
+                      if (result is String) ref.read(provider.notifier).update(index, result);
+                    },
+                  ),
+                ),
+              ),
+              itemCount: list.length,
+            ),
+          ),
+        ],
       ),
     );
   }

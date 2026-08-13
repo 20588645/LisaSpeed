@@ -191,7 +191,17 @@
       "tagActive": "使用中",
       "tagRemote": "订阅",
       "tagLocal": "本地",
-      "activate": "激活"
+      "activate": "激活",
+      "addModal": {
+        "clipboardTitle": "从剪贴板添加",
+        "clipboardDesc": "读取订阅链接或分享内容",
+        "fileTitle": "从文件导入",
+        "fileDesc": "支持常见订阅与配置文件",
+        "qrTitle": "扫码添加",
+        "qrDesc": "扫描订阅分享二维码",
+        "manualTitle": "手动添加",
+        "confirmAdd": "确认添加"
+      }
     },
     "profileDetails": {
       "title": "订阅详情",
@@ -204,7 +214,10 @@
         "disableAutoUpdate": "禁用自动更新",
         "autoUpdateInterval": "自动更新间隔",
         "loading": "正在添加配置文件..."
-      }
+      },
+      "sectionBasic": "基本信息",
+      "sectionUpdate": "更新策略",
+      "sectionContent": "配置内容"
     },
     "logs": {
       "title": "诊断",
