@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><mask id="ko"><rect width="128" height="128" fill="black"/><circle cx="64" cy="70.2" r="39" fill="white"/><g stroke="black" stroke-width="10.1" stroke-linecap="round" fill="none"><path d="M83.0 47.5 A29.6 29.6 0 1 1 45.0 47.5"/><path d="M64 26.6 L64 65.6"/></g></mask></defs><rect width="128" height="128" fill="#2EE6C5" mask="url(#ko)"/>
+</svg>

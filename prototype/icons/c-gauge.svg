@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- LisaSpeed app icon  Concept C: velocity gauge on deep navy -->
+  <defs>
+    <clipPath id="sq"><rect x="0" y="0" width="1024" height="1024" rx="232"/></clipPath>
+    <radialGradient id="bg" cx="50%" cy="36%" r="80%">
+      <stop offset="0%" stop-color="#152741"/>
+      <stop offset="55%" stop-color="#0B1424"/>
+      <stop offset="100%" stop-color="#060A12"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2EE6C5" stop-opacity="0.20"/>
+      <stop offset="60%" stop-color="#2EE6C5" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#2EE6C5" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vig" cx="50%" cy="46%" r="72%">
+      <stop offset="62%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.32"/>
+    </radialGradient>
+    <pattern id="grid" width="128" height="128" patternUnits="userSpaceOnUse">
+      <path d="M128 0H0V128" fill="none" stroke="#7DFFD2" stroke-opacity="0.05" stroke-width="2"/>
+    </pattern>
+    <linearGradient id="prog" x1="728.5" y1="415" x2="335.2" y2="716.8" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A9FFE7"/>
+      <stop offset="55%" stop-color="#2EE6C5"/>
+      <stop offset="100%" stop-color="#2EE6C5" stop-opacity="0.10"/>
+    </linearGradient>
+    <linearGradient id="needle" x1="512" y1="540" x2="694" y2="435" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7DFFD2"/>
+      <stop offset="100%" stop-color="#F4FFFC"/>
+    </linearGradient>
+    <linearGradient id="hub" x1="512" y1="488" x2="512" y2="592" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1B2E4A"/>
+      <stop offset="100%" stop-color="#0B1626"/>
+    </linearGradient>
+    <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+
+  <g clip-path="url(#sq)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <rect width="1024" height="1024" fill="url(#grid)"/>
+    <circle cx="560" cy="470" r="360" fill="url(#glow)"/>
+
+    <!-- gauge track (270, opening at bottom) -->
+    <path d="M335.2 716.8 A250 250 0 1 1 688.8 716.8" stroke="#2EE6C5" stroke-opacity="0.15" stroke-width="44" stroke-linecap="round" fill="none"/>
+    <!-- progress arc up to NE -->
+    <path d="M335.2 716.8 A250 250 0 1 1 728.5 415" stroke="url(#prog)" stroke-width="44" stroke-linecap="round" fill="none"/>
+    <circle cx="728.5" cy="415" r="26" fill="#C6FFEF" filter="url(#soft)"/>
+    <circle cx="728.5" cy="415" r="16" fill="#EFFFFB"/>
+
+    <!-- needle -->
+    <g filter="url(#soft)" opacity="0.5">
+      <path d="M512 540 L694 435" stroke="#2EE6C5" stroke-width="30" stroke-linecap="round"/>
+    </g>
+    <path d="M512 540 L694 435" stroke="url(#needle)" stroke-width="26" stroke-linecap="round"/>
+    <circle cx="512" cy="540" r="52" fill="url(#hub)"/>
+    <circle cx="512" cy="540" r="50.5" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="3" fill="none"/>
+    <circle cx="512" cy="540" r="14" fill="#7DFFD2"/>
+
+    <rect width="1024" height="1024" fill="url(#vig)"/>
+    <rect x="1.5" y="1.5" width="1021" height="1021" rx="230.5" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="3" fill="none"/>
+  </g>
+</svg>

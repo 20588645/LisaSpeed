@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="64" height="64" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- LisaSpeed app icon - glass power orb on deep navy (full-bleed artwork) -->
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- LisaSpeed app icon - Concept A: glass power orb on deep navy -->
   <defs>
+    <clipPath id="sq"><rect x="0" y="0" width="1024" height="1024" rx="232"/></clipPath>
     <radialGradient id="bg" cx="50%" cy="36%" r="80%">
       <stop offset="0%" stop-color="#152741"/>
       <stop offset="55%" stop-color="#0B1424"/>
@@ -45,29 +46,37 @@
     </filter>
   </defs>
 
-  <rect width="1024" height="1024" fill="url(#bg)"/>
-  <rect width="1024" height="1024" fill="url(#grid)"/>
-  <circle cx="512" cy="480" r="360" fill="url(#glow)"/>
+  <g clip-path="url(#sq)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <rect width="1024" height="1024" fill="url(#grid)"/>
+    <circle cx="512" cy="480" r="360" fill="url(#glow)"/>
 
-  <ellipse cx="512" cy="758" rx="212" ry="38" fill="#000000" opacity="0.35" filter="url(#soft)"/>
+    <!-- grounding shadow -->
+    <ellipse cx="512" cy="758" rx="212" ry="38" fill="#000000" opacity="0.35" filter="url(#soft)"/>
 
-  <circle cx="512" cy="512" r="268" stroke="#2EE6C5" stroke-opacity="0.14" stroke-width="46" fill="none"/>
-  <path d="M646 744.1 A268 268 0 1 1 731.5 358.3" stroke="url(#comet)" stroke-width="46" stroke-linecap="round" fill="none"/>
-  <circle cx="731.5" cy="358.3" r="27" fill="#C6FFEF" filter="url(#soft2)"/>
-  <circle cx="731.5" cy="358.3" r="17" fill="#EFFFFB"/>
+    <!-- comet ring: dim track + bright arc -->
+    <circle cx="512" cy="512" r="268" stroke="#2EE6C5" stroke-opacity="0.14" stroke-width="46" fill="none"/>
+    <path d="M646 744.1 A268 268 0 1 1 731.5 358.3" stroke="url(#comet)" stroke-width="46" stroke-linecap="round" fill="none"/>
+    <circle cx="731.5" cy="358.3" r="27" fill="#C6FFEF" filter="url(#soft2)"/>
+    <circle cx="731.5" cy="358.3" r="17" fill="#EFFFFB"/>
 
-  <circle cx="512" cy="512" r="206" fill="url(#disc)"/>
-  <circle cx="512" cy="512" r="206" fill="url(#discHi)"/>
-  <circle cx="512" cy="512" r="204.5" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="3" fill="none"/>
+    <!-- glass disc -->
+    <circle cx="512" cy="512" r="206" fill="url(#disc)"/>
+    <circle cx="512" cy="512" r="206" fill="url(#discHi)"/>
+    <circle cx="512" cy="512" r="204.5" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="3" fill="none"/>
 
-  <g filter="url(#soft)" opacity="0.55" stroke="#2EE6C5" stroke-width="46" stroke-linecap="round" fill="none">
-    <path d="M586.9 428.8 A112 112 0 1 1 437.1 428.8"/>
-    <path d="M512 348 L512 506"/>
+    <!-- power glyph glow -->
+    <g filter="url(#soft)" opacity="0.55" stroke="#2EE6C5" stroke-width="46" stroke-linecap="round" fill="none">
+      <path d="M586.9 428.8 A112 112 0 1 1 437.1 428.8"/>
+      <path d="M512 348 L512 506"/>
+    </g>
+    <!-- power glyph -->
+    <g stroke="url(#glyph)" stroke-width="42" stroke-linecap="round" fill="none">
+      <path d="M586.9 428.8 A112 112 0 1 1 437.1 428.8"/>
+      <path d="M512 348 L512 506"/>
+    </g>
+
+    <rect width="1024" height="1024" fill="url(#vig)"/>
+    <rect x="1.5" y="1.5" width="1021" height="1021" rx="230.5" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="3" fill="none"/>
   </g>
-  <g stroke="url(#glyph)" stroke-width="42" stroke-linecap="round" fill="none">
-    <path d="M586.9 428.8 A112 112 0 1 1 437.1 428.8"/>
-    <path d="M512 348 L512 506"/>
-  </g>
-
-  <rect width="1024" height="1024" fill="url(#vig)"/>
 </svg>

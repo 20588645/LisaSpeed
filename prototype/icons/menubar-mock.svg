@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="760" height="120" viewBox="0 0 760 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="760" height="120" fill="#3A4A63"/>
+  <rect x="10" y="8" width="740" height="44" rx="10" fill="#F5F5F7"/><text x="30" y="36" font-family="PingFang SC, sans-serif" font-size="13" fill="#1D1D1F" opacity="0.6">浅色菜单栏</text><g transform="translate(150 19) scale(0.171875)" stroke="#1D1D1F" stroke-width="13" stroke-linecap="round" fill="none" ><path d="M88.4 42.9 A38 38 0 1 1 39.6 42.9"/><path d="M64 20 L64 66"/></g><text x="182" y="36" font-family="PingFang SC, sans-serif" font-size="12" fill="#1D1D1F" opacity="0.75">未连接</text><g transform="translate(300 19) scale(0.171875)" stroke="#1D1D1F" stroke-width="13" stroke-linecap="round" fill="none" ><path d="M88.4 42.9 A38 38 0 1 1 39.6 42.9" stroke-dasharray="24 13"/><path d="M64 20 L64 66"/></g><text x="332" y="36" font-family="PingFang SC, sans-serif" font-size="12" fill="#1D1D1F" opacity="0.75">连接中</text><mask id="ko82">
+      <rect x="-20" y="-20" width="168" height="168" fill="white" transform="translate(450 19) scale(0.171875)"/>
+      <g transform="translate(450 19) scale(0.171875)">
+        <circle cx="64" cy="72" r="50" fill="black"/>
+      </g>
+    </mask>
+    <g transform="translate(450 19) scale(0.171875)">
+      <circle cx="64" cy="72" r="50" fill="#1D1D1F"/>
+      <g stroke="#F5F5F7" stroke-width="13" stroke-linecap="round" fill="none">
+        <path d="M88.4 42.9 A38 38 0 1 1 39.6 42.9"/><path d="M64 16 L64 66"/>
+      </g>
+    </g><text x="482" y="36" font-family="PingFang SC, sans-serif" font-size="12" fill="#1D1D1F" opacity="0.75">已连接</text><text x="710" y="36" text-anchor="end" font-family="PingFang SC, sans-serif" font-size="13" fill="#1D1D1F" opacity="0.8">10:24</text>
+  <rect x="10" y="66" width="740" height="44" rx="10" fill="#1D1D1F"/><text x="30" y="94" font-family="PingFang SC, sans-serif" font-size="13" fill="#F5F5F7" opacity="0.6">深色菜单栏</text><g transform="translate(150 77) scale(0.171875)" stroke="#F5F5F7" stroke-width="13" stroke-linecap="round" fill="none" ><path d="M88.4 42.9 A38 38 0 1 1 39.6 42.9"/><path d="M64 20 L64 66"/></g><text x="182" y="94" font-family="PingFang SC, sans-serif" font-size="12" fill="#F5F5F7" opacity="0.75">未连接</text><g transform="translate(300 77) scale(0.171875)" stroke="#F5F5F7" stroke-width="13" stroke-linecap="round" fill="none" ><path d="M88.4 42.9 A38 38 0 1 1 39.6 42.9" stroke-dasharray="24 13"/><path d="M64 20 L64 66"/></g><text x="332" y="94" font-family="PingFang SC, sans-serif" font-size="12" fill="#F5F5F7" opacity="0.75">连接中</text><mask id="ko662">
+      <rect x="-20" y="-20" width="168" height="168" fill="white" transform="translate(450 77) scale(0.171875)"/>
+      <g transform="translate(450 77) scale(0.171875)">
+        <circle cx="64" cy="72" r="50" fill="black"/>
+      </g>
+    </mask>
+    <g transform="translate(450 77) scale(0.171875)">
+      <circle cx="64" cy="72" r="50" fill="#F5F5F7"/>
+      <g stroke="#1D1D1F" stroke-width="13" stroke-linecap="round" fill="none">
+        <path d="M88.4 42.9 A38 38 0 1 1 39.6 42.9"/><path d="M64 16 L64 66"/>
+      </g>
+    </g><text x="482" y="94" font-family="PingFang SC, sans-serif" font-size="12" fill="#F5F5F7" opacity="0.75">已连接</text><text x="710" y="94" text-anchor="end" font-family="PingFang SC, sans-serif" font-size="13" fill="#F5F5F7" opacity="0.8">10:24</text>
+</svg>

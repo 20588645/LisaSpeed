@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>LisaSpeed 图标方案预览</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", sans-serif;
+    background: linear-gradient(160deg, #1b2536 0%, #0d1117 100%);
+    color: #e8eef5;
+    padding: 34px 40px;
+  }
+  h1 { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+  .sub { color: #8aa0b8; font-size: 13px; margin-bottom: 26px; }
+  .row { display: flex; gap: 28px; }
+  .card {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 18px;
+    padding: 22px 20px 18px;
+    text-align: center;
+  }
+  .card h2 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .card .d { font-size: 12px; color: #8aa0b8; margin-bottom: 16px; }
+  .big { width: 264px; height: 264px; filter: drop-shadow(0 18px 30px rgba(0,0,0,0.45)); }
+  .sizes { display: flex; align-items: flex-end; justify-content: center; gap: 18px; margin-top: 16px; }
+  .sizes img { filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+  .sizes span { display: block; font-size: 10px; color: #8aa0b8; margin-top: 6px; }
+  .dock {
+    margin-top: 18px; padding: 10px 16px 8px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    display: inline-flex; gap: 14px; align-items: center;
+    backdrop-filter: blur(8px);
+  }
+  .dock img { width: 56px; height: 56px; }
+  .dock .ghost { width: 56px; height: 56px; border-radius: 13px; background: rgba(255,255,255,0.25); }
+  h3 { font-size: 15px; margin: 34px 0 12px; }
+  .bars { display: flex; flex-direction: column; gap: 14px; max-width: 760px; }
+  .menubar {
+    display: flex; align-items: center; gap: 22px;
+    padding: 5px 18px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    height: 36px;
+  }
+  .menubar.light { background: rgba(246,246,248,0.92); color: #1d1d1f; }
+  .menubar.dark { background: rgba(28,28,30,0.92); color: #f5f5f7; }
+  .menubar img { width: 22px; height: 22px; }
+  .menubar .lbl { font-weight: 400; opacity: 0.55; font-size: 12px; margin-right: -12px; }
+  .menubar .time { margin-left: auto; font-weight: 400; opacity: 0.8; }
+  .menubar.light img { filter: invert(1); }
+</style>
+</head>
+<body>
+  <h1>LisaSpeed 新图标 · 三个方案</h1>
+  <div class="sub">品牌色取自应用本体：薄荷青 #2EE6C5 / #7DFFD2 · 深海军蓝 #0B1424 · 与主界面玻璃圆钮同一视觉语言</div>
+  <div class="row">
+    <div class="card">
+      <h2>方案 A · 玻璃电源球</h2>
+      <div class="d">主界面连接圆钮的图标化 —— 彗尾光环 + 玻璃盘 + 电源符号</div>
+      <img class="big" src="a-orb.svg">
+      <div class="sizes">
+        <div><img src="a-orb.svg" width="96" height="96"><span>96</span></div>
+        <div><img src="a-orb.svg" width="48" height="48"><span>48</span></div>
+        <div><img src="a-orb.svg" width="28" height="28"><span>28</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>方案 B · 疾速 L 徽标</h2>
+      <div class="d">保留品牌字母 —— 斜切圆角 L + 前向速度符，薄荷渐变</div>
+      <img class="big" src="b-lbolt.svg">
+      <div class="sizes">
+        <div><img src="b-lbolt.svg" width="96" height="96"><span>96</span></div>
+        <div><img src="b-lbolt.svg" width="48" height="48"><span>48</span></div>
+        <div><img src="b-lbolt.svg" width="28" height="28"><span>28</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>方案 C · 极速仪表</h2>
+      <div class="d">速度隐喻 —— 270° 仪表弧 + 指针拉满到高位</div>
+      <img class="big" src="c-gauge.svg">
+      <div class="sizes">
+        <div><img src="c-gauge.svg" width="96" height="96"><span>96</span></div>
+        <div><img src="c-gauge.svg" width="48" height="48"><span>48</span></div>
+        <div><img src="c-gauge.svg" width="28" height="28"><span>28</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>状态栏图标（模板图，随系统亮暗自动着色）— 未连接 / 连接中 / 已连接</h3>
+  <div class="bars">
+    <div class="menubar light">
+      <span class="lbl">浅色菜单栏</span>
+      <img src="tray-idle.svg"><img src="tray-connecting.svg"><img src="tray-connected.svg">
+      <span class="time">周四 8月13日 10:24</span>
+    </div>
+    <div class="menubar dark">
+      <span class="lbl">深色菜单栏</span>
+      <img src="tray-idle.svg"><img src="tray-connecting.svg"><img src="tray-connected.svg">
+      <span class="time">周四 8月13日 10:24</span>
+    </div>
+  </div>
+</body>
+</html>
