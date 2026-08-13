@@ -88,14 +88,21 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
                           ),
                         ),
                         Expanded(
-                          child: ListView.builder(
-                            padding: const EdgeInsets.only(bottom: 24),
+                          // Same gutters/rhythm as the subscriptions list so
+                          // the cards line up page to page (prototype `.list`).
+                          child: ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                            separatorBuilder: (context, index) => const Gap(8),
                             itemCount: group.items.length,
                             itemBuilder: (context, index) {
                               final proxy = group.items[index];
                               return ProxyTile(
                                 proxy,
-                                selected: group.selected == proxy.tag,
+                                // `group.selected` is typed as a string in the
+                                // Dart stubs but the Go core sends a message on
+                                // that field, so it never matches; the per-item
+                                // `is_selected` bool is aligned on both sides.
+                                selected: proxy.isSelected,
                                 onTap: () async {
                                   await ref
                                       .read(proxiesOverviewNotifierProvider.notifier)

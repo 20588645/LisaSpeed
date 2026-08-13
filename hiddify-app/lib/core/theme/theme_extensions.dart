@@ -39,6 +39,13 @@ class ConnectionButtonTheme extends ThemeExtension<ConnectionButtonTheme> {
     return isDark ? const Color(0xFF111C2C) : Colors.white;
   }
 
+  /// Prototype `--glass` translucent panel fill (tech theme applies it to
+  /// `.panel`, `.list-row`, `.setting-card`… so cards share one surface).
+  static Color glassOf(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const Color(0x8C0A1220) : const Color(0xB8FFFFFF);
+  }
+
   static const ConnectionButtonTheme light = ConnectionButtonTheme(
     idleColor: brandNavy,
     connectedColor: brandMint,

@@ -161,129 +161,117 @@ class ProfileTile extends HookConsumerWidget {
       await ref.read(profilesNotifierProvider.notifier).deleteProfile(profile);
     }
 
-    // Prototype `.profile-row`: content stack on the left, tiny action
-    // buttons pinned top-right, usage bar + meta line under the title.
-    return Container(
-      margin: margin,
-      decoration: TechUi.panelDecoration(context, selected: profile.active),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          if (profile.active)
-            Positioned(top: 0, bottom: 0, left: 0, child: Container(width: 3, color: accent)),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: ProfileTileConst.cardBorderRadius,
-              onTap: activate,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  profile.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
-                                  ),
-                                  semanticsLabel: profile.active
-                                      ? t.pages.profiles.activeProfileName(name: profile.name)
-                                      : t.pages.profiles.nonActiveProfileName(name: profile.name),
-                                ),
-                              ),
-                              if (profile.active) ...[
-                                const SizedBox(width: 8),
-                                TechUi.tag(context, t.pages.profiles.tagActive, active: true),
-                              ],
-                              const SizedBox(width: 6),
-                              TechUi.tag(
-                                context,
-                                isRemote ? t.pages.profiles.tagRemote : t.pages.profiles.tagLocal,
-                              ),
-                            ],
+    // Prototype `.profile-row`: same `.list-row` shell as the nodes page;
+    // content stack on the left, tiny action buttons pinned top-right,
+    // usage bar + meta line under the title.
+    return Padding(
+      padding: margin,
+      child: TechUi.listRow(
+        context,
+        selected: profile.active,
+        onTap: activate,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          profile.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
                           ),
-                          if (subInfo != null) ...[
-                            const Gap(9),
-                            RemainingTrafficIndicator(subInfo.ratio),
-                            const Gap(7),
-                            ProfileSubscriptionInfo(subInfo),
-                          ] else ...[
-                            const Gap(6),
-                            Text(
-                              '${t.pages.home.profileUpdated} ${DateFormat('MM-dd HH:mm').format(profile.lastUpdate)}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ],
+                          semanticsLabel: profile.active
+                              ? t.pages.profiles.activeProfileName(name: profile.name)
+                              : t.pages.profiles.nonActiveProfileName(name: profile.name),
+                        ),
+                      ),
+                      if (profile.active) ...[
+                        const SizedBox(width: 8),
+                        TechUi.tag(context, t.pages.profiles.tagActive, active: true),
+                      ],
+                      const SizedBox(width: 6),
+                      TechUi.tag(
+                        context,
+                        isRemote ? t.pages.profiles.tagRemote : t.pages.profiles.tagLocal,
+                      ),
+                    ],
+                  ),
+                  if (subInfo != null) ...[
+                    const Gap(9),
+                    RemainingTrafficIndicator(subInfo.ratio),
+                    const Gap(7),
+                    ProfileSubscriptionInfo(subInfo),
+                  ] else ...[
+                    const Gap(6),
+                    Text(
+                      '${t.pages.home.profileUpdated} ${DateFormat('MM-dd HH:mm').format(profile.lastUpdate)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    // Prototype row actions: 激活 / 更新 / 编辑 / 删除.
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (!profile.active) ...[
-                          TechUi.tinyButton(context, label: t.pages.profiles.activate, onPressed: activate),
-                          const SizedBox(width: 8),
-                        ],
-                        if (isRemote) ...[
-                          TechUi.tinyButton(
-                            context,
-                            label: t.common.update,
-                            onPressed: () {
-                              if (ref.read(updateProfileNotifierProvider(profile.id)).isLoading) {
-                                return;
-                              }
-                              ref
-                                  .read(updateProfileNotifierProvider(profile.id).notifier)
-                                  .updateProfile(profile as RemoteProfileEntity);
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        TechUi.tinyButton(
-                          context,
-                          label: t.common.edit,
-                          onPressed: () {
-                            context.goNamed('profileDetails', pathParameters: {'id': profile.id});
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        TechUi.tinyButton(
-                          context,
-                          label: t.common.delete,
-                          danger: true,
-                          onPressed: deleteWithConfirm,
-                        ),
-                        const SizedBox(width: 8),
-                        ProfileActionsMenu(profile, (context, toggleVisibility, _) {
-                          return TechUi.iconButton(
-                            context,
-                            icon: Icons.more_horiz_rounded,
-                            tooltip: MaterialLocalizations.of(context).showMenuTooltip,
-                            onPressed: toggleVisibility,
-                          );
-                        }, shareOnly: true),
-                      ],
-                    ),
                   ],
-                ),
+                ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 14),
+            // Prototype row actions: 激活 / 更新 / 编辑 / 删除.
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!profile.active) ...[
+                  TechUi.tinyButton(context, label: t.pages.profiles.activate, onPressed: activate),
+                  const SizedBox(width: 8),
+                ],
+                if (isRemote) ...[
+                  TechUi.tinyButton(
+                    context,
+                    label: t.common.update,
+                    onPressed: () {
+                      if (ref.read(updateProfileNotifierProvider(profile.id)).isLoading) {
+                        return;
+                      }
+                      ref
+                          .read(updateProfileNotifierProvider(profile.id).notifier)
+                          .updateProfile(profile as RemoteProfileEntity);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                TechUi.tinyButton(
+                  context,
+                  label: t.common.edit,
+                  onPressed: () {
+                    context.goNamed('profileDetails', pathParameters: {'id': profile.id});
+                  },
+                ),
+                const SizedBox(width: 8),
+                TechUi.tinyButton(
+                  context,
+                  label: t.common.delete,
+                  danger: true,
+                  onPressed: deleteWithConfirm,
+                ),
+                const SizedBox(width: 8),
+                ProfileActionsMenu(profile, (context, toggleVisibility, _) {
+                  return TechUi.iconButton(
+                    context,
+                    icon: Icons.more_horiz_rounded,
+                    tooltip: MaterialLocalizations.of(context).showMenuTooltip,
+                    onPressed: toggleVisibility,
+                  );
+                }, shareOnly: true),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

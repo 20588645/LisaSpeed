@@ -417,10 +417,48 @@ class TechUi {
   static BoxDecoration panelDecoration(BuildContext context, {bool selected = false}) {
     final accent = ConnectionButtonTheme.accentOf(context);
     return BoxDecoration(
-      color: ConnectionButtonTheme.panelOf(context),
+      color: ConnectionButtonTheme.glassOf(context),
       borderRadius: BorderRadius.circular(14),
       border: Border.all(
-        color: selected ? accent.withValues(alpha: 0.65) : ConnectionButtonTheme.lineOf(context),
+        color: selected ? accent : ConnectionButtonTheme.lineOf(context),
+      ),
+    );
+  }
+
+  /// Prototype `.list-row`: the ONE card shell shared by the nodes,
+  /// subscriptions and rules lists — glass fill, hairline border, 14px
+  /// radius, 13/14 padding; active rows get a full-accent border plus an
+  /// inset 3px accent stripe that never shifts the content.
+  static Widget listRow(
+    BuildContext context, {
+    required Widget child,
+    bool selected = false,
+    VoidCallback? onTap,
+    VoidCallback? onLongPress,
+    EdgeInsetsGeometry padding = const EdgeInsets.fromLTRB(14, 13, 14, 13),
+  }) {
+    return Container(
+      decoration: panelDecoration(context, selected: selected),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          if (selected)
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(width: 3, color: ConnectionButtonTheme.accentOf(context)),
+            ),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: onTap,
+              onLongPress: onLongPress,
+              child: Padding(padding: padding, child: child),
+            ),
+          ),
+        ],
       ),
     );
   }

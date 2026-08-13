@@ -71,7 +71,7 @@ class ProfilesPage extends HookConsumerWidget {
             child: asyncProfiles.when(
               data: (data) => ListView.separated(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                separatorBuilder: (context, index) => const Gap(10),
+                separatorBuilder: (context, index) => const Gap(8),
                 itemBuilder: (context, index) => ProfileTile(profile: data[index]),
                 itemCount: data.length,
               ),

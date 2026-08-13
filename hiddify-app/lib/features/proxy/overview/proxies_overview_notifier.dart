@@ -209,12 +209,15 @@ class ProxiesOverviewNotifier extends _$ProxiesOverviewNotifier with AppLogger {
       loggy.warning("error selecting outbound", err);
       throw err;
     }).run();
-    final newselected = outbounds.items.where((e) => e.tag == outboundTag).firstOrNull;
-    if (newselected != null) {
-      newselected.isSelected = true;
-      outbounds.selected = newselected.tag;
-      state = AsyncValue.data(outbounds);
+    // The core stream only re-emits on url-test events, so reflect the new
+    // selection locally: flip the per-item flags on a copy (mutating the
+    // current value in place would compare equal and skip the rebuild).
+    if (outbounds.items.none((e) => e.tag == outboundTag)) return;
+    final updated = outbounds.deepCopy();
+    for (final item in updated.items) {
+      item.isSelected = item.tag == outboundTag;
     }
+    state = AsyncValue.data(updated);
   }
 
   Future<void> urlTest(String groupTag) async {
