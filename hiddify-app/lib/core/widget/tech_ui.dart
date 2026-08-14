@@ -310,7 +310,8 @@ class TechUi {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: fontSize,
-                        fontWeight: FontWeight.w600,
+                        // Prototype `.seg`: active button bold (700), rest lighter.
+                        fontWeight: option == selected ? FontWeight.w700 : FontWeight.w500,
                         color: option == selected
                             ? const Color(0xFF041016)
                             : Theme.of(context).colorScheme.onSurface,
@@ -422,12 +423,26 @@ class TechUi {
   /// the tighter 14px `.list-row` radius via [listRow].
   static BoxDecoration panelDecoration(BuildContext context, {bool selected = false, double radius = 16}) {
     final accent = ConnectionButtonTheme.accentOf(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return BoxDecoration(
       color: ConnectionButtonTheme.glassOf(context),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
         color: selected ? accent : ConnectionButtonTheme.lineOf(context),
       ),
+      // Prototype `.panel` soft depth (`--shadow`). List rows (radius < 16)
+      // stay flat, matching the prototype's shadowless `.list-row`.
+      boxShadow: radius >= 16
+          ? [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.28)
+                    : const Color(0xFF102033).withValues(alpha: 0.08),
+                blurRadius: isDark ? 28 : 24,
+                offset: const Offset(0, 10),
+              ),
+            ]
+          : null,
     );
   }
 
@@ -443,28 +458,40 @@ class TechUi {
     VoidCallback? onLongPress,
     EdgeInsetsGeometry padding = const EdgeInsets.fromLTRB(14, 13, 14, 13),
   }) {
-    return Container(
-      decoration: panelDecoration(context, selected: selected, radius: 14),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          if (selected)
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              child: Container(width: 3, color: ConnectionButtonTheme.accentOf(context)),
-            ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onTap: onTap,
-              onLongPress: onLongPress,
-              child: Padding(padding: padding, child: child),
-            ),
+    final accent = ConnectionButtonTheme.accentOf(context);
+    return _HoverRegion(
+      builder: (hovered) => Container(
+        // Prototype `.list-row:hover` strengthens the hairline to `--line-strong`.
+        decoration: panelDecoration(context, selected: selected, radius: 14).copyWith(
+          border: Border.all(
+            color: selected
+                ? accent
+                : hovered
+                ? accent.withValues(alpha: 0.28)
+                : ConnectionButtonTheme.lineOf(context),
           ),
-        ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            if (selected)
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(width: 3, color: accent),
+              ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: onTap,
+                onLongPress: onLongPress,
+                child: Padding(padding: padding, child: child),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -559,63 +586,73 @@ class TechUi {
   }) {
     final theme = Theme.of(context);
     final accent = ConnectionButtonTheme.accentOf(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Ink(
-          decoration: panelDecoration(context),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+    return _HoverRegion(
+      builder: (hovered) => AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        // Prototype `.setting-card:hover`: accent border, soft glow, 1px lift.
+        transform: Matrix4.translationValues(0, hovered ? -1 : 0, 0),
+        decoration: panelDecoration(context).copyWith(
+          border: Border.all(color: hovered ? accent : ConnectionButtonTheme.lineOf(context)),
+          boxShadow: hovered ? [BoxShadow(color: accent.withValues(alpha: 0.16), blurRadius: 24)] : null,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      index.toString().padLeft(2, '0'),
+                      style: mono(context, size: 11, weight: FontWeight.w600, color: accent),
+                    ),
                   ),
-                  child: Text(
-                    index.toString().padLeft(2, '0'),
-                    style: mono(context, size: 11, weight: FontWeight.w600, color: accent),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, fontSize: 15),
-                      ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 4),
-                        DefaultTextStyle(
-                          style: theme.textTheme.bodySmall!.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          child: subtitle,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, fontSize: 15),
                         ),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: 4),
+                          DefaultTextStyle(
+                            style: theme.textTheme.bodySmall!.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            child: subtitle,
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  '›',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 20,
-                    height: 1,
+                  const SizedBox(width: 12),
+                  Text(
+                    '›',
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 20,
+                      height: 1,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -697,6 +734,30 @@ class TechUi {
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
+    );
+  }
+}
+
+/// Tracks pointer hover so cards and rows can show a desktop hover state
+/// (accent border / glow / lift), matching the prototype's `:hover` rules.
+class _HoverRegion extends StatefulWidget {
+  const _HoverRegion({required this.builder});
+
+  final Widget Function(bool hovered) builder;
+
+  @override
+  State<_HoverRegion> createState() => _HoverRegionState();
+}
+
+class _HoverRegionState extends State<_HoverRegion> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: widget.builder(_hovered),
     );
   }
 }
