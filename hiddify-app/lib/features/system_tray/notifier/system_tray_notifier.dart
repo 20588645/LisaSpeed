@@ -62,7 +62,10 @@ class SystemTrayNotifier extends _$SystemTrayNotifier with TrayListener, AppLogg
 
   Menu _trayMenu(ConnectionStatus connection, ServiceMode serviceMode, Translations t) => Menu(
     items: [
-      if (PlatformUtils.isLinux) ...[MenuItem(key: 'dashboard', label: t.common.dashboard), MenuItem.separator()],
+      // Open the main window straight from the menu bar on every desktop OS
+      // (macOS previously relied on a left-click only).
+      MenuItem(key: 'dashboard', label: t.common.dashboard),
+      MenuItem.separator(),
       MenuItem(
         key: 'connection',
         label: switch (connection) {

@@ -788,7 +788,29 @@
     "disconnect": "断开连接",
     "disconnecting": "断开连接中...",
     "reconnect": "重新连接",
-    "reconnectMsg": "正在重新连接以应用更改..."
+    "reconnectMsg": "正在重新连接以应用更改...",
+    "watchdog": {
+      "stalledTitle": "连接异常",
+      "stalledBody": "已连接，但数据不通，正在自动重连…",
+      "stalledBodyManual": "已连接，但数据不通。请检查网络或切换节点。",
+      "recovered": "连接已恢复",
+      "section": "连接维护",
+      "autoReconnect": "断流时自动重连",
+      "autoReconnectMsg": "隧道已连接但数据不通时，自动重新连接一次"
+    },
+    "test": {
+      "title": "连通性检测",
+      "run": "检测连接",
+      "running": "检测中…",
+      "ok": "正常",
+      "failed": "不通——隧道没有在传数据",
+      "exitIp": "出口 IP",
+      "latency": "延迟"
+    }
+  },
+  "alerts": {
+    "quotaTitle": "流量配额即将用尽",
+    "quotaBody": "本周期已用 ${used} / ${total} GB（${percent}%）"
   },
   "errors": {
     "unexpected": "意外错误",

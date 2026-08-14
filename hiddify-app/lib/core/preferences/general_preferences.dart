@@ -84,6 +84,10 @@ abstract class Preferences {
   /// Shows live up/down speeds beside the macOS menu-bar icon.
   static final showTraySpeed = PreferencesNotifier.create<bool, bool>("show_tray_speed", true);
 
+  /// Auto-reconnect when the tunnel goes silent (connected but no data flows,
+  /// e.g. a firewall that lets the handshake through then blackholes traffic).
+  static final autoReconnectOnStall = PreferencesNotifier.create<bool, bool>("auto_reconnect_on_stall", true);
+
   /// LisaHost client-area credentials backing the home host-quota card.
   static final hostPanelEnabled = PreferencesNotifier.create<bool, bool>("host_panel_enabled", false);
 

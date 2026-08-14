@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/notification/in_app_notification_controller.dart';
+import 'package:hiddify/core/notification/native_notifier.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/preferences/preferences_provider.dart';
 import 'package:hiddify/features/host_panel/data/lisahost_client.dart';
@@ -15,8 +18,14 @@ final hostQuotaProvider = NotifierProvider<HostQuotaNotifier, HostQuota?>(HostQu
 class HostQuotaNotifier extends Notifier<HostQuota?> with AppLogger {
   static const _snapshotKey = 'host_panel_quota_snapshot';
   static const _interval = Duration(minutes: 10);
+  static const _alertThreshold = 0.9;
 
   Timer? _timer;
+
+  /// One-shot latch so the near-quota alert fires once per billing cycle; it
+  /// re-arms automatically when usage drops below the threshold (i.e. after
+  /// the monthly reset).
+  bool _alerted = false;
 
   @override
   HostQuota? build() {
@@ -42,8 +51,27 @@ class HostQuotaNotifier extends Notifier<HostQuota?> with AppLogger {
       final quota = await client.fetchQuota();
       state = quota;
       await ref.read(sharedPreferencesProvider).requireValue.setString(_snapshotKey, quota.toJsonString());
+      _maybeAlert(quota);
     } catch (e) {
       loggy.warning('host panel quota refresh failed: $e');
     }
+  }
+
+  void _maybeAlert(HostQuota quota) {
+    if (quota.totalGb <= 0) return;
+    if (quota.ratio < _alertThreshold) {
+      _alerted = false;
+      return;
+    }
+    if (_alerted) return;
+    _alerted = true;
+    final t = ref.read(translationsProvider).requireValue;
+    final body = t.alerts.quotaBody(
+      used: quota.usedGb.toStringAsFixed(0),
+      total: quota.totalGb.toStringAsFixed(0),
+      percent: (quota.ratio * 100).round(),
+    );
+    ref.read(inAppNotificationControllerProvider).showInfoToast(body, duration: const Duration(seconds: 6));
+    NativeNotifier.show(t.alerts.quotaTitle, body);
   }
 }

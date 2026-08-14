@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fpdart/fpdart.dart';
@@ -5,12 +6,17 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/failures.dart';
+import 'package:hiddify/core/notification/in_app_notification_controller.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
+import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
+import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/log/data/log_data_providers.dart';
 import 'package:hiddify/features/log/model/log_level.dart';
 import 'package:hiddify/features/log/overview/logs_overview_notifier.dart';
+import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
+import 'package:hiddify/features/proxy/data/proxy_data_providers.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
@@ -32,6 +38,33 @@ class LogsPage extends HookConsumerWidget with PresLogger {
 
     final canShare = debug || PlatformUtils.isDesktop;
 
+    // One-click end-to-end test: fetch the exit IP *through the proxy* and read
+    // the node latency, so the user can confirm the tunnel is really passing
+    // data (not just "connected"), and see where it exits.
+    Future<void> runConnectivityTest() async {
+      final dialog = ref.read(dialogNotifierProvider.notifier);
+      final tt = t.connection.test;
+      if (!ref.read(serviceRunningProvider)) {
+        await dialog.showOk(tt.title, t.connection.tapToConnect);
+        return;
+      }
+      ref.read(inAppNotificationControllerProvider).showInfoToast(tt.running);
+      final result = await ref.read(proxyRepositoryProvider).getCurrentIpInfo(CancelToken()).run();
+      final delay = ref.read(activeProxyNotifierProvider).valueOrNull?.urlTestDelay ?? 0;
+      result.match(
+        (_) => dialog.showOk(tt.title, tt.failed),
+        (info) {
+          final lines = <String>[
+            tt.ok,
+            '${tt.exitIp}: ${info.ip}${info.countryCode.isNotEmpty ? ' (${info.countryCode})' : ''}',
+            if (delay > 0 && delay < 65000) '${tt.latency}: ${delay}ms',
+            if ((info.org ?? '').isNotEmpty) info.org!,
+          ];
+          dialog.showOk(tt.title, lines.join('\n'));
+        },
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Column(
@@ -46,6 +79,11 @@ class LogsPage extends HookConsumerWidget with PresLogger {
               subtitle: t.pages.logs.subtitle,
               onBack: () => context.pop(),
               actions: [
+                TechUi.ghostButton(
+                  context,
+                  label: t.connection.test.run,
+                  onPressed: runConnectivityTest,
+                ),
                 TechUi.ghostButton(
                   context,
                   label: state.paused ? t.common.resume : t.common.pause,

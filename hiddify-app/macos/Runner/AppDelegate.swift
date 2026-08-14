@@ -53,8 +53,10 @@ class AppDelegate: FlutterAppDelegate {
     return true
   }
   override func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // Deliver alerts even while the app is foreground (see delegate below).
+        UNUserNotificationCenter.current().delegate = self
         // Request notification authorization
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) { granted, error in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error {
                 print("Error requesting notification authorization: \(error)")
             }
@@ -75,4 +77,29 @@ class AppDelegate: FlutterAppDelegate {
   //     }
   //     return true
   // }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+  // Show watchdog / quota banners even when LisaSpeed is the active app.
+  func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    willPresent notification: UNNotification,
+    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    // `.banner` is macOS 11+. The Runner still targets 10.15, so the case
+    // must live in an @available helper — a plain `if #available` around the
+    // array literal is not enough for `flutter build macos`.
+    if #available(macOS 11.0, *) {
+      Self.presentForegroundBanner(completionHandler)
+    } else {
+      completionHandler([.alert, .sound])
+    }
+  }
+
+  @available(macOS 11.0, *)
+  private static func presentForegroundBanner(
+    _ completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    completionHandler([.banner, .sound])
+  }
 }
