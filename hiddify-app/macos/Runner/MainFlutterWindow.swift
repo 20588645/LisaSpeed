@@ -50,6 +50,23 @@ class MainFlutterWindow: NSWindow {
       UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
       result(nil)
     }
+
+    // Proper foreground activation for the menu-bar → window flow. Becoming a
+    // regular app *before* activating is what lets the window form its own
+    // Stage Manager group instead of overlapping another app's set.
+    FlutterMethodChannel(
+      name: "com.lisaspeed/window", binaryMessenger: flutterViewController.engine.binaryMessenger
+    )
+    .setMethodCallHandler { [weak self] (_ call: FlutterMethodCall, result: @escaping FlutterResult) in
+      guard call.method == "activate" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      NSApp.setActivationPolicy(.regular)
+      NSApp.activate(ignoringOtherApps: true)
+      self?.makeKeyAndOrderFront(nil)
+      result(nil)
+    }
     //
     RegisterGeneratedPlugins(registry: flutterViewController)
 

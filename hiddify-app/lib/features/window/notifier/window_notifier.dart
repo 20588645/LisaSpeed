@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
+import 'package:hiddify/core/window/native_window.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -96,10 +97,20 @@ class WindowNotifier extends _$WindowNotifier with AppLogger {
   }
 
   Future<void> show({bool focus = true}) async {
-    await windowManager.show();
-    if (focus) await windowManager.focus();
+    // Become a regular (Dock-showing) app BEFORE showing/activating: macOS
+    // floats accessory-mode windows over the current app set, so activating
+    // while still accessory is what made the window overlap others in Stage
+    // Manager. Switching first lets it claim its own group.
     if (Platform.isMacOS) {
       await windowManager.setSkipTaskbar(false);
+    }
+    await windowManager.show();
+    if (focus) {
+      await windowManager.focus();
+      // Full native activation so the app truly comes to the front and forms
+      // its own Stage Manager group (window_manager's focus() alone isn't
+      // reliable here).
+      if (Platform.isMacOS) await NativeWindow.activate();
     }
   }
 
@@ -111,7 +122,14 @@ class WindowNotifier extends _$WindowNotifier with AppLogger {
   }
 
   Future<void> showOrHide() async {
-    if (await windowManager.isVisible()) {
+    // Only fold away when the window is genuinely frontmost. In Stage Manager a
+    // window sitting in another set still reports visible, so a plain isVisible
+    // toggle would *hide* it on the click meant to bring it forward — the click
+    // then appears to do nothing. Requiring focus makes one click reliably
+    // surface it.
+    final visible = await windowManager.isVisible();
+    final focused = await windowManager.isFocused();
+    if (visible && focused) {
       await hide();
     } else {
       await show();
