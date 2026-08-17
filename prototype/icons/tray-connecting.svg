@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- LisaSpeed tray - connecting: dashed ring + power bar (template) -->
-  <g stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" fill="none">
-    <path d="M88.4 42.9 A38 38 0 1 1 39.6 42.9" stroke-dasharray="24 13"/>
-    <path d="M64 20 L64 66"/>
+  <g stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" fill="none">
+    <path d="M92.3 30.3 A44 44 0 1 1 35.7 30.3" stroke-dasharray="26 14"/>
+    <path d="M64 20 L64 56"/>
   </g>
 </svg>

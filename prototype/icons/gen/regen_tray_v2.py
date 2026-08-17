@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Regenerate the LisaSpeed menu-bar template icons (v2).
+"""Regenerate the LisaSpeed menu-bar template icons.
 
 Three states of the power glyph, drawn crisp for an 18pt slot:
   tray_icon.png / tray_icon_dark.png : outline glyph          (disconnected)
   tray_icon_disconnected.png         : dashed-arc outline     (connecting)
-  tray_icon_connected.png            : filled disc, bold knockout (connected)
+  tray_icon_connected.png            : filled disc, knockout  (connected)
+
+The stem sits on the circle's outer edge — it must not poke above the
+ring, or the 18pt template looks glued to the top of the menu bar.
+The whole glyph is centered on the 128px canvas so padding is even.
 
 128px canvases rendered at 4x supersampling with hand-stamped round caps
 (PIL arcs/lines have butt caps). macOS renders these as template masks, so
@@ -12,12 +16,33 @@ only the alpha channel matters there; the colours keep Windows/Linux trays
 sensible.
 """
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 import math
 import os
 
 S = 4  # supersample factor
 CANVAS = 128
+CX = 64
+CY = 64
+
+# PIL draws arc/ellipse *width inside the bbox*, so R is the visual outer
+# radius. Stem caps must sit on that same outer edge — not above it —
+# otherwise the 18pt template looks glued to the top of the menu bar.
+STROKE = 12
+R = 50  # outer radius → 14px padding
+GAP = 40  # degrees each side of 12 o'clock
+STEM_TOP = CY - R + STROKE / 2  # 20 — cap outer aligns with the ring
+STEM_BOT = CY - 8  # 56 — into the interior, not past center
+
+# Connected disc matches the outline's outer radius so states share a size.
+# Knockout is shifted down 4px so the stem/dots don't optically hug the
+# top of the disc (the glyph is heavier above its geometric center).
+DISC_R = 50
+KNOCK_CY = CY + 4
+KNOCK_STROKE = 14
+KNOCK_R = 32  # knockout outer radius
+KNOCK_STEM_TOP = KNOCK_CY - KNOCK_R + KNOCK_STROKE / 2
+KNOCK_STEM_BOT = KNOCK_CY - 6
 
 MINT = (46, 230, 197, 255)    # #2EE6C5
 WHITE = (255, 255, 255, 255)
@@ -55,16 +80,14 @@ def outline_glyph(color, dashed=False):
     """Outline power symbol: arc open at the top + stem through the gap."""
     img = Image.new('RGBA', (CANVAS * S, CANVAS * S), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    stroke = 12 * S
-    cx, cy, r = 64 * S, 74 * S, 42 * S
-    # Arc: gap of 2x40 degrees centered at the top (270 in PIL terms).
-    a0, a1 = 310, 230  # PIL wraps end < start by +360 -> 280 degrees of arc
+    stroke = STROKE * S
+    cx, cy, r = CX * S, CY * S, R * S
+    # Arc: gap of 2×GAP degrees centered at the top (270 in PIL terms).
+    a0, a1 = 270 + GAP, 270 - GAP  # 310 → 230, wrapping through the bottom
     if not dashed:
         arc_with_caps(d, cx, cy, r, a0, a1, stroke, color)
     else:
-        # 4 long dashes with generous gaps across the same 280-degree sweep,
-        # so the ring reads as dashed rather than beaded at 18pt.
-        total, dashes = 280, 4
+        total, dashes = 360 - 2 * GAP, 4
         gaps = dashes - 1
         dash_len = 49
         gap_len = (total - dashes * dash_len) / gaps
@@ -72,39 +95,36 @@ def outline_glyph(color, dashed=False):
         for _ in range(dashes):
             arc_with_caps(d, cx, cy, r, a % 360, (a + dash_len) % 360, stroke, color)
             a += dash_len + gap_len
-    stem_with_caps(d, cx, 8 * S, 54 * S, stroke, color)
+    stem_with_caps(d, cx, STEM_TOP * S, STEM_BOT * S, stroke, color)
     return img.resize((CANVAS, CANVAS), Image.LANCZOS)
 
 
 def filled_glyph(color):
-    """Connected: filled disc with a bold knocked-out power symbol."""
+    """Connected: filled disc with a knocked-out power symbol, both centered."""
     img = Image.new('RGBA', (CANVAS * S, CANVAS * S), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    cx, cy, R = 64 * S, 66 * S, 56 * S
-    d.ellipse([cx - R, cy - R, cx + R, cy + R], fill=color)
+    cx, cy, disc_r = CX * S, CY * S, DISC_R * S
+    d.ellipse([cx - disc_r, cy - disc_r, cx + disc_r, cy + disc_r], fill=color)
 
-    # Knockout drawn on a separate mask, then punched out of the disc.
     knock = Image.new('L', (CANVAS * S, CANVAS * S), 0)
     kd = ImageDraw.Draw(knock)
-    stroke = 16 * S
-    r = 30 * S
-    a0, a1 = 312, 228  # slightly wider top gap so the negative space breathes
-    kd.arc([cx - r, cy - r, cx + r, cy + r], a0, a1, fill=255, width=int(round(stroke)))
+    stroke = KNOCK_STROKE * S
+    r = KNOCK_R * S
+    kcx, kcy = CX * S, KNOCK_CY * S
+    a0, a1 = 270 + GAP, 270 - GAP
+    kd.arc([kcx - r, kcy - r, kcx + r, kcy + r], a0, a1, fill=255, width=int(round(stroke)))
     for deg in (a0, a1):
-        x, y = pt(cx, cy, r, deg)
+        x, y = pt(kcx, kcy, r, deg)
         rr = stroke / 2
         kd.ellipse([x - rr, y - rr, x + rr, y + rr], fill=255)
-    # Stem knockout: from above the disc edge down into the arc gap.
-    x = cx
-    y0, y1 = 22 * S, 58 * S
+    x = kcx
+    y0, y1 = KNOCK_STEM_TOP * S, KNOCK_STEM_BOT * S
     kd.line([x, y0, x, y1], fill=255, width=int(round(stroke)))
     for y in (y0, y1):
         rr = stroke / 2
         kd.ellipse([x - rr, y - rr, x + rr, y + rr], fill=255)
 
-    # Punch: zero the alpha where the knockout mask is set.
     alpha = img.getchannel('A')
-    from PIL import ImageChops
     inv = ImageChops.invert(knock)
     alpha = ImageChops.multiply(alpha, inv)
     img.putalpha(alpha)
@@ -117,8 +137,22 @@ def save(img, name):
     print('wrote', path)
 
 
+def save_ico(img, name):
+    path = os.path.normpath(os.path.join(OUT, name))
+    img.save(path, format='ICO', sizes=[(16, 16), (32, 32), (48, 48), (64, 64)])
+    print('wrote', path)
+
+
 if __name__ == '__main__':
-    save(outline_glyph(WHITE), 'tray_icon.png')
-    save(outline_glyph(NAVY), 'tray_icon_dark.png')
-    save(outline_glyph(WHITE, dashed=True), 'tray_icon_disconnected.png')
-    save(filled_glyph(MINT), 'tray_icon_connected.png')
+    white = outline_glyph(WHITE)
+    navy = outline_glyph(NAVY)
+    dashed = outline_glyph(WHITE, dashed=True)
+    connected = filled_glyph(MINT)
+    save(white, 'tray_icon.png')
+    save(navy, 'tray_icon_dark.png')
+    save(dashed, 'tray_icon_disconnected.png')
+    save(connected, 'tray_icon_connected.png')
+    save_ico(white, 'tray_icon.ico')
+    save_ico(navy, 'tray_icon_dark.ico')
+    save_ico(dashed, 'tray_icon_disconnected.ico')
+    save_ico(connected, 'tray_icon_connected.ico')
