@@ -72,6 +72,13 @@ class ProfileParser {
             cancelToken: CancelToken(),
             ref: _ref,
           );
+          await expandClashProxyProviders(
+            tempFilePath: tempFilePath,
+            httpClient: _httpClient,
+            cancelToken: CancelToken(),
+            ref: _ref,
+          );
+          await rewriteSanitizedClashFile(tempFilePath);
         }, (_, _) => const ProfileFailure.unexpected())
         .flatMap((_) => TaskEither.fromEither(populateHeaders(content: content)))
         .flatMap(
@@ -176,6 +183,28 @@ class ProfileParser {
       cancelToken: cancelToken ?? CancelToken(),
       ref: _ref,
     );
+    await expandClashProxyProviders(
+      tempFilePath: tempFilePath,
+      httpClient: _httpClient,
+      cancelToken: cancelToken ?? CancelToken(),
+      ref: _ref,
+    );
+    await rewriteSanitizedClashFile(tempFilePath);
+    if (needsShareLinkFallback(await File(tempFilePath).readAsString())) {
+      await _httpClient
+          .download(
+            url.trim(),
+            tempFilePath,
+            cancelToken: cancelToken,
+            userAgent: shareLinkUserAgent,
+          )
+          .catchError((err) {
+            if (CancelToken.isCancel(err as DioException)) {
+              throw const ProfileFailure.cancelByUser('HTTP request for getting profile content canceled by user.');
+            }
+            throw err;
+          });
+    }
     // fixing headers before return
     return rs.headers.map.map((key, value) {
       if (value.length == 1) return MapEntry(key, value.first);
@@ -240,6 +269,132 @@ class ProfileParser {
       final newContent = results.join("\n");
       await File(tempFilePath).writeAsString(newContent);
     }
+  }
+
+  /// Clash Meta `/auto` subscriptions often ship an empty `proxies:` list and
+  /// put the real nodes behind `proxy-providers` HTTP urls. clash2singbox only
+  /// reads `proxies`, so fetch those provider documents and flatten them.
+  Future<void> expandClashProxyProviders({
+    required String tempFilePath,
+    required DioHttpClient httpClient,
+    required CancelToken cancelToken,
+    required Ref ref,
+  }) async {
+    final content = await File(tempFilePath).readAsString();
+    if (clashHasInlineProxies(content)) return;
+    final urls = clashProxyProviderUrls(content);
+    if (urls.isEmpty) return;
+
+    final bodies = <String>[];
+    for (final (i, url) in urls.indexed) {
+      if (cancelToken.isCancelled) return;
+      try {
+        final tmpPath = '$tempFilePath.pp$i';
+        await httpClient.download(
+          url,
+          tmpPath,
+          cancelToken: cancelToken,
+          userAgent: ref.read(ConfigOptions.useXrayCoreWhenPossible)
+              ? httpClient.userAgent.replaceAll('LisaSpeed', 'LisaSpeedX')
+              : null,
+        );
+        bodies.add(await File(tmpPath).readAsString());
+      } catch (err) {
+        if (err is DioException && CancelToken.isCancel(err)) return;
+      }
+    }
+    final merged = mergeClashProxyProviders(content, bodies);
+    if (merged != null) {
+      await File(tempFilePath).writeAsString(merged);
+    }
+  }
+
+  static const shareLinkUserAgent = 'v2rayN/6.23';
+
+  @visibleForTesting
+  static Future<void> rewriteSanitizedClashFile(String tempFilePath) async {
+    final content = await File(tempFilePath).readAsString();
+    if (!looksLikeClashYaml(content)) return;
+    final sanitized = sanitizeClashYaml(content);
+    if (sanitized != content) {
+      await File(tempFilePath).writeAsString(sanitized);
+    }
+  }
+
+  @visibleForTesting
+  static bool looksLikeClashYaml(String content) {
+    final trimmed = content.trimLeft();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) return false;
+    return RegExp(r'^(mixed-port|proxies|proxy-providers|proxy-groups):', multiLine: true).hasMatch(content);
+  }
+
+  @visibleForTesting
+  static bool needsShareLinkFallback(String content) {
+    return looksLikeClashYaml(content) && !clashHasInlineProxies(content);
+  }
+
+  /// clash2singbox unmarshals smux max-connections as int; panel YAML quotes them.
+  @visibleForTesting
+  static String sanitizeClashYaml(String content) {
+    var s = content.replaceAllMapped(
+      RegExp(r'''(max-connections|min-streams|max-streams):\s*['"](\d+)['"]''', caseSensitive: false),
+      (match) => '${match[1]}: ${match[2]}',
+    );
+    s = s.replaceAll(RegExp(r'\bflow:\s*,'), 'flow: "",');
+    return s;
+  }
+
+  @visibleForTesting
+  static bool clashHasInlineProxies(String content) {
+    return RegExp(r'^proxies:\s*\n[ \t]*-', multiLine: true).hasMatch(content) ||
+        RegExp(r'^proxies:\s*\[', multiLine: true).hasMatch(content);
+  }
+
+  @visibleForTesting
+  static List<String> clashProxyProviderUrls(String content) {
+    final start = RegExp(r'^proxy-providers:\s*$', multiLine: true).firstMatch(content);
+    if (start == null) return const [];
+    final rest = content.substring(start.end);
+    final nextTop = RegExp(r'^[^ \t#\n]', multiLine: true).firstMatch(rest);
+    final block = nextTop == null ? rest : rest.substring(0, nextTop.start);
+    final urls = <String>[];
+    final seen = <String>{};
+    for (final match in RegExp(r'''^\s+url:\s+['"]?(\S+?)['"]?\s*$''', multiLine: true).allMatches(block)) {
+      var url = match.group(1)!;
+      if (url.startsWith('"') || url.startsWith("'")) {
+        url = url.substring(1, url.length - 1);
+      }
+      if ((url.startsWith('http://') || url.startsWith('https://')) && seen.add(url)) {
+        urls.add(url);
+      }
+    }
+    return urls;
+  }
+
+  @visibleForTesting
+  static String? clashProxiesListBody(String providerBody) {
+    final trimmed = providerBody.trim();
+    if (trimmed.isEmpty) return null;
+    final header = RegExp(r'^proxies:\s*', multiLine: true).firstMatch(trimmed);
+    if (header != null) {
+      var list = trimmed.substring(header.end);
+      final nextTop = RegExp(r'^[^ \t#\n-]', multiLine: true).firstMatch(list);
+      if (nextTop != null) list = list.substring(0, nextTop.start);
+      list = list.trim();
+      return list.isEmpty ? null : list;
+    }
+    return trimmed.startsWith('-') ? trimmed : null;
+  }
+
+  @visibleForTesting
+  static String? mergeClashProxyProviders(String original, List<String> providerBodies) {
+    final lists = [
+      for (final body in providerBodies)
+        if (clashProxiesListBody(body) case final list?) list,
+    ];
+    if (lists.isEmpty) return null;
+    if (clashHasInlineProxies(original)) return original;
+    return sanitizeClashYaml('proxies:\n${lists.join('\n')}');
   }
 
   static Either<ProfileFailure, Map<String, dynamic>> populateHeaders({

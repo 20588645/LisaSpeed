@@ -163,4 +163,63 @@ void main() {
       });
     });
   });
+
+  group("clash proxy-providers", () {
+    const autoYaml = '''
+mixed-port: 7890
+proxy-providers:
+  🇨🇳 V20260607085289-001:
+    type: http
+    url: http://137.175.93.51:47911/3d1271f4-a23e-48f4-b313-b90044f3f0cd/proxies
+
+proxies:
+
+proxy-groups:
+  - { name: 🚀 节点选择, type: select, proxies: [DIRECT] }
+
+rule-providers:
+  reject:
+    type: http
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt"
+''';
+
+    test("extracts proxy-provider urls and ignores rule-providers", () {
+      expect(
+        ProfileParser.clashProxyProviderUrls(autoYaml),
+        ['http://137.175.93.51:47911/3d1271f4-a23e-48f4-b313-b90044f3f0cd/proxies'],
+      );
+      expect(ProfileParser.clashHasInlineProxies(autoYaml), isFalse);
+    });
+
+    test("flattens provider documents into proxies", () {
+      const provider = '''
+proxies:
+  - {name: "node-a", type: vless, server: 1.1.1.1, port: 443}
+  - {name: "node-b", type: hysteria2, server: 1.1.1.1, port: 443}
+''';
+      final merged = ProfileParser.mergeClashProxyProviders(autoYaml, [provider]);
+      expect(merged, isNotNull);
+      expect(ProfileParser.clashHasInlineProxies(merged!), isTrue);
+      expect(merged, contains('node-a'));
+      expect(merged, contains('hysteria2'));
+      expect(merged, isNot(contains('proxy-providers')));
+    });
+
+    test("unquotes smux integers so clash2singbox can unmarshal", () {
+      const provider = '''
+proxies:
+  - {name: "n1", type: vless, server: 1.1.1.1, port: 443, smux: { enabled: false, max-connections: '8', min-streams: '16' }, flow: ,}
+''';
+      final merged = ProfileParser.mergeClashProxyProviders(autoYaml, [provider]);
+      expect(merged, contains('max-connections: 8'));
+      expect(merged, isNot(contains("max-connections: '8'")));
+      expect(merged, contains('flow: "",'));
+    });
+
+    test("falls back to share links when Clash still has no inline proxies", () {
+      expect(ProfileParser.needsShareLinkFallback(autoYaml), isTrue);
+      expect(ProfileParser.looksLikeClashYaml(autoYaml), isTrue);
+      expect(ProfileParser.needsShareLinkFallback('vless://uuid@host:443'), isFalse);
+    });
+  });
 }

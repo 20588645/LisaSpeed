@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/hiddify/ray2sing/ray2sing"
 	"github.com/sagernet/sing-box/experimental/libbox"
@@ -16,6 +18,7 @@ import (
 	SJ "github.com/sagernet/sing/common/json"
 	"github.com/xmdhs/clash2singbox/convert"
 	"github.com/xmdhs/clash2singbox/model/clash"
+	"github.com/xmdhs/clash2singbox/model/singbox"
 	"gopkg.in/yaml.v3"
 )
 
@@ -76,29 +79,106 @@ func ParseConfigContent(contentstr string, debug bool, configOpt *HiddifyOptions
 		return patchConfig(newContent, "SingboxParser", configOpt)
 	}
 
+	if looksLikeClashYAML(content) {
+		if out, recognized, err := parseClashConfig(content, configOpt); recognized {
+			return out, err
+		}
+	}
+
 	v2rayStr, err := ray2sing.Ray2Singbox(string(content), configOpt.UseXrayCoreWhenPossible)
 	if err == nil {
 		return patchConfig([]byte(v2rayStr), "V2rayParser", configOpt)
 	}
 	fmt.Printf("Convert using clash\n")
-	clashObj := clash.Clash{}
-	if err := yaml.Unmarshal(content, &clashObj); err == nil && clashObj.Proxies != nil {
-		if len(clashObj.Proxies) == 0 {
-			return nil, fmt.Errorf("[ClashParser] no outbounds found")
-		}
-		converted, err := convert.Clash2sing(clashObj)
-		if err != nil {
-			return nil, fmt.Errorf("[ClashParser] converting clash to sing-box error: %w", err)
-		}
-		output := configByte
-		output, err = convert.Patch(output, converted, "", "", nil)
-		if err != nil {
-			return nil, fmt.Errorf("[ClashParser] patching clash config error: %w", err)
-		}
-		return patchConfig(output, "ClashParser", configOpt)
+	if out, recognized, err := parseClashConfig(content, configOpt); recognized {
+		return out, err
 	}
 
 	return nil, fmt.Errorf("unable to determine config format")
+}
+
+var (
+	clashQuotedIntKeys = regexp.MustCompile(`(?i)(max-connections|min-streams|max-streams):\s*['"](\d+)['"]`)
+	clashEmptyFlow     = regexp.MustCompile(`(?i)\bflow:\s*,`)
+	clashYAMLKey       = regexp.MustCompile(`(?m)^(mixed-port|proxies|proxy-providers|proxy-groups):`)
+)
+
+func looksLikeClashYAML(content []byte) bool {
+	s := bytes.TrimSpace(content)
+	if len(s) == 0 || s[0] == '{' || s[0] == '[' {
+		return false
+	}
+	return clashYAMLKey.Match(s)
+}
+
+// Clash Meta panel exports quote smux integers (`max-connections: '8'`) and
+// put SHA256 cert pins in `fingerprint`. clash2singbox unmarshals those ints
+// as int and maps fingerprint to uTLS, so the whole document used to fail
+// with "unable to determine config format".
+func sanitizeClashYAML(content []byte) []byte {
+	s := string(content)
+	s = clashQuotedIntKeys.ReplaceAllString(s, "$1: $2")
+	s = clashEmptyFlow.ReplaceAllString(s, `flow: "",`)
+	return []byte(s)
+}
+
+func parseClashConfig(content []byte, configOpt *HiddifyOptions) ([]byte, bool, error) {
+	fmt.Printf("Convert using clash\n")
+	clashObj := clash.Clash{}
+	if err := yaml.Unmarshal(sanitizeClashYAML(content), &clashObj); err != nil {
+		return nil, false, err
+	}
+	if len(clashObj.Proxies) == 0 {
+		if looksLikeClashYAML(content) {
+			return nil, true, fmt.Errorf("[ClashParser] no inline proxies; proxy-providers are not imported")
+		}
+		return nil, false, nil
+	}
+	converted, convErr := convert.Clash2sing(clashObj)
+	converted = cleanupClashOutbounds(converted)
+	if len(converted) == 0 {
+		if convErr != nil {
+			return nil, true, fmt.Errorf("[ClashParser] converting clash to sing-box error: %w", convErr)
+		}
+		return nil, true, fmt.Errorf("[ClashParser] no outbounds found")
+	}
+	output, err := convert.Patch(configByte, converted, "", "", nil)
+	if err != nil {
+		return nil, true, fmt.Errorf("[ClashParser] patching clash config error: %w", err)
+	}
+	out, err := patchConfig(output, "ClashParser", configOpt)
+	return out, true, err
+}
+
+func cleanupClashOutbounds(sl []singbox.SingBoxOut) []singbox.SingBoxOut {
+	out := sl[:0]
+	for _, item := range sl {
+		if item.Heartbeat == "0ms" || item.Heartbeat == "0s" || item.Heartbeat == "0" {
+			item.Heartbeat = ""
+		}
+		if item.TLS != nil && item.TLS.Utls != nil {
+			fp := item.TLS.Utls.Fingerprint
+			if fp == "" || strings.Contains(fp, ":") || isHexCertPin(fp) {
+				item.TLS.Utls = nil
+			}
+		}
+		out = append(out, item)
+	}
+	return out
+}
+
+func isHexCertPin(fp string) bool {
+	if len(fp) < 20 {
+		return false
+	}
+	for _, r := range fp {
+		switch {
+		case r >= '0' && r <= '9', r >= 'a' && r <= 'f', r >= 'A' && r <= 'F', r == ':':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func patchConfig(content []byte, name string, configOpt *HiddifyOptions) ([]byte, error) {
