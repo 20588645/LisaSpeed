@@ -46,6 +46,15 @@ class HostQuotaNotifier extends Notifier<HostQuota?> with AppLogger {
     return raw == null ? null : HostQuota.fromJsonString(raw);
   }
 
+  /// Pull a fresh snapshot now (home refresh). No-op when the panel is off.
+  Future<void> refreshNow() async {
+    final enabled = ref.read(Preferences.hostPanelEnabled);
+    final email = ref.read(Preferences.hostPanelEmail);
+    final password = ref.read(Preferences.hostPanelPassword);
+    if (!enabled || email.isEmpty || password.isEmpty) return;
+    await _refresh(LisahostClient(email: email, password: password));
+  }
+
   Future<void> _refresh(LisahostClient client) async {
     try {
       final quota = await client.fetchQuota();
