@@ -15,10 +15,12 @@ import 'package:hiddify/core/theme/app_theme.dart';
 import 'package:hiddify/core/theme/theme_preferences.dart';
 import 'package:hiddify/features/app_update/notifier/app_update_notifier.dart';
 import 'package:hiddify/features/connection/notifier/connection_health_notifier.dart';
+import 'package:hiddify/features/connection/notifier/network_revive_notifier.dart';
 import 'package:hiddify/features/connection/widget/connection_wrapper.dart';
 import 'package:hiddify/features/host_panel/notifier/host_quota_notifier.dart';
 import 'package:hiddify/features/per_app_proxy/overview/per_app_proxy_service_notifier.dart';
 import 'package:hiddify/features/profile/notifier/profiles_update_notifier.dart';
+import 'package:hiddify/features/profile/notifier/subscription_alert_notifier.dart';
 import 'package:hiddify/features/shortcut/shortcut_wrapper.dart';
 import 'package:hiddify/features/stats/notifier/total_traffic_notifier.dart';
 import 'package:hiddify/features/system_tray/notifier/system_tray_notifier.dart';
@@ -77,6 +79,10 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
     // Connection watchdog: detects "connected but no data" stalls and alerts /
     // self-heals. Kept alive here so it runs regardless of the visible page.
     ref.listen(connectionHealthNotifierProvider, (_, _) {});
+    // Sleep / hotspot: bounce the tunnel if the user had it connected.
+    if (PlatformUtils.isMacOS) ref.listen(networkReviveProvider, (_, _) {});
+    // Subscription expiry / remaining traffic, even while the window is hidden.
+    ref.listen(subscriptionAlertProvider, (_, _) {});
 
     // updating ActiveBreakpointNotifier value
     useEffect(() {

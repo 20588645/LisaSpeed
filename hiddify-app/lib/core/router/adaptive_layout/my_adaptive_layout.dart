@@ -66,7 +66,7 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                   FocusScope(
                     node: navScopeNode,
                     child: TechSidebar(
-                      selectedIndex: navigationShell.currentIndex.clamp(0, 3),
+                      selectedIndex: navigationShell.currentIndex.clamp(0, destinations.length - 1),
                       onSelected: (index) => _onTap(context, index),
                       destinations: destinations,
                     ),
@@ -80,7 +80,7 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                 child: NavigationBar(
                   backgroundColor: ConnectionButtonTheme.panelOf(context),
                   indicatorColor: ConnectionButtonTheme.accentOf(context).withValues(alpha: 0.16),
-                  selectedIndex: navigationShell.currentIndex.clamp(0, 3),
+                  selectedIndex: navigationShell.currentIndex.clamp(0, destinations.length - 1),
                   destinations: _navDests(actions),
                   onDestinationSelected: (index) => _onTap(context, index),
                 ),
@@ -96,8 +96,11 @@ class MyAdaptiveLayout extends HookConsumerWidget {
 
   List<ShellRouteAction> _actions(Translations t) => [
     ShellRouteAction(Icons.home_rounded, t.pages.home.title),
-    ShellRouteAction(Icons.hub_rounded, t.pages.proxies.title),
     ShellRouteAction(Icons.subscriptions_rounded, t.pages.profiles.title),
+    ShellRouteAction(Icons.hub_rounded, t.pages.proxies.title),
+    ShellRouteAction(Icons.network_check_rounded, t.pages.linkTest.title),
+    ShellRouteAction(Icons.shield_rounded, t.pages.ipPurity.title),
+    ShellRouteAction(Icons.alt_route_rounded, t.pages.settings.officeMedia.title),
     ShellRouteAction(Icons.settings_rounded, t.pages.settings.title),
   ];
 

@@ -11,6 +11,8 @@ import 'package:hiddify/core/router/go_router/refresh_listenable.dart';
 import 'package:hiddify/features/about/widget/about_page.dart';
 import 'package:hiddify/features/home/widget/home_page.dart';
 import 'package:hiddify/features/intro/widget/intro_page.dart';
+import 'package:hiddify/features/ip_purity/widget/ip_purity_page.dart';
+import 'package:hiddify/features/link_test/widget/link_test_page.dart';
 import 'package:hiddify/features/log/overview/logs_page.dart';
 import 'package:hiddify/features/per_app_proxy/overview/per_app_proxy_page.dart';
 import 'package:hiddify/features/profile/details/profile_details_page.dart';
@@ -25,6 +27,7 @@ import 'package:hiddify/features/settings/overview/sections/chain_options_page.d
 import 'package:hiddify/features/settings/overview/sections/dns_options_page.dart';
 import 'package:hiddify/features/settings/overview/sections/general_page.dart';
 import 'package:hiddify/features/settings/overview/sections/inbound_options_page.dart';
+import 'package:hiddify/features/settings/overview/sections/office_media_page.dart';
 import 'package:hiddify/features/settings/overview/sections/routing_options_page.dart';
 import 'package:hiddify/features/settings/overview/sections/tls_tricks_page.dart';
 import 'package:hiddify/features/settings/overview/settings_page.dart';
@@ -38,6 +41,9 @@ final branchesScope = <String, FocusScopeNode>{
   'home': FocusScopeNode(),
   'proxies': FocusScopeNode(),
   'profiles': FocusScopeNode(),
+  'linkTest': FocusScopeNode(),
+  'ipPurity': FocusScopeNode(),
+  'officeMedia': FocusScopeNode(),
   'settings': FocusScopeNode(),
 };
 
@@ -46,8 +52,8 @@ final loadingConfig = RoutingConfig(
   routes: <RouteBase>[GoRoute(path: '/home', builder: (context, state) => const Material())],
 );
 
-/// LisaSpeed shell: Home · Nodes · Subscriptions · Settings
-const shellBranchNames = ['home', 'proxies', 'profiles', 'settings'];
+/// LisaSpeed shell: Home · Subscriptions · Nodes · Test · Purity · Office · Settings
+const shellBranchNames = ['home', 'profiles', 'proxies', 'linkTest', 'ipPurity', 'officeMedia', 'settings'];
 
 String getNameOfBranch(bool isMobileBreakpoint, bool showProfilesAction, int index) =>
     shellBranchNames[index.clamp(0, shellBranchNames.length - 1)];
@@ -123,15 +129,6 @@ class RoutingConfigNotifier extends _$RoutingConfigNotifier {
             StatefulShellBranch(
               routes: <GoRoute>[
                 GoRoute(
-                  name: 'proxies',
-                  path: '/proxies',
-                  builder: (_, _) => FocusScope(node: branchesScope['proxies'], child: const ProxiesOverviewPage()),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              routes: <GoRoute>[
-                GoRoute(
                   name: 'profiles',
                   path: '/profiles',
                   builder: (_, _) => FocusScope(node: branchesScope['profiles'], child: const ProfilesPage()),
@@ -146,6 +143,45 @@ class RoutingConfigNotifier extends _$RoutingConfigNotifier {
                       ),
                     ),
                   ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: <GoRoute>[
+                GoRoute(
+                  name: 'proxies',
+                  path: '/proxies',
+                  builder: (_, _) => FocusScope(node: branchesScope['proxies'], child: const ProxiesOverviewPage()),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: <GoRoute>[
+                GoRoute(
+                  name: 'linkTest',
+                  path: '/link-test',
+                  builder: (_, _) => FocusScope(node: branchesScope['linkTest'], child: const LinkTestPage()),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: <GoRoute>[
+                GoRoute(
+                  name: 'ipPurity',
+                  path: '/ip-purity',
+                  builder: (_, _) => FocusScope(node: branchesScope['ipPurity'], child: const IpPurityPage()),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: <GoRoute>[
+                GoRoute(
+                  name: 'officeMedia',
+                  path: '/office-media',
+                  builder: (_, _) => FocusScope(
+                    node: branchesScope['officeMedia'],
+                    child: const OfficeMediaPage(),
+                  ),
                 ),
               ],
             ),

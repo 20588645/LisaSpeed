@@ -86,6 +86,7 @@ do_build_core() {
 do_compile() {
   phase "compile"
   log "LisaSpeed 本地全量编译开始（core + Flutter，离线依赖）"
+  restore_single_build_dir
 
   if [[ ! -x "$FLUTTER_BIN" ]]; then
     echo "[[ERROR]] 未找到 Flutter：$FLUTTER_BIN"
@@ -146,7 +147,44 @@ do_compile() {
   fi
 
   log "编译成功：$SRC_APP"
+  hide_build_app_from_launch_services
   phase "compile-done"
+}
+
+# Never point `build` at `build.noindex`. Clang then loads the same PCM
+# via two paths (symlink vs realpath) and fails with:
+#   Module 'Foundation' is defined in both .../build/... and .../build.noindex/...
+# Spotlight: unregister the Release .app after compile (see hide_build_app...).
+restore_single_build_dir() {
+  local build="$PROJECT_DIR/build"
+  local hidden="$PROJECT_DIR/build.noindex"
+  if [[ -L "$build" ]]; then
+    rm -f "$build"
+    if [[ -d "$hidden" ]]; then
+      mv "$hidden" "$build"
+      log "已把 build.noindex 还原为真实 build 目录（避免 Clang 双路径模块缓存）"
+    fi
+  elif [[ -d "$hidden" && ! -e "$build" ]]; then
+    mv "$hidden" "$build"
+    log "已把 build.noindex 还原为真实 build 目录"
+  elif [[ -d "$hidden" && -d "$build" ]]; then
+    rm -rf "$hidden"
+    log "已删除多余的 build.noindex，只保留真实 build 目录"
+  fi
+  if [[ -d "$build/macos/ModuleCache.noindex" ]]; then
+    rm -rf "$build/macos/ModuleCache.noindex"
+    log "已清理 Xcode ModuleCache"
+  fi
+}
+
+hide_build_app_from_launch_services() {
+  if [[ ! -d "$SRC_APP" ]]; then
+    return 0
+  fi
+  local lsregister="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+  if [[ -x "$lsregister" ]]; then
+    "$lsregister" -u "$SRC_APP" >/dev/null 2>&1 || true
+  fi
 }
 
 do_install() {
