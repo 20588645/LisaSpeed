@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hiddify/core/localization/locale_preferences.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
-import 'package:hiddify/gen/fonts.gen.dart';
+import 'package:hiddify/features/proxy/active/ip_widget.dart';
+import 'package:hiddify/features/proxy/overview/proxy_display.dart';
+import 'package:hiddify/features/proxy/overview/proxy_list_filter.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/utils/custom_loggers.dart';
-import 'package:hiddify/utils/platform_utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ProxyTile extends HookConsumerWidget with PresLogger {
@@ -17,9 +20,22 @@ class ProxyTile extends HookConsumerWidget with PresLogger {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
+    final locale = ref.watch(localePreferencesProvider);
+    final chinese = locale == AppLocale.zhCn || locale == AppLocale.zhTw;
+    final title = proxyDisplayTitle(proxy, chinese: chinese, autoLabel: t.pages.proxies.autoSelect);
+    final country = proxyFlagCountryCode(proxy);
+    final protocolChip = isInjectedAutoGroup(proxy)
+        ? ''
+        : (proxyProtocolLabel(proxyRemark(proxy), proxy.type) ?? proxy.type);
+    final selectedMember = proxy.isGroup
+        ? stripProxyVendorNoise(
+            proxy.groupSelectedTagDisplay.isNotEmpty ? proxy.groupSelectedTagDisplay : proxy.host,
+          )
+        : '';
+    final showProtocol = protocolChip.isNotEmpty && !title.contains(protocolChip);
+    final showSubtitle = showProtocol || selectedMember.isNotEmpty;
 
-    // Same `.list-row` shell as the subscriptions page; only the row content
-    // differs (title + tag chips left, latency pill right).
     return TechUi.listRow(
       context,
       selected: selected,
@@ -28,6 +44,10 @@ class ProxyTile extends HookConsumerWidget with PresLogger {
           await ref.read(dialogNotifierProvider.notifier).showProxyInfo(outboundInfo: proxy),
       child: Row(
         children: [
+          if (country.isNotEmpty) ...[
+            IPCountryFlag(countryCode: country, size: 24),
+            const SizedBox(width: 10),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,42 +56,39 @@ class ProxyTile extends HookConsumerWidget with PresLogger {
                 Row(
                   children: [
                     if (selected) ...[
-                      TechUi.currentBadge(context),
+                      TechUi.currentBadge(context, t.pages.proxies.current),
                       const SizedBox(width: 8),
                     ],
                     Flexible(
                       child: Text(
-                        proxy.tagDisplay,
+                        title,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontFamily: PlatformUtils.isWindows ? FontFamily.emoji : null,
-                        ),
+                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 7),
-                // Region + mono protocol tag chips, mirroring the prototype rows.
-                Row(
-                  children: [
-                    if (proxy.ipinfo.countryCode.trim().isNotEmpty) ...[
-                      TechUi.tag(context, proxy.ipinfo.countryCode.trim()),
-                      const SizedBox(width: 6),
+                if (showSubtitle) ...[
+                  const SizedBox(height: 7),
+                  Row(
+                    children: [
+                      if (showProtocol) ...[
+                        TechUi.tag(context, protocolChip, monoFont: true),
+                        if (selectedMember.isNotEmpty) const SizedBox(width: 6),
+                      ],
+                      if (selectedMember.isNotEmpty) Flexible(child: TechUi.tag(context, selectedMember)),
                     ],
-                    TechUi.tag(context, proxy.type, monoFont: true),
-                    if (proxy.isGroup && proxy.groupSelectedTagDisplay.trim().isNotEmpty) ...[
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: TechUi.tag(context, proxy.groupSelectedTagDisplay.trim()),
-                      ),
-                    ],
-                  ],
-                ),
+                  ),
+                ],
               ],
             ),
           ),
-          if (proxy.urlTestDelay != 0) TechUi.latencyPill(context, proxy.urlTestDelay),
+          if (proxy.urlTestDelay != 0)
+            TechUi.latencyPill(
+              context,
+              proxy.urlTestDelay,
+              emptyLabel: proxy.urlTestDelay >= 65000 ? t.pages.proxies.delay.timeout : null,
+            ),
         ],
       ),
     );

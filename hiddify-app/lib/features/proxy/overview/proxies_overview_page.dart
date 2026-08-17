@@ -25,28 +25,24 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
         children: [
           SafeArea(
             bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-              child: Row(
+            child: TechUi.pageIntro(
+              context,
+              title: t.pages.proxies.title,
+              subtitle: t.pages.proxies.subtitle,
+              action: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: TechUi.pageIntro(
-                      context,
-                      eyebrow: 'Nodes',
-                      title: t.pages.proxies.title,
-                      subtitle: t.pages.proxies.subtitle,
-                    ),
-                  ),
                   MenuAnchor(
                     menuChildren: [
                       for (final sort in ProxiesSort.values)
-                        MenuItemButton(
-                          onPressed: () => ref.read(proxiesSortNotifierProvider.notifier).update(sort),
-                          trailingIcon: sort == sortBy
-                              ? Icon(Icons.check_rounded, size: 16, color: ConnectionButtonTheme.accentOf(context))
-                              : null,
-                          child: Text(sort.present(t)),
-                        ),
+                        if (sort != ProxiesSort.usage)
+                          MenuItemButton(
+                            onPressed: () => ref.read(proxiesSortNotifierProvider.notifier).update(sort),
+                            trailingIcon: sort == sortBy
+                                ? Icon(Icons.check_rounded, size: 16, color: ConnectionButtonTheme.accentOf(context))
+                                : null,
+                            child: Text(sort.present(t)),
+                          ),
                     ],
                     builder: (context, controller, child) => TechUi.ghostButton(
                       context,
@@ -61,7 +57,6 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
                     onPressed: () async =>
                         await ref.read(proxiesOverviewNotifierProvider.notifier).urlTest('select'),
                   ),
-                  const Gap(20),
                 ],
               ),
             ),
@@ -73,7 +68,7 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                          padding: const EdgeInsets.fromLTRB(TechUi.pageInset, TechUi.pageBodyTop, TechUi.pageInset, 8),
                           child: Row(
                             children: [
                               TechUi.countChip(context, '${group.items.length}'),
@@ -91,7 +86,7 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
                           // Same gutters/rhythm as the subscriptions list so
                           // the cards line up page to page (prototype `.list`).
                           child: ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                            padding: const EdgeInsets.fromLTRB(TechUi.pageInset, 0, TechUi.pageInset, TechUi.pageBodyBottom),
                             separatorBuilder: (context, index) => const Gap(8),
                             itemCount: group.items.length,
                             itemBuilder: (context, index) {

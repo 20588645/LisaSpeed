@@ -18,8 +18,13 @@ func GetProxyInfo(detour adapter.Outbound) *OutboundInfo {
 		return nil
 	}
 	out := &OutboundInfo{
-		Tag:  detour.Tag(),
-		Type: detour.Type(),
+		Tag:      detour.Tag(),
+		Type:     detour.Type(),
+		IsSecure: outboundLooksSecure(detour.Type()),
+	}
+	if _, isGroup := detour.(adapter.OutboundGroup); isGroup {
+		out.IsGroup = true
+		out.IsSecure = true
 	}
 	url_test_history := static.Box.UrlTestHistory().LoadURLTestHistory(adapter.OutboundTag(detour))
 	if url_test_history != nil {
@@ -38,13 +43,18 @@ func GetProxyInfo(detour adapter.Outbound) *OutboundInfo {
 				PostalCode:  url_test_history.IpInfo.PostalCode,
 			}
 		}
-		if _, isGroup := detour.(adapter.OutboundGroup); isGroup {
-			out.IsGroup = true
-		}
-
 	}
 
 	return out
+}
+
+func outboundLooksSecure(typ string) bool {
+	switch strings.ToLower(typ) {
+	case "vless", "vmess", "trojan", "shadowsocks", "hysteria", "hysteria2", "tuic", "wireguard", "anytls", "shadowtls", "urltest", "selector":
+		return true
+	default:
+		return false
+	}
 }
 
 func GetAllProxiesInfo(onlyGroupitems bool) *OutboundGroupList {
@@ -72,7 +82,22 @@ func GetAllProxiesInfo(onlyGroupitems bool) *OutboundGroupList {
 		_, group.Selectable = iGroup.(*outbound.Selector)
 		selectedTag := iGroup.Now()
 		group.Selected = outbounds_converted[selectedTag]
-		outbounds_converted[iGroup.Tag()].GroupSelectedOutbound = group.Selected
+		if groupInfo := outbounds_converted[iGroup.Tag()]; groupInfo != nil {
+			groupInfo.GroupSelectedOutbound = group.Selected
+			// Dart stubs still read field 13/14 as strings, so the nested
+			// GroupSelectedOutbound never arrives. Put the picked tag in Host
+			// (groups have no server host) so home/tray can resolve auto → leaf
+			// without lighting a second「当前」.
+			if selectedTag != "" && selectedTag != iGroup.Tag() {
+				groupInfo.Host = selectedTag
+				if picked := outbounds_converted[selectedTag]; picked != nil {
+					groupInfo.Ipinfo = picked.Ipinfo
+					groupInfo.UrlTestDelay = picked.UrlTestDelay
+					groupInfo.UrlTestTime = picked.UrlTestTime
+					groupInfo.IsSecure = picked.IsSecure
+				}
+			}
+		}
 		if cacheFile != nil {
 			if isExpand, loaded := cacheFile.LoadGroupExpand(group.Tag); loaded {
 				group.IsExpand = isExpand
@@ -84,7 +109,11 @@ func GetAllProxiesInfo(onlyGroupitems bool) *OutboundGroupList {
 				continue
 			}
 			pinfo := outbounds_converted[itemTag]
-			pinfo.IsSelected = itemTag == selectedTag
+			// Only the user-facing selector owns "current". urltest's Now()
+			// is the auto-picked member and must not also light up 当前.
+			if group.Selectable {
+				pinfo.IsSelected = itemTag == selectedTag
+			}
 
 			group.Items = append(group.Items, pinfo)
 			pinfo.IsVisible = !strings.Contains(itemTag, "§hide§")

@@ -9,6 +9,7 @@ import 'package:hiddify/features/proxy/data/proxy_data_providers.dart';
 import 'package:hiddify/features/proxy/data/proxy_repository.dart';
 import 'package:hiddify/features/proxy/model/ip_info_entity.dart' as oldipinfo;
 import 'package:hiddify/features/proxy/model/proxy_failure.dart';
+import 'package:hiddify/features/proxy/overview/proxy_list_filter.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 
 import 'package:hiddify/utils/riverpod_utils.dart';
@@ -84,7 +85,7 @@ class ActiveProxyNotifier extends _$ActiveProxyNotifier with AppLogger {
     return _proxyRepo
         .watchActiveProxies()
         .map((event) => event.getOrElse((l) => List<OutboundGroup>.empty()))
-        .map((event) => event.firstOrNull?.items.first ?? OutboundInfo());
+        .map(resolveActiveProxy);
   }
 
   ProxyRepository get _proxyRepo => ref.read(proxyRepositoryProvider);

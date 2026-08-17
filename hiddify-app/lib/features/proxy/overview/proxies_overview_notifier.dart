@@ -9,6 +9,7 @@ import 'package:hiddify/core/utils/preferences_utils.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/proxy/data/proxy_data_providers.dart';
 import 'package:hiddify/features/proxy/model/proxy_failure.dart';
+import 'package:hiddify/features/proxy/overview/proxy_list_filter.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 
 import 'package:hiddify/utils/riverpod_utils.dart';
@@ -139,25 +140,16 @@ class ProxiesOverviewNotifier extends _$ProxiesOverviewNotifier with AppLogger {
   Future<OutboundGroup?> _sortOutbounds(OutboundGroup? proxies, ProxiesSort sortBy) async {
     if (proxies == null) return null;
 
+    final visible = visibleProxyItems(proxies.items);
     final sortedItems = switch (sortBy) {
-      ProxiesSort.name => proxies.items.sortedWith((a, b) {
+      ProxiesSort.name => visible.sortedWith((a, b) {
         if (a.isGroup && !b.isGroup) return -1;
         if (!a.isGroup && b.isGroup) return 1;
         return a.tag.compareTo(b.tag);
       }),
-      ProxiesSort.delay => proxies.items.sortedWith((a, b) {
-        if (a.isGroup && !b.isGroup) return -1;
-        if (!a.isGroup && b.isGroup) return 1;
-
-        final ai = a.urlTestDelay;
-        final bi = b.urlTestDelay;
-        if (ai == 0 && bi == 0) return -1;
-        if (ai == 0 && bi > 0) return 1;
-        if (ai > 0 && bi == 0) return -1;
-        return ai.compareTo(bi);
-      }),
-      ProxiesSort.unsorted => proxies.items,
-      ProxiesSort.usage => proxies.items.sortedWith((a, b) {
+      ProxiesSort.delay => visible.sortedWith(compareProxyDelay),
+      ProxiesSort.unsorted => visible,
+      ProxiesSort.usage => visible.sortedWith((a, b) {
         if (a.isGroup && !b.isGroup) return -1;
         if (!a.isGroup && b.isGroup) return 1;
         return (b.upload + b.download).compareTo(a.upload + a.download);
@@ -202,13 +194,13 @@ class ProxiesOverviewNotifier extends _$ProxiesOverviewNotifier with AppLogger {
 
   Future<void> changeProxy(String groupTag, String outboundTag) async {
     loggy.debug("changing proxy, group: [$groupTag] - outbound: [$outboundTag]");
-    if (!state.hasValue) return;
-    final outbounds = state.value!;
     await ref.read(hapticServiceProvider.notifier).lightImpact();
     await ref.read(proxyRepositoryProvider).selectProxy(groupTag, outboundTag).getOrElse((err) {
       loggy.warning("error selecting outbound", err);
       throw err;
     }).run();
+    if (!state.hasValue) return;
+    final outbounds = state.value!;
     // The core stream only re-emits on url-test events, so reflect the new
     // selection locally: flip the per-item flags on a copy (mutating the
     // current value in place would compare equal and skip the rebuild).

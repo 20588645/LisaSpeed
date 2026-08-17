@@ -1,11 +1,16 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
+import 'package:hiddify/features/line_health/notifier/line_health_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
+import 'package:hiddify/features/proxy/overview/proxies_overview_notifier.dart';
+import 'package:hiddify/features/proxy/overview/proxy_display.dart';
+import 'package:hiddify/features/proxy/overview/tray_proxy_menu.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/window/notifier/window_notifier.dart';
 import 'package:hiddify/gen/assets.gen.dart';
@@ -32,14 +37,13 @@ class SystemTrayNotifier extends _$SystemTrayNotifier with TrayListener, AppLogg
   }
 
   Future<void> _initializeTray() async {
-    final t = await ref.watch(translationsProvider.future);
-    final urlTestDelay = await ref
+    final activeProxy = await ref
         .watch(activeProxyNotifierProvider.future)
         .catchError((e) {
           loggy.warning("error getting active proxy", e);
           return OutboundInfo(urlTestDelay: 0);
-        })
-        .then((connection) => connection.urlTestDelay);
+        });
+    final urlTestDelay = activeProxy.urlTestDelay;
     final connection = await ref
         .watch(connectionNotifierProvider.future)
         .catchError((e) {
@@ -48,6 +52,16 @@ class SystemTrayNotifier extends _$SystemTrayNotifier with TrayListener, AppLogg
         })
         .then((connection) => _modifyConnectionStatus(connection, urlTestDelay));
     final serviceMode = ref.watch(ConfigOptions.serviceMode);
+    final t = await ref.watch(translationsProvider.future);
+    final locale = ref.watch(localePreferencesProvider);
+    final chinese = locale == AppLocale.zhCn || locale == AppLocale.zhTw;
+    final nodeTitle = proxyDisplayTitle(activeProxy, chinese: chinese, autoLabel: t.pages.proxies.autoSelect);
+    final delayText = proxyDelayLabel(
+      urlTestDelay,
+      testing: t.pages.home.delayTesting,
+      timeout: t.pages.proxies.delay.timeout,
+    );
+    final group = ref.watch(proxiesOverviewNotifierProvider).valueOrNull;
 
     await trayManager.setIcon(
       _trayIconPath(connection),
@@ -56,41 +70,73 @@ class SystemTrayNotifier extends _$SystemTrayNotifier with TrayListener, AppLogg
       // numbers tick; text-left keeps the readout anchored beside it.
       iconPosition: PlatformUtils.isMacOS ? TrayIconPosition.right : TrayIconPosition.left,
     );
-    if (!PlatformUtils.isLinux) await trayManager.setToolTip(_trayTooltip(connection, urlTestDelay, t));
-    await trayManager.setContextMenu(_trayMenu(connection, serviceMode, t));
+    if (!PlatformUtils.isLinux) {
+      await trayManager.setToolTip(_trayTooltip(connection, nodeTitle, delayText, t));
+    }
+    await trayManager.setContextMenu(_trayMenu(connection, serviceMode, t, group, chinese));
   }
 
-  Menu _trayMenu(ConnectionStatus connection, ServiceMode serviceMode, Translations t) => Menu(
-    items: [
-      // Open the main window straight from the menu bar on every desktop OS
-      // (macOS previously relied on a left-click only).
-      MenuItem(key: 'dashboard', label: t.common.dashboard),
-      MenuItem.separator(),
-      MenuItem(
-        key: 'connection',
-        label: switch (connection) {
-          Disconnected() => t.connection.connect,
-          Connecting() => t.connection.connecting,
-          Connected() => t.connection.disconnect,
-          Disconnecting() => t.connection.disconnecting,
-        },
-        disabled: connection.isSwitching,
-      ),
-      MenuItem.submenu(
-        label: t.pages.settings.inbound.serviceMode,
-        icon: Assets.images.trayIconIco,
-        submenu: Menu(
-          items: [
-            ...ServiceMode.values.map(
-              (e) => MenuItem.checkbox(checked: e == serviceMode, key: e.name, label: e.present(t)),
-            ),
-          ],
+  Menu _trayMenu(
+    ConnectionStatus connection,
+    ServiceMode serviceMode,
+    Translations t,
+    OutboundGroup? group,
+    bool chinese,
+  ) {
+    final nodes = group == null
+        ? const <TrayProxyItem>[]
+        : buildTrayProxyItems(
+            group: group,
+            chinese: chinese,
+            autoLabel: t.pages.proxies.autoSelect,
+          );
+    return Menu(
+      items: [
+        MenuItem(key: 'dashboard', label: t.common.dashboard),
+        MenuItem.separator(),
+        MenuItem(
+          key: 'connection',
+          label: switch (connection) {
+            Disconnected() => t.connection.connect,
+            Connecting() => t.connection.connecting,
+            Connected() => t.connection.disconnect,
+            Disconnecting() => t.connection.disconnecting,
+          },
+          disabled: connection.isSwitching,
         ),
-      ),
-      MenuItem.separator(),
-      MenuItem(key: 'quit', label: t.common.quit),
-    ],
-  );
+        MenuItem.submenu(
+          label: t.pages.proxies.traySwitch,
+          submenu: Menu(
+            items: nodes.isEmpty
+                ? [MenuItem(key: 'nodesHint', label: t.pages.proxies.trayNeedConnect, disabled: true)]
+                : [
+                    for (final node in nodes)
+                      MenuItem.checkbox(
+                        checked: node.selected,
+                        key: node.menuKey,
+                        label: node.label,
+                        disabled: connection.isSwitching || connection is! Connected,
+                      ),
+                  ],
+          ),
+        ),
+        MenuItem(key: 'lineHealth', label: t.pages.lineHealth.trayAction),
+        MenuItem.submenu(
+          label: t.pages.settings.inbound.serviceMode,
+          icon: Assets.images.trayIconIco,
+          submenu: Menu(
+            items: [
+              ...ServiceMode.values.map(
+                (e) => MenuItem.checkbox(checked: e == serviceMode, key: e.name, label: e.present(t)),
+              ),
+            ],
+          ),
+        ),
+        MenuItem.separator(),
+        MenuItem(key: 'quit', label: t.common.quit),
+      ],
+    );
+  }
 
   String _trayIconPath(ConnectionStatus status) {
     final isDarkMode = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
@@ -113,23 +159,22 @@ class SystemTrayNotifier extends _$SystemTrayNotifier with TrayListener, AppLogg
     }
   }
 
-  String _trayTooltip(ConnectionStatus connection, int urlTestDelay, Translations t) {
+  String _trayTooltip(ConnectionStatus connection, String nodeTitle, String delayText, Translations t) {
     final r = "${Constants.appName} - ${connection.present(t)}";
     if (connection is Connected) {
-      if (Platform.isMacOS) windowManager.setBadgeLabel("${urlTestDelay}ms");
-      return '$r : ${urlTestDelay}ms"';
+      if (Platform.isMacOS) {
+        final ms = int.tryParse(delayText.split(' ').first);
+        windowManager.setBadgeLabel(ms != null ? '${ms}ms' : '');
+      }
+      return nodeTitle.isEmpty ? '$r · $delayText' : '$r · $nodeTitle · $delayText';
     } else {
-      if (Platform.isMacOS) windowManager.setBadgeLabel("-ms");
+      if (Platform.isMacOS) windowManager.setBadgeLabel("");
       return r;
     }
   }
 
   ConnectionStatus _modifyConnectionStatus(ConnectionStatus connection, int urlTestDelay) {
-    if (connection is Connected) {
-      return urlTestDelay > 0 && urlTestDelay < 65000 ? const Connected() : const Connecting();
-    } else {
-      return connection;
-    }
+    return connection;
   }
 
   @override
@@ -137,14 +182,31 @@ class SystemTrayNotifier extends _$SystemTrayNotifier with TrayListener, AppLogg
     // if (menuItem.key == 'dashboard') {
     //   await ref.read(windowNotifierProvider.notifier).open();
     // }
-    if (menuItem.key == 'dashboard') {
+    final key = menuItem.key;
+    if (key == null || key == 'nodesHint') return;
+    if (key == 'dashboard') {
       await ref.read(windowNotifierProvider.notifier).show();
-    } else if (menuItem.key == 'connection') {
+    } else if (key == 'connection') {
       await ref.read(connectionNotifierProvider.notifier).toggleConnection();
-    } else if (menuItem.key == 'quit') {
+    } else if (key == 'quit') {
       await ref.read(windowNotifierProvider.notifier).exit();
+    } else if (key == 'lineHealth') {
+      await ref.read(lineHealthProvider.notifier).run();
+    } else if (TrayProxyItem.parseKey(key) case final parsed?) {
+      try {
+        await ref.read(proxiesOverviewNotifierProvider.notifier).changeProxy(parsed.$1, parsed.$2);
+      } catch (e) {
+        loggy.warning("tray switch node failed", e);
+      }
     } else {
-      final newMode = ServiceMode.values.byName(menuItem.key!);
+      ServiceMode? newMode;
+      for (final mode in ServiceMode.values) {
+        if (mode.name == key) {
+          newMode = mode;
+          break;
+        }
+      }
+      if (newMode == null) return;
       loggy.debug("switching service mode: [$newMode]");
       await ref.read(ConfigOptions.serviceMode.notifier).update(newMode);
     }
