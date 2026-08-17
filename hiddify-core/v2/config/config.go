@@ -197,14 +197,15 @@ func setOutbounds(options *option.Options, input *option.Options, opt *HiddifyOp
 			// IdleTimeout: option.Duration(opt.URLTestIdleTimeout.Duration()),
 			Tolerance:                 1,
 			IdleTimeout:               option.Duration(opt.URLTestInterval.Duration().Nanoseconds() * 3),
-			InterruptExistConnections: true,
+			InterruptExistConnections: false,
 		},
 	}
 	defaultSelect := urlTest.Tag
 
 	for _, tag := range tags {
 		if strings.Contains(tag, "§default§") {
-			defaultSelect = "§default§"
+			defaultSelect = tag
+			break
 		}
 	}
 	selector := option.Outbound{
@@ -213,7 +214,7 @@ func setOutbounds(options *option.Options, input *option.Options, opt *HiddifyOp
 		SelectorOptions: option.SelectorOutboundOptions{
 			Outbounds:                 append([]string{urlTest.Tag}, tags...),
 			Default:                   defaultSelect,
-			InterruptExistConnections: true,
+			InterruptExistConnections: false,
 		},
 	}
 
@@ -784,6 +785,36 @@ func setRoutingOptions(options *option.Options, opt *HiddifyOptions) {
 		})
 
 	}
+
+	// HTTP/3 over SOCKS→VLESS+WS is lossy; Chromium then shows
+	// ERR_CONNECTION_CLOSED (Douyin desktop + Chrome). Block UDP/443
+	// before mixed-in is pinned to the proxy so QUIC cannot leak through.
+	if opt.EnableTun || opt.RouteOptions.BlockQuic {
+		routeRules = append(routeRules, option.Rule{
+			Type: C.RuleTypeDefault,
+			DefaultOptions: option.DefaultRule{
+				Port:     []uint16{443},
+				Network:  []string{"udp"},
+				Outbound: OutboundBlockTag,
+			},
+		})
+	}
+
+	if opt.EnableTun {
+		// Privileged TUN already split-routed; only proxy-bound flows reach
+		// mixed-in. geosite-cn below would send those DIRECT out of the GUI
+		// process (TUN process-bypass). Office networks RST that path for
+		// Douyin while allowing Bilibili — which is why bili "worked" and
+		// Douyin did not.
+		routeRules = append(routeRules, option.Rule{
+			Type: C.RuleTypeDefault,
+			DefaultOptions: option.DefaultRule{
+				Inbound:  []string{InboundMixedTag},
+				Outbound: OutboundMainProxyTag,
+			},
+		})
+	}
+
 	if opt.Region != "other" {
 		dnsRules = append(dnsRules, option.DefaultDNSRule{
 			DomainSuffix: []string{"." + opt.Region},
@@ -860,16 +891,6 @@ func setRoutingOptions(options *option.Options, opt *HiddifyOptions) {
 					"geosite-" + opt.Region,
 				},
 				Outbound: OutboundDirectTag,
-			},
-		})
-	}
-	if opt.RouteOptions.BlockQuic {
-		routeRules = append(routeRules, option.Rule{
-			Type: C.RuleTypeDefault,
-			DefaultOptions: option.DefaultRule{
-				Port:     []uint16{443},
-				Network:  []string{"udp"},
-				Outbound: OutboundBlockTag,
 			},
 		})
 	}

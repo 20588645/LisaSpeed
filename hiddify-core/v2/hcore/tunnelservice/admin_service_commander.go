@@ -91,6 +91,28 @@ func startTunnelRequest(opt *TunnelStartRequest, installService bool) (bool, err
 	return true, nil
 }
 
+// reloadTunnelRequest replaces the running helper box (new route rules)
+// without Stop's DNS restore. The GUI core stays up.
+func reloadTunnelRequest(opt *TunnelStartRequest) error {
+	if !hutils.IsPortInUse(tunnelServicePort) {
+		return fmt.Errorf("tunnel service is not running")
+	}
+	conn, err := grpc.Dial(tunnelServiceAddress, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	c := NewTunnelServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+	res, err := c.Start(ctx, opt)
+	if err != nil {
+		log.Printf("reload tunnel failed: %+v %+v", res, err)
+		return err
+	}
+	return nil
+}
+
 func stopTunnelRequest() error {
 	conn, err := grpc.Dial(tunnelServiceAddress, grpc.WithInsecure())
 	if err != nil {

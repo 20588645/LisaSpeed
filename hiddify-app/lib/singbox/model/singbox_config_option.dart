@@ -51,6 +51,8 @@ class SingboxConfigOption with _$SingboxConfigOption {
     required bool enableFakeDns,
     // required bool enableDnsRouting,
     required bool independentDnsCache,
+    required bool officeMediaProxy,
+    required List<String> officeMediaApps,
     required Map<String, dynamic> routeRule,
     // required SingboxMuxOption mux,
     required SingboxTlsTricks tlsTricks,

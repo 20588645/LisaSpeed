@@ -112,6 +112,7 @@ func (s *CoreService) ChangeHiddifySettings(ctx context.Context, in *ChangeHiddi
 }
 
 func ChangeHiddifySettings(in *ChangeHiddifySettingsRequest, insert bool) (*CoreInfoResponse, error) {
+	oldOn, oldApps := officeMediaFingerprint()
 	static.HiddifyOptions = config.DefaultHiddifyOptions()
 	if in.HiddifySettingsJson == "" {
 		return &CoreInfoResponse{}, nil
@@ -137,6 +138,12 @@ func ChangeHiddifySettings(in *ChangeHiddifySettingsRequest, insert bool) (*Core
 		err := json.Unmarshal([]byte(static.HiddifyOptions.Warp2.WireguardConfigStr), &static.HiddifyOptions.Warp2.WireguardConfig)
 		if err != nil {
 			return nil, err
+		}
+	}
+	if insert && OnHiddifySettingsChanged != nil {
+		newOn, newApps := officeMediaFingerprint()
+		if oldOn != newOn || oldApps != newApps {
+			OnHiddifySettingsChanged()
 		}
 	}
 	return &CoreInfoResponse{}, nil

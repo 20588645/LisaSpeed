@@ -69,6 +69,12 @@ type RouteOptions struct {
 	BypassLAN              bool                  `json:"bypass-lan,omitempty"`
 	AllowConnectionFromLAN bool                  `json:"allow-connection-from-lan,omitempty"`
 	BlockQuic              bool                  `json:"block-quic,omitempty"`
+	// OfficeMediaProxy pins selected Mac apps to the node by process path.
+	// Off by default so home networks do not send Bilibili/Douyin through quota.
+	OfficeMediaProxy bool `json:"office-media-proxy"`
+	// OfficeMediaApps are .app bundle folder names without the suffix
+	// (e.g. "抖音", "汽水音乐"). Empty means process pinning is skipped.
+	OfficeMediaApps []string `json:"office-media-apps,omitempty"`
 }
 
 type TLSTricks struct {
@@ -134,6 +140,7 @@ func DefaultHiddifyOptions() *HiddifyOptions {
 			IPv6Mode:               option.DomainStrategy(dns.DomainStrategyAsIS),
 			BypassLAN:              false,
 			AllowConnectionFromLAN: false,
+			OfficeMediaProxy:       false,
 		},
 		LogLevel: "warn",
 		// LogFile:        "/dev/null",

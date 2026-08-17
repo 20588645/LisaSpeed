@@ -2,7 +2,10 @@ package tunnelservice
 
 import (
 	"fmt"
+	"net"
+	"net/netip"
 
+	"github.com/hiddify/hiddify-core/v2/hcore"
 	hutils "github.com/hiddify/hiddify-core/v2/hutils"
 	"github.com/hiddify/hiddify-core/v2/service_manager"
 	C "github.com/sagernet/sing-box/constant"
@@ -61,6 +64,14 @@ func (s *autoActivateService) OnMainServicePreStart(singconfig *option.Options) 
 	if stack == "" {
 		stack = "gvisor"
 	}
+	// TunnelStartRequest has no spare fields; piggy-back flags on Stack.
+	if hcore.OfficeMediaProxyEnabled() {
+		stack += officeMediaStackFlag
+		stack += encodeOfficeMediaApps(hcore.OfficeMediaApps())
+	}
+	for _, ip := range collectProxyDialIPs(singconfig) {
+		stack += excludeStackPrefix + ip
+	}
 
 	s.req = &TunnelStartRequest{
 		Ipv6:                   true,
@@ -95,6 +106,95 @@ func (s *autoActivateService) OnMainServiceClose() error {
 	return err
 }
 
+func reloadTunnelOfficeMedia() {
+	if autoActivate.req == nil {
+		return
+	}
+	next := applyOfficeMediaToStack(autoActivate.req.Stack, hcore.OfficeMediaProxyEnabled(), hcore.OfficeMediaApps())
+	if next == autoActivate.req.Stack {
+		return
+	}
+	autoActivate.req.Stack = next
+	fmt.Printf("Reloading privileged tunnel for office-media change\n")
+	if err := reloadTunnelRequest(autoActivate.req); err != nil {
+		fmt.Printf("office-media tunnel reload failed: %v\n", err)
+	}
+}
+
+var autoActivate = &autoActivateService{}
+
 func init() {
-	service_manager.Register(&autoActivateService{})
+	service_manager.Register(autoActivate)
+	hcore.OnHiddifySettingsChanged = reloadTunnelOfficeMedia
+}
+
+// collectProxyDialIPs returns IPv4 addresses the GUI core will dial for
+// proxy outbounds. Those must be excluded from TUN AutoRoute; otherwise the
+// node IP is captured by utun and VLESS/VMess loops through mixed-in
+// (tls: protocol is shutdown / i/o timeout to the node port).
+func collectProxyDialIPs(opt *option.Options) []string {
+	if opt == nil {
+		return nil
+	}
+	seen := map[netip.Addr]bool{}
+	var out []string
+	add := func(host string) {
+		if host == "" || host == "127.0.0.1" || host == "localhost" || host == "::1" {
+			return
+		}
+		if addr, err := netip.ParseAddr(host); err == nil {
+			if addr.Is4() && !seen[addr] {
+				seen[addr] = true
+				out = append(out, addr.String())
+			}
+			return
+		}
+		ips, err := net.LookupIP(host)
+		if err != nil {
+			return
+		}
+		for _, ip := range ips {
+			v4 := ip.To4()
+			if v4 == nil {
+				continue
+			}
+			addr, ok := netip.AddrFromSlice(v4)
+			if !ok || seen[addr] {
+				continue
+			}
+			seen[addr] = true
+			out = append(out, addr.String())
+		}
+	}
+	for _, ob := range opt.Outbounds {
+		add(outboundServerHost(ob))
+	}
+	return out
+}
+
+func outboundServerHost(ob option.Outbound) string {
+	switch ob.Type {
+	case C.TypeVLESS:
+		return ob.VLESSOptions.Server
+	case C.TypeVMess:
+		return ob.VMessOptions.Server
+	case C.TypeTrojan:
+		return ob.TrojanOptions.Server
+	case C.TypeShadowsocks:
+		return ob.ShadowsocksOptions.Server
+	case C.TypeHysteria2:
+		return ob.Hysteria2Options.Server
+	case C.TypeHysteria:
+		return ob.HysteriaOptions.Server
+	case C.TypeTUIC:
+		return ob.TUICOptions.Server
+	case C.TypeHTTP:
+		return ob.HTTPOptions.Server
+	case C.TypeSOCKS:
+		return ob.SocksOptions.Server
+	case C.TypeSSH:
+		return ob.SSHOptions.Server
+	default:
+		return ""
+	}
 }

@@ -48,6 +48,18 @@ abstract class ConfigOptions {
 
   static final resolveDestination = PreferencesNotifier.create<bool, bool>("resolve-destination", false);
 
+  /// Pin selected Mac apps to the node by process path. Off by default.
+  static final officeMediaProxy = PreferencesNotifier.create<bool, bool>("office-media-proxy", false);
+
+  /// .app bundle folder names (no suffix) pinned to the node when
+  /// [officeMediaProxy] is on. Empty until the user picks apps.
+  static final officeMediaApps = PreferencesNotifier.create<List<String>, String>(
+    "office-media-apps",
+    const [],
+    mapFrom: (value) => value.split(';').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+    mapTo: (value) => value.join(';'),
+  );
+
   static final ipv6Mode = PreferencesNotifier.create<IPv6Mode, String>(
     "ipv6-mode",
     IPv6Mode.disable,
@@ -358,6 +370,8 @@ abstract class ConfigOptions {
     "service-mode": serviceMode,
     "log-level": logLevel,
     "resolve-destination": resolveDestination,
+    "office-media-proxy": officeMediaProxy,
+    "office-media-apps": officeMediaApps,
     "ipv6-mode": ipv6Mode,
     "remote-dns-address": remoteDnsAddress,
     "remote-dns-domain-strategy": remoteDnsDomainStrategy,
@@ -503,6 +517,8 @@ abstract class ConfigOptions {
       enableFakeDns: ref.watch(enableFakeDns),
       // enableDnsRouting: ref.watch(enableDnsRouting),
       independentDnsCache: ref.watch(independentDnsCache),
+      officeMediaProxy: ref.watch(officeMediaProxy),
+      officeMediaApps: ref.watch(officeMediaApps),
       // mux: SingboxMuxOption(
       //   enable: ref.watch(enableMux),
       //   padding: ref.watch(muxPadding),

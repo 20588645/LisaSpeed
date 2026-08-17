@@ -1,6 +1,7 @@
 package hcore
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/hiddify/hiddify-core/v2/config"
@@ -24,6 +25,36 @@ type HiddifyInstance struct {
 	globalPlatformInterface   libbox.PlatformInterface
 	previousStartRequest      *StartRequest
 	debug                     bool
+}
+
+// OnHiddifySettingsChanged runs after ChangeHiddifySettings applies a new
+// JSON blob. The privileged tunnel uses this to refresh office-media process
+// routing without restarting the GUI core (which would drop the session).
+var OnHiddifySettingsChanged func()
+
+// OfficeMediaProxyEnabled reports whether selected Mac apps should be pinned
+// to the selected node.
+func OfficeMediaProxyEnabled() bool {
+	if static.HiddifyOptions == nil {
+		return false
+	}
+	return static.HiddifyOptions.OfficeMediaProxy
+}
+
+// OfficeMediaApps returns .app bundle folder names (no suffix) whose
+// processes should be pinned to the node when OfficeMediaProxy is on.
+func OfficeMediaApps() []string {
+	if static.HiddifyOptions == nil {
+		return nil
+	}
+	return static.HiddifyOptions.OfficeMediaApps
+}
+
+func officeMediaFingerprint() (bool, string) {
+	if static.HiddifyOptions == nil {
+		return false, ""
+	}
+	return static.HiddifyOptions.OfficeMediaProxy, strings.Join(static.HiddifyOptions.OfficeMediaApps, "\x1f")
 }
 
 var static = &HiddifyInstance{

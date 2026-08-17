@@ -76,9 +76,9 @@ func StartTunnelService(goArg string) (int, string) {
 
 	svcConfig := &service.Config{
 		Name:        "HiddifyTunnelService",
-		DisplayName: "Hiddify Tunnel Service",
+		DisplayName: "LisaSpeed Tunnel",
 		Arguments:   []string{"tunnel", "run"},
-		Description: "This is a bridge for tunnel",
+		Description: "Privileged tunnel helper for LisaSpeed",
 		Option: map[string]interface{}{
 			"RunAtLoad":        true,
 			"WorkingDirectory": workDir,
