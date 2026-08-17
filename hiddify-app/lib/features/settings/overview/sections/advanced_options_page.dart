@@ -9,9 +9,13 @@ import 'package:hiddify/features/common/general_pref_tiles.dart';
 import 'package:hiddify/features/log/model/log_level.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
+import 'package:hiddify/features/settings/notifier/config_option/config_option_notifier.dart';
+import 'package:hiddify/features/settings/notifier/reset_tunnel/reset_tunnel_notifier.dart';
 import 'package:hiddify/features/settings/overview/sections/chain_options_page.dart';
 import 'package:hiddify/features/settings/overview/sections/dns_options_page.dart';
+import 'package:hiddify/features/settings/overview/sections/routing_options_page.dart';
 import 'package:hiddify/features/settings/overview/sections/tls_tricks_page.dart';
+import 'package:hiddify/features/settings/widget/lan_sharing_tile.dart';
 import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/utils/utils.dart';
@@ -72,6 +76,22 @@ class AdvancedOptionsPage extends HookConsumerWidget {
         validateInput: isPort,
         trailing: SwitchPreferenceWidget(preference: ConfigOptions.enableDirectPort),
       ),
+      ValuePreferenceWidget(
+        value: ref.watch(ConfigOptions.mixedPort),
+        preferences: ref.watch(ConfigOptions.mixedPort.notifier),
+        title: t.pages.settings.inbound.mixedPort,
+        inputToValue: int.tryParse,
+        digitsOnly: true,
+        validateInput: isPort,
+        trailing: SwitchPreferenceWidget(preference: ConfigOptions.enableMixedPort),
+      ),
+      const LanSharingPreferenceWidget(),
+      TechUi.formSwitchRow(
+        context,
+        title: t.pages.settings.general.autoIpCheck,
+        value: ref.watch(Preferences.autoCheckIp),
+        onChanged: ref.read(Preferences.autoCheckIp.notifier).update,
+      ),
       TechUi.formSwitchRow(
         context,
         title: t.pages.settings.general.useXrayCoreWhenPossible,
@@ -89,6 +109,13 @@ class AdvancedOptionsPage extends HookConsumerWidget {
     ];
 
     final debugRows = <Widget>[
+      if (PlatformUtils.isDesktop)
+        TechUi.formSwitchRow(
+          context,
+          title: t.pages.settings.general.silentStart,
+          value: ref.watch(Preferences.silentStart),
+          onChanged: ref.read(Preferences.silentStart.notifier).update,
+        ),
       TechUi.formSwitchRow(
         context,
         title: t.pages.settings.general.debugMode,
@@ -146,6 +173,7 @@ class AdvancedOptionsPage extends HookConsumerWidget {
 
     final dnsRows = dnsOptionRows(context, ref, t);
     final tlsRows = tlsTrickRows(context, ref, t);
+    final routingRows = routingEngineOptionRows(context, ref, t);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -156,7 +184,6 @@ class AdvancedOptionsPage extends HookConsumerWidget {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'Advanced',
               title: t.pages.settings.advanced.title,
               subtitle: t.pages.settings.advanced.subtitle,
               onBack: () => context.pop(),
@@ -175,6 +202,11 @@ class AdvancedOptionsPage extends HookConsumerWidget {
                     children: [
                       TechUi.formSectionTitle(context, t.pages.settings.advanced.sectionCore, first: true),
                       for (final row in coreRows) ...[
+                        const SizedBox(height: 10),
+                        row,
+                      ],
+                      TechUi.formSectionTitle(context, t.pages.settings.advanced.sectionRouting),
+                      for (final row in routingRows) ...[
                         const SizedBox(height: 10),
                         row,
                       ],
@@ -211,6 +243,15 @@ class AdvancedOptionsPage extends HookConsumerWidget {
                         const SizedBox(height: 10),
                         row,
                       ],
+                      const SizedBox(height: 12),
+                      _ConfigBackupActions(),
+                      if (PlatformUtils.isIOS) ...[
+                        const SizedBox(height: 10),
+                        PreferenceRow(
+                          title: t.pages.settings.resetTunnel,
+                          onTap: () async => await ref.read(resetTunnelNotifierProvider.notifier).run(),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -219,6 +260,89 @@ class AdvancedOptionsPage extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ConfigBackupActions extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(translationsProvider).requireValue;
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        MenuAnchor(
+          menuChildren: <Widget>[
+            MenuItemButton(
+              onPressed: () async => await ref
+                  .read(dialogNotifierProvider.notifier)
+                  .showConfirmation(
+                    title: t.common.msg.import.confirm,
+                    message: t.dialogs.confirmation.settings.import.msg,
+                  )
+                  .then((shouldImport) async {
+                    if (shouldImport) {
+                      await ref.read(configOptionNotifierProvider.notifier).importFromClipboard();
+                    }
+                  }),
+              child: Text(t.pages.settings.options.import.clipboard),
+            ),
+            MenuItemButton(
+              onPressed: () async => await ref
+                  .read(dialogNotifierProvider.notifier)
+                  .showConfirmation(
+                    title: t.common.msg.import.confirm,
+                    message: t.dialogs.confirmation.settings.import.msg,
+                  )
+                  .then((shouldImport) async {
+                    if (shouldImport) {
+                      await ref.read(configOptionNotifierProvider.notifier).importFromJsonFile();
+                    }
+                  }),
+              child: Text(t.pages.settings.options.import.file),
+            ),
+          ],
+          builder: (context, controller, child) => TechUi.ghostButton(
+            context,
+            label: t.common.import,
+            onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+          ),
+        ),
+        MenuAnchor(
+          menuChildren: <Widget>[
+            MenuItemButton(
+              onPressed: () async => await ref.read(configOptionNotifierProvider.notifier).exportJsonClipboard(),
+              child: Text(t.pages.settings.options.export.anonymousToClipboard),
+            ),
+            MenuItemButton(
+              onPressed: () async => await ref.read(configOptionNotifierProvider.notifier).exportJsonFile(),
+              child: Text(t.pages.settings.options.export.anonymousToFile),
+            ),
+            const PopupMenuDivider(),
+            MenuItemButton(
+              onPressed: () async =>
+                  await ref.read(configOptionNotifierProvider.notifier).exportJsonClipboard(excludePrivate: false),
+              child: Text(t.pages.settings.options.export.allToClipboard),
+            ),
+            MenuItemButton(
+              onPressed: () async =>
+                  await ref.read(configOptionNotifierProvider.notifier).exportJsonFile(excludePrivate: false),
+              child: Text(t.pages.settings.options.export.allToFile),
+            ),
+          ],
+          builder: (context, controller, child) => TechUi.ghostButton(
+            context,
+            label: t.common.export,
+            onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+          ),
+        ),
+        TechUi.ghostButton(
+          context,
+          label: t.pages.settings.options.reset,
+          onPressed: () async => await ref.read(configOptionNotifierProvider.notifier).resetOption(),
+        ),
+      ],
     );
   }
 }

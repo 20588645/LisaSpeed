@@ -4,7 +4,6 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
-import 'package:hiddify/features/settings/widget/lan_sharing_tile.dart';
 import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/utils/utils.dart';
@@ -25,7 +24,6 @@ class InboundOptionsPage extends HookConsumerWidget with AppLogger {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'Connection',
               title: t.pages.settings.inbound.title,
               onBack: () => context.pop(),
             ),
@@ -44,24 +42,6 @@ class InboundOptionsPage extends HookConsumerWidget with AppLogger {
                   title: t.pages.settings.inbound.serviceMode,
                   presentChoice: (value) => value.present(t),
                 ),
-                TechUi.formSwitchRow(
-                  context,
-                  title: t.pages.settings.general.autoIpCheck,
-                  value: ref.watch(Preferences.autoCheckIp),
-                  onChanged: ref.read(Preferences.autoCheckIp.notifier).update,
-                ),
-                TechUi.formSectionTitle(context, t.pages.settings.inbound.sectionPorts),
-                ValuePreferenceWidget(
-                  value: ref.watch(ConfigOptions.mixedPort),
-                  preferences: ref.watch(ConfigOptions.mixedPort.notifier),
-                  title: t.pages.settings.inbound.mixedPort,
-                  inputToValue: int.tryParse,
-                  digitsOnly: true,
-                  validateInput: isPort,
-                  trailing: SwitchPreferenceWidget(preference: ConfigOptions.enableMixedPort),
-                ),
-                TechUi.formSectionTitle(context, t.pages.settings.inbound.sectionSharing),
-                const LanSharingPreferenceWidget(),
                 TechUi.formSectionTitle(context, t.connection.watchdog.section),
                 TechUi.formSwitchRow(
                   context,

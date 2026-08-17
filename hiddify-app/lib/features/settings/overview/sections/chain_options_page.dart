@@ -21,6 +21,13 @@ List<Widget> chainTimelineSections(BuildContext context, WidgetRef ref, Translat
   final theme = Theme.of(context);
   final profiles = ref.watch(profilesNotifierProvider).value ?? [];
   return [
+    Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        t.pages.settings.chain.experimentalWarning,
+        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      ),
+    ),
     const ChainTimeline(level: ChainTimelineLevel.app),
           ChainTimeline(
             level: ChainTimelineLevel.extraSecurity,
@@ -209,7 +216,6 @@ class ChainOptionsPage extends HookConsumerWidget {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'Chain',
               title: t.pages.settings.chain.title,
               subtitle: t.pages.settings.chain.subtitle,
               onBack: () => context.pop(),

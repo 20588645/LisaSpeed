@@ -57,7 +57,6 @@ class DnsOptionsPage extends HookConsumerWidget {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'DNS',
               title: t.pages.settings.dns.title,
               onBack: () => context.pop(),
             ),

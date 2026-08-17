@@ -92,7 +92,6 @@ class TlsTricksPage extends HookConsumerWidget {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'TLS',
               title: t.pages.settings.tlsTricks.title,
               onBack: () => context.pop(),
             ),

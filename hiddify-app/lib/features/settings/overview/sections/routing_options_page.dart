@@ -64,100 +64,44 @@ class RoutingOptionsPage extends HookConsumerWidget {
         }
       });
     });
-    final generalOptionsPanel = Padding(
-      padding: const EdgeInsets.fromLTRB(12, 16, 12, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            decoration: TechUi.panelDecoration(context),
-            clipBehavior: Clip.antiAlias,
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TechUi.formSectionTitle(context, t.pages.settings.routing.generalOptions.title, first: true),
-                const Gap(10),
-                ChoicePreferenceWidget(
-                  selected: ref.watch(ConfigOptions.region),
-                  preferences: ref.watch(ConfigOptions.region.notifier),
-                  choices: Region.values,
-                  title: t.pages.settings.routing.generalOptions.region,
-                  showFlag: true,
-                  presentChoice: (value) => value.present(t),
-                  onChanged: (val) async {
-                    await ref.read(ConfigOptions.directDnsAddress.notifier).reset();
-                    final autoRegion = ref.read(Preferences.autoAppsSelectionRegion);
-                    final mode = ref.read(Preferences.perAppProxyMode).toAppProxy();
-                    if (autoRegion != val &&
-                        autoRegion != null &&
-                        val != Region.other &&
-                        mode != null &&
-                        PlatformUtils.isAndroid) {
-                      await ref
-                          .read(dialogNotifierProvider.notifier)
-                          .showOk(
-                            t.pages.settings.routing.generalOptions.perAppProxy.autoSelection.dialog.title,
-                            t.pages.settings.routing.generalOptions.perAppProxy.autoSelection.dialog.msg(
-                              region: val.name,
-                            ),
-                          );
-                      await ref.read(PerAppProxyProvider(mode).notifier).clearAutoSelected();
-                    }
-                  },
-                ),
-                if (PlatformUtils.isAndroid) ...[
-                  const Gap(10),
-                  PreferenceRow(
-                    title: t.pages.settings.routing.generalOptions.perAppProxy.title,
-                    trailing: Transform.scale(
-                      scale: 0.8,
-                      child: Switch(
-                        value: perAppProxy,
-                        onChanged: (value) async {
-                          final newMode = perAppProxy ? PerAppProxyMode.off : PerAppProxyMode.exclude;
-                          await ref.read(Preferences.perAppProxyMode.notifier).update(newMode);
-                          if (!perAppProxy && context.mounted) context.goNamed('perAppProxy');
-                        },
-                      ),
-                    ),
-                    onTap: () async {
-                      if (!perAppProxy) {
-                        await ref.read(Preferences.perAppProxyMode.notifier).update(PerAppProxyMode.exclude);
-                      }
-                      if (context.mounted) context.goNamed('perAppProxy');
+    Widget? androidPerAppPanel;
+    if (PlatformUtils.isAndroid) {
+      androidPerAppPanel = Padding(
+        padding: const EdgeInsets.fromLTRB(12, 16, 12, 0),
+        child: Container(
+          decoration: TechUi.panelDecoration(context),
+          clipBehavior: Clip.antiAlias,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TechUi.formSectionTitle(context, t.pages.settings.routing.generalOptions.perAppProxy.title, first: true),
+              const Gap(10),
+              PreferenceRow(
+                title: t.pages.settings.routing.generalOptions.perAppProxy.title,
+                trailing: Transform.scale(
+                  scale: 0.8,
+                  child: Switch(
+                    value: perAppProxy,
+                    onChanged: (value) async {
+                      final newMode = perAppProxy ? PerAppProxyMode.off : PerAppProxyMode.exclude;
+                      await ref.read(Preferences.perAppProxyMode.notifier).update(newMode);
+                      if (!perAppProxy && context.mounted) context.goNamed('perAppProxy');
                     },
                   ),
-                ],
-                const Gap(10),
-                ChoicePreferenceWidget(
-                  title: t.pages.settings.routing.generalOptions.balancerStrategy.title,
-                  selected: ref.watch(ConfigOptions.balancerStrategy),
-                  preferences: ref.watch(ConfigOptions.balancerStrategy.notifier),
-                  choices: BalancerStrategy.values,
-                  presentChoice: (value) => value.present(t),
                 ),
-                const Gap(10),
-                TechUi.formSwitchRow(
-                  context,
-                  title: t.pages.settings.routing.generalOptions.resolveDestination,
-                  value: ref.watch(ConfigOptions.resolveDestination),
-                  onChanged: ref.read(ConfigOptions.resolveDestination.notifier).update,
-                ),
-                const Gap(10),
-                ChoicePreferenceWidget(
-                  selected: ref.watch(ConfigOptions.ipv6Mode),
-                  preferences: ref.watch(ConfigOptions.ipv6Mode.notifier),
-                  choices: IPv6Mode.values,
-                  title: t.pages.settings.routing.generalOptions.ipv6Route,
-                  presentChoice: (value) => value.present(t),
-                ),
-              ],
-            ),
+                onTap: () async {
+                  if (!perAppProxy) {
+                    await ref.read(Preferences.perAppProxyMode.notifier).update(PerAppProxyMode.exclude);
+                  }
+                  if (context.mounted) context.goNamed('perAppProxy');
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ),
+      );
+    }
 
     final rulesHeader = Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -199,7 +143,6 @@ class RoutingOptionsPage extends HookConsumerWidget {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'Routing',
               title: t.pages.settings.routing.title,
               subtitle: t.pages.settings.routing.desc,
               onBack: () => context.pop(),
@@ -245,7 +188,7 @@ class RoutingOptionsPage extends HookConsumerWidget {
                     buildDefaultDragHandles: false,
                     onReorder: ref.read(rulesNotifierProvider.notifier).reorder,
                     header: rulesHeader,
-                    footer: generalOptionsPanel,
+                    footer: androidPerAppPanel,
                     itemBuilder: (context, index) =>
                         RuleTile(key: Key('$index'), index: index, rule: rules[index]),
                     itemCount: rules.length,
@@ -266,7 +209,7 @@ class RoutingOptionsPage extends HookConsumerWidget {
                           ),
                         ),
                       ),
-                      generalOptionsPanel,
+                      if (androidPerAppPanel != null) androidPerAppPanel,
                     ],
                   ),
           ),
@@ -274,4 +217,58 @@ class RoutingOptionsPage extends HookConsumerWidget {
       ),
     );
   }
+}
+
+/// Region / balancer / IPv6 knobs — used by Advanced, not the everyday routing page.
+List<Widget> routingEngineOptionRows(BuildContext context, WidgetRef ref, Translations t) {
+  return [
+    ChoicePreferenceWidget(
+      selected: ref.watch(ConfigOptions.region),
+      preferences: ref.watch(ConfigOptions.region.notifier),
+      choices: Region.values,
+      title: t.pages.settings.routing.generalOptions.region,
+      showFlag: true,
+      presentChoice: (value) => value.present(t),
+      onChanged: (val) async {
+        await ref.read(ConfigOptions.directDnsAddress.notifier).reset();
+        final autoRegion = ref.read(Preferences.autoAppsSelectionRegion);
+        final mode = ref.read(Preferences.perAppProxyMode).toAppProxy();
+        if (autoRegion != val &&
+            autoRegion != null &&
+            val != Region.other &&
+            mode != null &&
+            PlatformUtils.isAndroid) {
+          await ref
+              .read(dialogNotifierProvider.notifier)
+              .showOk(
+                t.pages.settings.routing.generalOptions.perAppProxy.autoSelection.dialog.title,
+                t.pages.settings.routing.generalOptions.perAppProxy.autoSelection.dialog.msg(
+                  region: val.name,
+                ),
+              );
+          await ref.read(PerAppProxyProvider(mode).notifier).clearAutoSelected();
+        }
+      },
+    ),
+    ChoicePreferenceWidget(
+      title: t.pages.settings.routing.generalOptions.balancerStrategy.title,
+      selected: ref.watch(ConfigOptions.balancerStrategy),
+      preferences: ref.watch(ConfigOptions.balancerStrategy.notifier),
+      choices: BalancerStrategy.values,
+      presentChoice: (value) => value.present(t),
+    ),
+    TechUi.formSwitchRow(
+      context,
+      title: t.pages.settings.routing.generalOptions.resolveDestination,
+      value: ref.watch(ConfigOptions.resolveDestination),
+      onChanged: ref.read(ConfigOptions.resolveDestination.notifier).update,
+    ),
+    ChoicePreferenceWidget(
+      selected: ref.watch(ConfigOptions.ipv6Mode),
+      preferences: ref.watch(ConfigOptions.ipv6Mode.notifier),
+      choices: IPv6Mode.values,
+      title: t.pages.settings.routing.generalOptions.ipv6Route,
+      presentChoice: (value) => value.present(t),
+    ),
+  ];
 }

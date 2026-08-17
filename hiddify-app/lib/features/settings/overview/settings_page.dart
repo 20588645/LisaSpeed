@@ -1,68 +1,111 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
-import 'package:hiddify/core/theme/theme_extensions.dart';
+import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
-import 'package:hiddify/features/settings/notifier/config_option/config_option_notifier.dart';
-import 'package:hiddify/features/settings/notifier/reset_tunnel/reset_tunnel_notifier.dart';
+import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
+import 'package:hiddify/features/common/general_pref_tiles.dart';
+import 'package:hiddify/features/dev_update/widget/local_update_dialog.dart';
+import 'package:hiddify/features/settings/data/config_option_repository.dart';
+import 'package:hiddify/features/settings/widget/preference_tile.dart';
+import 'package:hiddify/features/settings/widget/restore_network_tile.dart';
+import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-enum ConfigOptionSection {
-  warp,
-  fragment;
-
-  static final _warpKey = GlobalKey(debugLabel: "warp-section-key");
-  static final _fragmentKey = GlobalKey(debugLabel: "fragment-section-key");
-
-  GlobalKey get key => switch (this) {
-    ConfigOptionSection.warp => _warpKey,
-    ConfigOptionSection.fragment => _fragmentKey,
-  };
-}
-
 class SettingsPage extends HookConsumerWidget {
-  SettingsPage({super.key, String? section})
-    : section = section != null ? ConfigOptionSection.values.byName(section) : null;
-
-  final ConfigOptionSection? section;
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
+    final autoStart = ref.watch(autoStartNotifierProvider);
+    final hostEnabled = ref.watch(Preferences.hostPanelEnabled);
 
-    final sections = <({String title, String desc, String location})>[
-      (
-        title: t.pages.settings.general.title,
-        desc: t.pages.settings.general.desc,
-        location: context.namedLocation('general'),
+    final everyday = <Widget>[
+      TechUi.formSectionTitle(context, t.pages.settings.general.sectionAppearance, first: true),
+      const LocalePrefTile(),
+      const AppearancePrefBlock(),
+      TechUi.formSectionTitle(context, t.pages.settings.inbound.sectionMode),
+      ChoicePreferenceWidget(
+        selected: ref.watch(ConfigOptions.serviceMode),
+        preferences: ref.watch(ConfigOptions.serviceMode.notifier),
+        choices: ServiceMode.choices,
+        title: t.pages.settings.inbound.serviceMode,
+        presentChoice: (value) => value.present(t),
       ),
-      (
-        title: t.pages.settings.inbound.title,
-        desc: t.pages.settings.inbound.desc,
-        location: context.namedLocation('inboundOptions'),
+      TechUi.formSwitchRow(
+        context,
+        title: t.connection.watchdog.autoReconnect,
+        subtitle: t.connection.watchdog.autoReconnectMsg,
+        value: ref.watch(Preferences.autoReconnectOnStall),
+        onChanged: ref.read(Preferences.autoReconnectOnStall.notifier).update,
       ),
+      if (PlatformUtils.isMacOS) ...[
+        TechUi.formSectionTitle(context, t.pages.settings.general.sectionNetwork),
+        const RestoreNetworkTile(),
+      ],
+      if (PlatformUtils.isDesktop) ...[
+        TechUi.formSectionTitle(context, t.pages.settings.general.sectionStartup),
+        const ClosingPrefTile(),
+        TechUi.formSwitchRow(
+          context,
+          title: t.pages.settings.general.autoStart,
+          value: autoStart.value ?? false,
+          onChanged: autoStart.isLoading
+              ? null
+              : (value) async => value
+                    ? await ref.read(autoStartNotifierProvider.notifier).enable()
+                    : await ref.read(autoStartNotifierProvider.notifier).disable(),
+        ),
+        if (PlatformUtils.isMacOS)
+          TechUi.formSwitchRow(
+            context,
+            title: t.pages.settings.general.trayLiveSpeed,
+            subtitle: t.pages.settings.general.trayLiveSpeedMsg,
+            value: ref.watch(Preferences.showTraySpeed),
+            onChanged: ref.read(Preferences.showTraySpeed.notifier).update,
+          ),
+      ],
+      TechUi.formSectionTitle(context, t.pages.settings.general.sectionHostPanel),
+      TechUi.formSwitchRow(
+        context,
+        title: t.pages.settings.general.hostPanelEnabled,
+        subtitle: t.pages.settings.general.hostPanelEnabledMsg,
+        value: hostEnabled,
+        onChanged: ref.read(Preferences.hostPanelEnabled.notifier).update,
+      ),
+      if (hostEnabled) ...[
+        ValuePreferenceWidget<String>(
+          value: ref.watch(Preferences.hostPanelEmail),
+          preferences: ref.watch(Preferences.hostPanelEmail.notifier),
+          title: t.pages.settings.general.hostPanelEmail,
+          presentValue: (value) => value.isEmpty ? '—' : value,
+        ),
+        ValuePreferenceWidget<String>(
+          value: ref.watch(Preferences.hostPanelPassword),
+          preferences: ref.watch(Preferences.hostPanelPassword.notifier),
+          title: t.pages.settings.general.hostPanelPassword,
+          presentValue: (value) => value.isEmpty ? '—' : '••••••••',
+        ),
+      ],
+    ];
+
+    final more = <({String title, String desc, String location})>[
       (
         title: t.pages.settings.routing.title,
         desc: t.pages.settings.routing.desc,
         location: context.namedLocation('routingOptions'),
       ),
       (
-        title: t.pages.settings.advanced.title,
-        desc: t.pages.settings.advanced.subtitle,
-        location: context.namedLocation('advancedOptions'),
-      ),
-      (
-        title: t.pages.logs.title,
-        desc: t.pages.logs.desc,
-        location: context.namedLocation('logs'),
-      ),
-      (
         title: t.pages.about.title,
         desc: t.pages.about.desc,
         location: context.namedLocation('about'),
+      ),
+      (
+        title: t.pages.settings.advanced.title,
+        desc: t.pages.settings.advanced.subtitle,
+        location: context.namedLocation('advancedOptions'),
       ),
     ];
 
@@ -73,174 +116,48 @@ class SettingsPage extends HookConsumerWidget {
         children: [
           SafeArea(
             bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TechUi.pageIntro(
+            child: TechUi.pageIntro(
+              context,
+              title: t.pages.settings.title,
+              subtitle: t.pages.settings.subtitle,
+              action: PlatformUtils.isMacOS
+                  ? TechUi.primaryButton(
                       context,
-                      eyebrow: 'Settings',
-                      title: t.pages.settings.title,
-                      subtitle: t.pages.settings.subtitle,
-                    ),
-                  ),
-                  MenuAnchor(
-                    menuChildren: <Widget>[
-                      MenuItemButton(
-                        onPressed: () async => await ref
-                            .read(dialogNotifierProvider.notifier)
-                            .showConfirmation(
-                              title: t.common.msg.import.confirm,
-                              message: t.dialogs.confirmation.settings.import.msg,
-                            )
-                            .then((shouldImport) async {
-                              if (shouldImport) {
-                                await ref.read(configOptionNotifierProvider.notifier).importFromClipboard();
-                              }
-                            }),
-                        child: Text(t.pages.settings.options.import.clipboard),
-                      ),
-                      MenuItemButton(
-                        onPressed: () async => await ref
-                            .read(dialogNotifierProvider.notifier)
-                            .showConfirmation(
-                              title: t.common.msg.import.confirm,
-                              message: t.dialogs.confirmation.settings.import.msg,
-                            )
-                            .then((shouldImport) async {
-                              if (shouldImport) {
-                                await ref.read(configOptionNotifierProvider.notifier).importFromJsonFile();
-                              }
-                            }),
-                        child: Text(t.pages.settings.options.import.file),
-                      ),
-                    ],
-                    builder: (context, controller, child) => TechUi.ghostButton(
-                      context,
-                      label: t.common.import,
-                      onPressed: () => controller.isOpen ? controller.close() : controller.open(),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  MenuAnchor(
-                    menuChildren: <Widget>[
-                      MenuItemButton(
-                        onPressed: () async =>
-                            await ref.read(configOptionNotifierProvider.notifier).exportJsonClipboard(),
-                        child: Text(t.pages.settings.options.export.anonymousToClipboard),
-                      ),
-                      MenuItemButton(
-                        onPressed: () async =>
-                            await ref.read(configOptionNotifierProvider.notifier).exportJsonFile(),
-                        child: Text(t.pages.settings.options.export.anonymousToFile),
-                      ),
-                      const PopupMenuDivider(),
-                      MenuItemButton(
-                        onPressed: () async => await ref
-                            .read(configOptionNotifierProvider.notifier)
-                            .exportJsonClipboard(excludePrivate: false),
-                        child: Text(t.pages.settings.options.export.allToClipboard),
-                      ),
-                      MenuItemButton(
-                        onPressed: () async => await ref
-                            .read(configOptionNotifierProvider.notifier)
-                            .exportJsonFile(excludePrivate: false),
-                        child: Text(t.pages.settings.options.export.allToFile),
-                      ),
-                    ],
-                    builder: (context, controller, child) => TechUi.ghostButton(
-                      context,
-                      label: t.common.export,
-                      onPressed: () => controller.isOpen ? controller.close() : controller.open(),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  TechUi.ghostButton(
-                    context,
-                    label: t.pages.settings.options.reset,
-                    onPressed: () async => await ref.read(configOptionNotifierProvider.notifier).resetOption(),
-                  ),
-                  const SizedBox(width: 20),
-                ],
-              ),
+                      label: t.pages.about.localUpdate,
+                      onPressed: () => LocalUpdateDialog.show(context),
+                    )
+                  : null,
             ),
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              padding: TechUi.pageBodyPadding,
               children: [
-                // Prototype `.settings-grid`: two columns of numbered cards.
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final twoColumns = constraints.maxWidth >= 560;
-                    if (!twoColumns) {
-                      return Column(
-                        children: [
-                          for (final (i, section) in sections.indexed) ...[
-                            if (i > 0) const Gap(12),
-                            TechUi.hubCard(
-                              context,
-                              index: i + 1,
-                              title: section.title,
-                              subtitle: Text(section.desc),
-                              onTap: () => context.go(section.location),
-                            ),
-                          ],
-                        ],
-                      );
-                    }
-                    return Column(
-                      children: [
-                        for (var row = 0; row < sections.length; row += 2) ...[
-                          if (row > 0) const Gap(12),
-                          IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                for (var col = 0; col < 2; col++) ...[
-                                  if (col > 0) const Gap(12),
-                                  Expanded(
-                                    child: row + col < sections.length
-                                        ? TechUi.hubCard(
-                                            context,
-                                            index: row + col + 1,
-                                            title: sections[row + col].title,
-                                            subtitle: Text(sections[row + col].desc),
-                                            onTap: () => context.go(sections[row + col].location),
-                                          )
-                                        : const SizedBox(),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
+                Container(
+                  decoration: TechUi.panelDecoration(context),
+                  clipBehavior: Clip.antiAlias,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final (i, child) in everyday.indexed) ...[
+                        if (i > 0) const SizedBox(height: 10),
+                        child,
                       ],
-                    );
-                  },
-                ),
-                if (PlatformUtils.isIOS)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: () async {
-                          await ref.read(resetTunnelNotifierProvider.notifier).run();
-                        },
-                        child: Ink(
-                          decoration: TechUi.panelDecoration(context),
-                          child: ListTile(
-                            title: Text(t.pages.settings.resetTunnel),
-                            leading: Icon(Icons.autorenew_rounded, color: ConnectionButtonTheme.accentOf(context)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                        ),
-                      ),
-                    ),
+                    ],
                   ),
+                ),
+                const SizedBox(height: 16),
+                TechUi.formSectionTitle(context, t.pages.settings.sectionMore, first: true),
+                const SizedBox(height: 8),
+                for (final (i, item) in more.indexed) ...[
+                  if (i > 0) const SizedBox(height: 10),
+                  _MoreEntry(
+                    title: item.title,
+                    desc: item.desc,
+                    onTap: () => context.go(item.location),
+                  ),
+                ],
               ],
             ),
           ),
@@ -250,28 +167,54 @@ class SettingsPage extends HookConsumerWidget {
   }
 }
 
-class SettingsSection extends HookConsumerWidget {
-  const SettingsSection({
-    super.key,
+class _MoreEntry extends StatelessWidget {
+  const _MoreEntry({
     required this.title,
-    this.subtitle,
-    required this.namedLocation,
-    this.index = 1,
+    required this.desc,
+    required this.onTap,
   });
 
   final String title;
-  final Widget? subtitle;
-  final String namedLocation;
-  final int index;
+  final String desc;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return TechUi.hubCard(
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return TechUi.listRow(
       context,
-      index: index,
-      title: title,
-      subtitle: subtitle,
-      onTap: () => context.go(namedLocation),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, fontSize: 15),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  desc,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '›',
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 20,
+              height: 1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
