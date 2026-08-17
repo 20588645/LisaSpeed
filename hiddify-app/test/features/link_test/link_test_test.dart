@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hiddify/features/link_test/data/link_test_catalog.dart';
 import 'package:hiddify/features/link_test/data/link_tester.dart';
 import 'package:hiddify/features/link_test/model/link_test_target.dart';
+import 'package:hiddify/features/link_test/model/probe_grade.dart';
 
 void main() {
   test('catalog has both domestic and overseas sites', () {
@@ -47,5 +48,14 @@ void main() {
     );
     expect(t.host, 'www.google.com');
     expect(t.displayName(chinese: true), 'Google');
+  });
+
+  test('homepage probe latency is graded, not treated as a usable page', () {
+    expect(gradeLatencyMs(0), ProbeGrade.ok);
+    expect(gradeLatencyMs(399), ProbeGrade.ok);
+    expect(gradeLatencyMs(400), ProbeGrade.sluggish);
+    expect(gradeLatencyMs(999), ProbeGrade.sluggish);
+    expect(gradeLatencyMs(1000), ProbeGrade.switchNode);
+    expect(gradeLatencyMs(1064), ProbeGrade.switchNode);
   });
 }

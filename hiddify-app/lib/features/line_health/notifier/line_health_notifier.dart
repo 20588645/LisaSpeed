@@ -81,18 +81,19 @@ class LineHealthNotifier extends Notifier<LineHealthState> with AppLogger {
 
       final tunnelFuture = ref.read(connectionHealthNotifierProvider.notifier).checkNow();
       final cnFuture = _anyOk(cnTargets, mixedPort: port, useProxy: false);
-      final intlFuture = _anyOk(intlTargets, mixedPort: port, useProxy: true);
+      final intlFuture = _bestOk(intlTargets, mixedPort: port, useProxy: true);
 
       final tunnelOk = await tunnelFuture;
       final cnOk = await cnFuture;
-      final intlOk = await intlFuture;
+      final intl = await intlFuture;
 
       _finish(
         LineHealthSnapshot(
           connected: true,
           tunnelOk: tunnelOk,
           cnOk: cnOk,
-          intlOk: intlOk,
+          intlOk: intl.$1,
+          intlLatencyMs: intl.$2,
         ),
       );
     } catch (e) {
@@ -106,6 +107,15 @@ class LineHealthNotifier extends Notifier<LineHealthState> with AppLogger {
     required int mixedPort,
     required bool useProxy,
   }) async {
+    final best = await _bestOk(targets, mixedPort: mixedPort, useProxy: useProxy);
+    return best.$1;
+  }
+
+  Future<(bool, int?)> _bestOk(
+    List<LinkTestTarget> targets, {
+    required int mixedPort,
+    required bool useProxy,
+  }) async {
     for (final target in targets) {
       final outcome = await _tester.probe(
         target: target,
@@ -113,9 +123,9 @@ class LineHealthNotifier extends Notifier<LineHealthState> with AppLogger {
         useProxy: useProxy,
         timeout: _timeout,
       );
-      if (outcome.ok) return true;
+      if (outcome.ok) return (true, outcome.latencyMs);
     }
-    return false;
+    return (false, null);
   }
 
   void _finish(LineHealthSnapshot snapshot) {
@@ -129,8 +139,8 @@ class LineHealthNotifier extends Notifier<LineHealthState> with AppLogger {
     final body = lineHealthVerdictText(t, verdict);
     if (verdict == LineHealthVerdict.ok) {
       ref.read(inAppNotificationControllerProvider).showSuccessToast(body);
-    } else if (verdict == LineHealthVerdict.notConnected) {
-      ref.read(inAppNotificationControllerProvider).showInfoToast(body);
+    } else if (verdict == LineHealthVerdict.notConnected || verdict == LineHealthVerdict.sluggish) {
+      ref.read(inAppNotificationControllerProvider).showInfoToast(body, duration: const Duration(seconds: 5));
     } else {
       ref.read(inAppNotificationControllerProvider).showErrorToast(body);
     }
@@ -141,6 +151,8 @@ class LineHealthNotifier extends Notifier<LineHealthState> with AppLogger {
 String lineHealthVerdictText(Translations t, LineHealthVerdict verdict) => switch (verdict) {
   LineHealthVerdict.notConnected => t.pages.lineHealth.verdictNotConnected,
   LineHealthVerdict.ok => t.pages.lineHealth.verdictOk,
+  LineHealthVerdict.sluggish => t.pages.lineHealth.verdictSluggish,
+  LineHealthVerdict.switchNode => t.pages.lineHealth.verdictSwitchNode,
   LineHealthVerdict.nodeDead => t.pages.lineHealth.verdictNodeDead,
   LineHealthVerdict.intlFail => t.pages.lineHealth.verdictIntlFail,
   LineHealthVerdict.localFail => t.pages.lineHealth.verdictLocalFail,

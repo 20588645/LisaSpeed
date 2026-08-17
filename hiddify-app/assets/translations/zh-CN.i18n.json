@@ -223,10 +223,13 @@
       "failUnknown": "未知错误",
       "groupCn": "国内",
       "groupIntl": "海外",
-      "hintConnected": "已连接：国内走直连，海外走节点",
+      "hintConnected": "已连接：国内走直连，海外走节点。有毫秒数不等于网页能打开——超过 400ms 标勉强，超过 1 秒建议换节点。",
       "hintDisconnected": "未连接：全部走直连",
       "viaDirect": "直连",
-      "viaProxy": "节点"
+      "viaProxy": "节点",
+      "gradeOk": "正常",
+      "gradeSluggish": "勉强",
+      "gradeSwitch": "建议换节点"
     },
     "speedTest": {
       "title": "带宽测速",
@@ -267,10 +270,13 @@
       "fail": "异常",
       "verdictNotConnected": "还没连接节点，先点主页连接。",
       "verdictOk": "隧道正常，国内和出国都能通。",
+      "verdictSluggish": "能通但偏慢（出国超过 400ms），建议换一条更快的节点。",
+      "verdictSwitchNode": "出国能通但已经超过 1 秒，网页会打不开——换节点。",
       "verdictNodeDead": "国内正常，但隧道不通——当前节点该换了。",
       "verdictIntlFail": "国内正常，出国网站不行——换一个节点再试。",
       "verdictLocalFail": "国内网站也不通。请先到设置里点「恢复本机网络」，或检查公司网络是否拦截。",
-      "verdictMixed": "结果不一致。请再体检一次，或到节点页换一条线路。"
+      "verdictMixed": "结果不一致。请再体检一次，或到节点页换一条线路。",
+      "goSwitch": "去换节点"
     },
     "ipPurity": {
       "title": "纯净",
@@ -508,7 +514,10 @@
         "trayLiveSpeedMsg": "在菜单栏图标旁显示上行 / 下行速率",
         "sectionNetwork": "本机网络",
         "restoreNetwork": "恢复本机网络",
+        "restoreNetworkRun": "恢复",
         "restoreNetworkMsg": "关掉 LisaSpeed 留下的系统代理，并断开当前隧道。不修运营商宽带。",
+        "restoreNetworkConfirmTitle": "恢复本机网络？",
+        "restoreNetworkConfirmBody": "将断开当前隧道，并关掉本机系统代理。取消则什么也不做。",
         "restoreNetworkDone": "已恢复本机网络（系统代理已关）",
         "restoreNetworkFailed": "恢复失败：${error}",
         "sectionHostPanel": "丽莎主机面板",

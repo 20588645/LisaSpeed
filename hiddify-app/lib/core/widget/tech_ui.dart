@@ -52,9 +52,10 @@ class TechUi {
     return dangerOf(context);
   }
 
-  static Widget latencyPill(BuildContext context, int delayMs, {String? emptyLabel}) {
+  static Widget latencyPill(BuildContext context, int delayMs, {String? emptyLabel, String? suffix}) {
     final color = delayColor(context, delayMs);
-    final label = delayMs <= 0 || delayMs >= 65000 ? (emptyLabel ?? '—') : '$delayMs ms';
+    final base = delayMs <= 0 || delayMs >= 65000 ? (emptyLabel ?? '—') : '$delayMs ms';
+    final label = suffix == null || suffix.isEmpty ? base : '$base · $suffix';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999)),

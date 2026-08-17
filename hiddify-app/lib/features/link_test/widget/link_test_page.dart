@@ -9,6 +9,7 @@ import 'package:hiddify/features/line_health/notifier/line_health_notifier.dart'
 import 'package:hiddify/features/line_health/widget/line_health_panel.dart';
 import 'package:hiddify/features/link_test/data/link_test_catalog.dart';
 import 'package:hiddify/features/link_test/model/link_test_target.dart';
+import 'package:hiddify/features/link_test/model/probe_grade.dart';
 import 'package:hiddify/features/link_test/notifier/link_test_notifier.dart';
 import 'package:hiddify/features/speed_test/notifier/speed_test_notifier.dart';
 import 'package:hiddify/features/speed_test/widget/speed_test_panel.dart';
@@ -326,7 +327,17 @@ class _StatusPill extends ConsumerWidget {
       return TechUi.tag(context, t.pages.linkTest.idle);
     }
     if (outcome!.ok) {
-      return TechUi.latencyPill(context, outcome!.latencyMs ?? 0);
+      final ms = outcome!.latencyMs ?? 0;
+      if (!outcome!.viaProxy) {
+        return TechUi.latencyPill(context, ms);
+      }
+      final grade = gradeLatencyMs(ms);
+      final gradeLabel = switch (grade) {
+        ProbeGrade.ok => t.pages.linkTest.gradeOk,
+        ProbeGrade.sluggish => t.pages.linkTest.gradeSluggish,
+        ProbeGrade.switchNode => t.pages.linkTest.gradeSwitch,
+      };
+      return TechUi.latencyPill(context, ms, emptyLabel: '—', suffix: gradeLabel);
     }
     final reason = switch (outcome!.failure) {
       LinkTestFailureKind.timeout => t.pages.linkTest.failTimeout,

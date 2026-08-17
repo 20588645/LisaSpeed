@@ -223,10 +223,13 @@
       "failUnknown": "Unknown error",
       "groupCn": "China",
       "groupIntl": "Overseas",
-      "hintConnected": "Connected: China sites go direct, overseas via the node",
+      "hintConnected": "Connected: China sites go direct, overseas via the node. A millisecond reading is not a usable page — over 400ms is sluggish; over 1s, switch node.",
       "hintDisconnected": "Idle: every probe goes direct",
       "viaDirect": "Direct",
-      "viaProxy": "Node"
+      "viaProxy": "Node",
+      "gradeOk": "OK",
+      "gradeSluggish": "Sluggish",
+      "gradeSwitch": "Switch node"
     },
     "speedTest": {
       "title": "Speed test",
@@ -267,10 +270,13 @@
       "fail": "Fail",
       "verdictNotConnected": "Not connected yet. Connect from Home first.",
       "verdictOk": "Tunnel is healthy. China and overseas sites both work.",
+      "verdictSluggish": "Reachable but slow (overseas over 400ms). Switch to a faster node.",
+      "verdictSwitchNode": "Overseas responds, but over 1 second — pages will not load. Switch node.",
       "verdictNodeDead": "China works, but the tunnel does not — switch node.",
       "verdictIntlFail": "China works, overseas sites do not — try another node.",
       "verdictLocalFail": "China sites also fail. Use Restore local network in Settings, or check the office network.",
-      "verdictMixed": "Mixed results. Check again, or switch node."
+      "verdictMixed": "Mixed results. Check again, or switch node.",
+      "goSwitch": "Switch node"
     },
     "ipPurity": {
       "title": "Purity",
@@ -508,7 +514,10 @@
         "trayLiveSpeedMsg": "Show up/down rates beside the menu bar icon",
         "sectionNetwork": "This Mac",
         "restoreNetwork": "Restore local network",
+        "restoreNetworkRun": "Restore",
         "restoreNetworkMsg": "Turn off leftover system proxies and disconnect the tunnel. Does not fix your ISP.",
+        "restoreNetworkConfirmTitle": "Restore local network?",
+        "restoreNetworkConfirmBody": "This disconnects the tunnel and turns off system proxies. Cancel leaves everything as-is.",
         "restoreNetworkDone": "Local network restored (system proxies off)",
         "restoreNetworkFailed": "Restore failed: ${error}",
         "sectionHostPanel": "LisaHost panel",
