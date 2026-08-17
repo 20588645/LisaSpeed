@@ -16,8 +16,8 @@ class SaveDialog extends HookConsumerWidget {
       title: Text(title),
       content: ConstrainedBox(constraints: AlertDialogConst.boxConstraints, child: Text(description)),
       actions: [
-        TextButton(onPressed: () => context.pop(false), child: Text(t.common.discard)),
-        TextButton(onPressed: () => context.pop(true), child: Text(t.common.save)),
+        TechDialogActions.text(context, label: t.common.discard, onPressed: () => context.pop(false)),
+        TechDialogActions.ok(context, label: t.common.save, onPressed: () => context.pop(true)),
       ],
     );
   }

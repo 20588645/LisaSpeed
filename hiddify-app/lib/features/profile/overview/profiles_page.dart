@@ -33,18 +33,13 @@ class ProfilesPage extends HookConsumerWidget {
         children: [
           SafeArea(
             bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-              child: Row(
+            child: TechUi.pageIntro(
+              context,
+              title: t.pages.profiles.title,
+              subtitle: t.pages.profiles.subtitle,
+              action: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: TechUi.pageIntro(
-                      context,
-                      eyebrow: 'Subscriptions',
-                      title: t.pages.profiles.title,
-                      subtitle: t.pages.profiles.subtitle,
-                    ),
-                  ),
                   TechUi.ghostButton(
                     context,
                     label: t.common.update,
@@ -62,7 +57,6 @@ class ProfilesPage extends HookConsumerWidget {
                     label: t.common.add,
                     onPressed: () async => await ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
                   ),
-                  const Gap(20),
                 ],
               ),
             ),
@@ -70,7 +64,7 @@ class ProfilesPage extends HookConsumerWidget {
           Expanded(
             child: asyncProfiles.when(
               data: (data) => ListView.separated(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                padding: TechUi.pageBodyPadding,
                 separatorBuilder: (context, index) => const Gap(8),
                 itemBuilder: (context, index) => ProfileTile(profile: data[index]),
                 itemCount: data.length,

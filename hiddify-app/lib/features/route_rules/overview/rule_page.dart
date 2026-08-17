@@ -35,7 +35,6 @@ class RulePage extends HookConsumerWidget {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'Rule',
               title: t.pages.settings.routing.routeRule.rule.title,
               onBack: () => context.pop(),
               actions: [

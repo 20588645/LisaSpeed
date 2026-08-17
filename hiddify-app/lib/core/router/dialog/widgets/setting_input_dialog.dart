@@ -121,29 +121,30 @@ class SettingInputDialog<T> extends HookConsumerWidget with PresLogger {
       ),
       actions: [
         if (optionalAction != null)
-          TextButton(
+          TechDialogActions.text(
+            context,
+            label: optionalAction!.$1.toUpperCase(),
             onPressed: () {
               optionalAction!.$2();
               context.pop(T == String ? textController.value.text : null);
             },
-            child: Text(optionalAction!.$1.toUpperCase()),
           ),
         if (onReset != null)
-          TextButton(
+          TechDialogActions.text(
+            context,
+            label: t.common.reset,
             onPressed: () {
               onReset!();
               context.pop();
             },
-            child: Text(t.common.reset),
           ),
-        TextButton(
-          onPressed: () {
-            context.pop();
-          },
-          child: Text(localizations.cancelButtonLabel.toUpperCase()),
+        TechDialogActions.cancel(
+          context,
+          onPressed: () => context.pop(),
+          label: localizations.cancelButtonLabel.toUpperCase(),
         ),
-        TextButton(
-          focusNode: okBtnFocusNode,
+        TechDialogActions.ok(
+          context,
           onPressed: () {
             if (validator?.call(textController.value.text) == false) {
               context.pop();
@@ -153,7 +154,7 @@ class SettingInputDialog<T> extends HookConsumerWidget with PresLogger {
               context.pop(T == String ? textController.value.text : null);
             }
           },
-          child: Text(localizations.okButtonLabel.toUpperCase()),
+          label: localizations.okButtonLabel.toUpperCase(),
         ),
       ],
     );

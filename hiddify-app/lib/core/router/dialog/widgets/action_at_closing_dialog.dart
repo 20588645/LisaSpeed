@@ -19,18 +19,11 @@ class ActionsAtClosingDialog extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: ActionsAtClosing.values
             .map(
-              (e) => RadioListTile(
-                title: Text(e.present(t)),
-                value: e,
-                groupValue: selected,
-                onChanged: context.pop,
-              ),
+              (e) => RadioListTile(title: Text(e.present(t)), value: e, groupValue: selected, onChanged: context.pop),
             )
             .toList(),
       ),
-      actions: [
-        TechDialogActions.cancel(context, onPressed: () => context.pop(), label: t.common.cancel),
-      ],
+      actions: [TechDialogActions.cancel(context, onPressed: () => context.pop(), label: t.common.cancel)],
     );
   }
 }

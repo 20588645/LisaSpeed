@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -23,11 +24,12 @@ class ProfileLoading extends ConsumerWidget {
           const Gap(20),
           const LinearProgressIndicator(backgroundColor: Colors.transparent),
           const Gap(8),
-          TextButton(
+          TechUi.ghostButton(
+            context,
+            label: MaterialLocalizations.of(context).cancelButtonLabel,
             onPressed: () {
               ref.invalidate(addProfileNotifierProvider);
             },
-            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
           ),
         ],
       ),

@@ -15,9 +15,7 @@ class OkDialog extends HookConsumerWidget {
       title: title,
       icon: Icons.info_outline_rounded,
       content: Text(description),
-      actions: [
-        TechDialogActions.ok(context, onPressed: () => context.pop(), label: t.common.ok),
-      ],
+      actions: [TechDialogActions.ok(context, onPressed: () => context.pop(), label: t.common.ok)],
     );
   }
 }

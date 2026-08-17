@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/failures.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/profile/notifier/profiles_update_notifier.dart';
 import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
@@ -53,14 +54,14 @@ class ProfilesModal extends HookConsumerWidget {
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      FilledButton.icon(
-                        label: Text(t.common.sort, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        icon: const Icon(Icons.sort_rounded),
+                      TechUi.ghostButton(
+                        context,
+                        label: t.common.sort,
                         onPressed: () => ref.read(dialogNotifierProvider.notifier).showSortProfiles(),
                       ),
-                      FilledButton.icon(
-                        label: Text(t.pages.profiles.updateSubscriptions, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        icon: const Icon(Icons.update_rounded),
+                      TechUi.primaryButton(
+                        context,
+                        label: t.pages.profiles.updateSubscriptions,
                         onPressed: () => ref.read(foregroundProfilesUpdateNotifierProvider.notifier).trigger(),
                       ),
                     ],

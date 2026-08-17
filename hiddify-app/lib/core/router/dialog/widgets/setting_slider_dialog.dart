@@ -61,17 +61,23 @@ class SettingsSliderDialog extends HookConsumerWidget with PresLogger {
       ),
       actions: [
         if (onReset != null)
-          TextButton(
+          TechDialogActions.text(
+            context,
+            label: t.common.reset,
             onPressed: () {
               onReset!();
               context.pop();
             },
-            child: Text(t.common.reset),
           ),
-        TextButton(onPressed: () => context.pop(), child: Text(localizations.cancelButtonLabel.toUpperCase())),
-        TextButton(
+        TechDialogActions.cancel(
+          context,
+          onPressed: () => context.pop(),
+          label: localizations.cancelButtonLabel.toUpperCase(),
+        ),
+        TechDialogActions.ok(
+          context,
           onPressed: () => context.pop(sliderValue.value),
-          child: Text(localizations.okButtonLabel.toUpperCase()),
+          label: localizations.okButtonLabel.toUpperCase(),
         ),
       ],
     );

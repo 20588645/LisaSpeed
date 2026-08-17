@@ -40,7 +40,6 @@ class GenericListPage extends HookConsumerWidget {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'Rule',
               title: ruleEnum.present(t),
               onBack: () => context.pop(),
               actions: [

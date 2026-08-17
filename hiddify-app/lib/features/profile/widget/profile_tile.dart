@@ -65,7 +65,6 @@ class ProfileTile extends HookConsumerWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (profile.active) Container(width: 3, color: accent),
                 if (isRemote) ...[
                   SizedBox(
                     width: 48,
@@ -142,9 +141,7 @@ class ProfileTile extends HookConsumerWidget {
     void activate() {
       if (profile.active) return;
       if (selectActiveMutation.state.isInProgress) return;
-      selectActiveMutation.setFuture(
-        ref.read(profilesNotifierProvider.notifier).selectActiveProfile(profile.id),
-      );
+      selectActiveMutation.setFuture(ref.read(profilesNotifierProvider.notifier).selectActiveProfile(profile.id));
     }
 
     Future<void> deleteWithConfirm() async {
@@ -195,10 +192,7 @@ class ProfileTile extends HookConsumerWidget {
                         TechUi.tag(context, t.pages.profiles.tagActive, active: true),
                       ],
                       const SizedBox(width: 6),
-                      TechUi.tag(
-                        context,
-                        isRemote ? t.pages.profiles.tagRemote : t.pages.profiles.tagLocal,
-                      ),
+                      TechUi.tag(context, isRemote ? t.pages.profiles.tagRemote : t.pages.profiles.tagLocal),
                     ],
                   ),
                   if (subInfo != null) ...[
@@ -210,16 +204,13 @@ class ProfileTile extends HookConsumerWidget {
                     const Gap(6),
                     Text(
                       '${t.pages.home.profileUpdated} ${DateFormat('MM-dd HH:mm').format(profile.lastUpdate)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ],
               ),
             ),
             const SizedBox(width: 14),
-            // Prototype row actions: 激活 / 更新 / 编辑 / 删除.
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -250,12 +241,7 @@ class ProfileTile extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(width: 8),
-                TechUi.tinyButton(
-                  context,
-                  label: t.common.delete,
-                  danger: true,
-                  onPressed: deleteWithConfirm,
-                ),
+                TechUi.tinyButton(context, label: t.common.delete, danger: true, onPressed: deleteWithConfirm),
                 const SizedBox(width: 8),
                 ProfileActionsMenu(profile, (context, toggleVisibility, _) {
                   return TechUi.iconButton(
@@ -345,9 +331,7 @@ class ProfileActionsMenu extends HookConsumerWidget {
             if (link.isNotEmpty) {
               await Clipboard.setData(ClipboardData(text: link));
               if (context.mounted) {
-                ref
-                    .read(inAppNotificationControllerProvider)
-                    .showSuccessToast(t.common.msg.export.clipboard.success);
+                ref.read(inAppNotificationControllerProvider).showSuccessToast(t.common.msg.export.clipboard.success);
               }
             }
           },
@@ -486,8 +470,8 @@ class RemainingTrafficIndicator extends StatelessWidget {
     final color = ratio < 0.25
         ? ConnectionButtonTheme.accentOf(context)
         : ratio < 0.65
-            ? TechUi.warnOf(context)
-            : TechUi.dangerOf(context);
+        ? TechUi.warnOf(context)
+        : TechUi.dangerOf(context);
     return LinearProgressIndicator(
       value: ratio.clamp(0.0, 1.0),
       borderRadius: BorderRadius.circular(999),

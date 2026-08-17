@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/theme/app_theme_mode.dart';
 import 'package:hiddify/core/theme/theme_extensions.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 
 class AppTheme {
   AppTheme(this.mode, this.fontFamily);
@@ -11,9 +12,7 @@ class AppTheme {
   ThemeData lightTheme(ColorScheme? lightColorScheme) {
     final ColorScheme scheme =
         lightColorScheme ??
-        ColorScheme.fromSeed(
-          seedColor: ConnectionButtonTheme.brandNavy,
-        ).copyWith(
+        ColorScheme.fromSeed(seedColor: ConnectionButtonTheme.brandNavy).copyWith(
           primary: ConnectionButtonTheme.brandMintLight,
           secondary: ConnectionButtonTheme.brandBlueLight,
           surface: ConnectionButtonTheme.bgElevLight,
@@ -73,16 +72,13 @@ class AppTheme {
         ),
       ),
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
-    );
+    )._withUnifiedButtons(ConnectionButtonTheme.brandMintLight);
   }
 
   ThemeData darkTheme(ColorScheme? darkColorScheme) {
     final ColorScheme scheme =
         darkColorScheme ??
-        ColorScheme.fromSeed(
-          seedColor: ConnectionButtonTheme.brandNavy,
-          brightness: Brightness.dark,
-        ).copyWith(
+        ColorScheme.fromSeed(seedColor: ConnectionButtonTheme.brandNavy, brightness: Brightness.dark).copyWith(
           primary: ConnectionButtonTheme.brandMint,
           secondary: ConnectionButtonTheme.brandBlue,
           surface: const Color(0xFF0B1220),
@@ -96,10 +92,7 @@ class AppTheme {
         backgroundColor: const Color(0xFF0B1220),
         indicatorColor: ConnectionButtonTheme.brandMint.withValues(alpha: 0.16),
         selectedIconTheme: const IconThemeData(color: ConnectionButtonTheme.brandMint),
-        selectedLabelTextStyle: const TextStyle(
-          color: ConnectionButtonTheme.brandMint,
-          fontWeight: FontWeight.w700,
-        ),
+        selectedLabelTextStyle: const TextStyle(color: ConnectionButtonTheme.brandMint, fontWeight: FontWeight.w700),
         unselectedIconTheme: IconThemeData(color: scheme.onSurface.withValues(alpha: 0.55)),
         unselectedLabelTextStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.55)),
       ),
@@ -146,7 +139,7 @@ class AppTheme {
         ),
       ),
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
-    );
+    )._withUnifiedButtons(ConnectionButtonTheme.brandMint);
   }
 
   /// Prototype `.form input`: bordered 10px box on the elevated surface,
@@ -182,8 +175,7 @@ class AppTheme {
   static SwitchThemeData _switchTheme(ColorScheme scheme, Color accent) {
     return SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith(
-        (states) =>
-            states.contains(WidgetState.selected) ? accent : scheme.onSurface.withValues(alpha: 0.7),
+        (states) => states.contains(WidgetState.selected) ? accent : scheme.onSurface.withValues(alpha: 0.7),
       ),
       trackColor: WidgetStateProperty.resolveWith(
         (states) => states.contains(WidgetState.selected)
@@ -206,9 +198,6 @@ class AppTheme {
       AppThemeMode.black => true,
     };
     final def = CupertinoThemeData(brightness: isDark ? Brightness.dark : Brightness.light);
-    // final def = CupertinoThemeData(brightness: Brightness.dark);
-
-    // return def;
     final defaultMaterialTheme = isDark ? darkTheme(darkColorScheme) : lightTheme(lightColorScheme);
     return MaterialBasedCupertinoThemeData(
       materialTheme: defaultMaterialTheme.copyWith(
@@ -227,6 +216,18 @@ class AppTheme {
           scaffoldBackgroundColor: def.scaffoldBackgroundColor,
         ),
       ),
+    );
+  }
+}
+
+extension on ThemeData {
+  ThemeData _withUnifiedButtons(Color accent) {
+    return copyWith(
+      outlinedButtonTheme: TechUi.outlinedButtonTheme(colorScheme),
+      filledButtonTheme: TechUi.filledButtonTheme(accent),
+      elevatedButtonTheme: TechUi.elevatedButtonTheme(accent),
+      textButtonTheme: TechUi.textButtonTheme(colorScheme),
+      iconButtonTheme: TechUi.iconButtonTheme(colorScheme),
     );
   }
 }

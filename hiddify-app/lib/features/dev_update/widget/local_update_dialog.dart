@@ -25,10 +25,41 @@ class LocalUpdateDialog extends ConsumerStatefulWidget {
     );
   }
 
-  static const scriptPath = '/Users/ldy/LisaSpeed/scripts/rebuild-and-install.command';
-
   @override
   ConsumerState<LocalUpdateDialog> createState() => _LocalUpdateDialogState();
+}
+
+class _LisaSpeedRepo {
+  _LisaSpeedRepo._(this.root);
+
+  final String root;
+
+  String get scriptPath => '$root/scripts/rebuild-and-install.command';
+  String get appDir => '$root/hiddify-app';
+
+  String get pathPrefix {
+    final home = Platform.environment['HOME'] ?? '';
+    final flutterBins = <String>[
+      '/Users/ldy/flutter/bin',
+      if (home.isNotEmpty) '$home/flutter/bin',
+    ].where((dir) => File('$dir/flutter').existsSync() || File('$dir/dart').existsSync());
+    final flutter = flutterBins.isEmpty ? '/Users/ldy/flutter/bin' : flutterBins.first;
+    return '$flutter:${home.isEmpty ? '' : '$home/.pub-cache/bin:'}/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin';
+  }
+
+  static _LisaSpeedRepo? locate() {
+    final home = Platform.environment['HOME'] ?? '';
+    final candidates = <String>[
+      if ((Platform.environment['LISASPEED_ROOT'] ?? '').isNotEmpty) Platform.environment['LISASPEED_ROOT']!,
+      if (home.isNotEmpty) '$home/LisaSpeed',
+      '/Users/ldy/LisaSpeed',
+    ];
+    for (final root in candidates) {
+      final repo = _LisaSpeedRepo._(root);
+      if (File(repo.scriptPath).existsSync()) return repo;
+    }
+    return null;
+  }
 }
 
 class _LocalUpdateDialogState extends ConsumerState<LocalUpdateDialog> with InfraLogger {
@@ -65,26 +96,26 @@ class _LocalUpdateDialogState extends ConsumerState<LocalUpdateDialog> with Infr
   Future<void> _startCompile() async {
     if (_phase == _UpdatePhase.compiling || _phase == _UpdatePhase.installing) return;
 
-    final script = File(LocalUpdateDialog.scriptPath);
-    if (!script.existsSync()) {
+    final repo = _LisaSpeedRepo.locate();
+    if (repo == null) {
       setState(() => _phase = _UpdatePhase.failed);
-      _append('[[ERROR]] 找不到脚本：${LocalUpdateDialog.scriptPath}');
+      _append('[[ERROR]] 找不到仓库（试过 \$HOME/LisaSpeed 与 /Users/ldy/LisaSpeed）');
       return;
     }
 
     setState(() => _phase = _UpdatePhase.compiling);
     _logCtrl.clear();
     _append('开始本地编译（离线依赖，不退出应用）…');
+    _append('仓库：${repo.root}');
 
     try {
       final process = await Process.start(
         '/bin/bash',
-        [LocalUpdateDialog.scriptPath, 'compile'],
-        workingDirectory: '/Users/ldy/LisaSpeed/hiddify-app',
+        [repo.scriptPath, 'compile'],
+        workingDirectory: repo.appDir,
         environment: {
           ...Platform.environment,
-          'PATH':
-              '/Users/ldy/flutter/bin:${Platform.environment['HOME']}/.pub-cache/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin',
+          'PATH': repo.pathPrefix,
           'GIT_SSL_NO_VERIFY': 'true',
           'COCOAPODS_DISABLE_STATS': 'true',
         },
@@ -125,16 +156,21 @@ class _LocalUpdateDialogState extends ConsumerState<LocalUpdateDialog> with Infr
     _append('启动分离安装进程（应用即将退出并自动重新打开）…');
 
     try {
+      final repo = _LisaSpeedRepo.locate();
+      if (repo == null) {
+        setState(() => _phase = _UpdatePhase.failed);
+        _append('[[ERROR]] 找不到仓库，无法安装');
+        return;
+      }
       // Fully detached so install survives LisaSpeed being killed.
       await Process.start(
         '/bin/bash',
-        [LocalUpdateDialog.scriptPath, 'install'],
-        workingDirectory: '/Users/ldy/LisaSpeed/hiddify-app',
+        [repo.scriptPath, 'install'],
+        workingDirectory: repo.appDir,
         mode: ProcessStartMode.detached,
         environment: {
           ...Platform.environment,
-          'PATH':
-              '/Users/ldy/flutter/bin:${Platform.environment['HOME']}/.pub-cache/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin',
+          'PATH': repo.pathPrefix,
         },
       );
       _append('安装进程已分离。若数秒后未自动退出，请手动关闭应用。');
@@ -179,27 +215,33 @@ class _LocalUpdateDialogState extends ConsumerState<LocalUpdateDialog> with Infr
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: ConnectionButtonTheme.lineOf(context)),
                 ),
-                child: Scrollbar(
-                  controller: _scrollCtrl,
-                  child: TextField(
-                    controller: _logCtrl,
-                    scrollController: _scrollCtrl,
-                    readOnly: true,
-                    maxLines: null,
-                    expands: true,
-                    decoration: InputDecoration(
-                      isCollapsed: true,
-                      contentPadding: const EdgeInsets.all(12),
-                      filled: false,
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      hintText: t.pages.about.localUpdateIdle,
-                    ),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontFamily: 'Menlo',
-                      fontFamilyFallback: const ['monospace'],
-                      height: 1.35,
+                // Desktop TextField already paints a scrollbar; wrapping another
+                // Scrollbar without disabling the inherited one draws two thumbs.
+                child: ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                  child: Scrollbar(
+                    controller: _scrollCtrl,
+                    thumbVisibility: true,
+                    child: TextField(
+                      controller: _logCtrl,
+                      scrollController: _scrollCtrl,
+                      readOnly: true,
+                      maxLines: null,
+                      expands: true,
+                      decoration: InputDecoration(
+                        isCollapsed: true,
+                        contentPadding: const EdgeInsets.all(12),
+                        filled: false,
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        hintText: t.pages.about.localUpdateIdle,
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontFamily: 'Menlo',
+                        fontFamilyFallback: const ['monospace'],
+                        height: 1.35,
+                      ),
                     ),
                   ),
                 ),

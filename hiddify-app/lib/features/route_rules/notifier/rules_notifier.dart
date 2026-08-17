@@ -22,11 +22,116 @@ class RulesNotifier extends _$RulesNotifier with AppLogger {
   List<Rule> build() {
     final directories = ref.watch(appDirectoriesProvider).requireValue;
     file = File('${directories.baseDir.path}/route_rule.proto');
-    if (file.existsSync()) {
-      return RouteRule.fromBuffer(file.readAsBytesSync()).rules;
-    } else {
-      return <Rule>[];
+    final loaded = file.existsSync() ? RouteRule.fromBuffer(file.readAsBytesSync()).rules : <Rule>[];
+    final merged = _withClientProxyRules(loaded);
+    if (merged.$2) {
+      Future.microtask(_updateFile);
     }
+    return merged.$1;
+  }
+
+  /// Desktop clients that office networks commonly block on the China-direct
+  /// path. Seeded once (by stable name) so a reset can still drop them.
+  static List<Rule> _clientProxyRules() => [
+    Rule(
+      enabled: true,
+      name: '哔哩哔哩客户端',
+      outbound: Outbound.proxy,
+      processNames: const [
+        '哔哩哔哩',
+        '哔哩哔哩 Helper',
+        '哔哩哔哩 Helper (GPU)',
+        '哔哩哔哩 Helper (Plugin)',
+        '哔哩哔哩 Helper (Renderer)',
+        '哔哩哔哩 Login Helper',
+      ],
+      domainSuffixes: const [
+        'bilibili.com',
+        'bilivideo.com',
+        'hdslb.com',
+        'biliapi.net',
+        'biliapi.com',
+        'b23.tv',
+        'acgvideo.com',
+      ],
+    ),
+    Rule(
+      enabled: true,
+      name: '抖音客户端',
+      outbound: Outbound.proxy,
+      processNames: const [
+        '抖音',
+        '抖音 Helper',
+        '抖音 Helper (GPU)',
+        '抖音 Helper (Plugin)',
+        '抖音 Helper (Renderer)',
+        '抖音 Login Helper',
+      ],
+      domainSuffixes: const [
+        'douyin.com',
+        'douyinpic.com',
+        'douyinstatic.com',
+        'douyinvod.com',
+        'douyincdn.com',
+        'iesdouyin.com',
+        'amemv.com',
+        'snssdk.com',
+        'bytedance.com',
+        'byteimg.com',
+        'bytescm.com',
+        'bytegoofy.com',
+        'bytegecko.com',
+        'bytednsdoc.com',
+        'pstatp.com',
+        'toutiao.com',
+        'toutiaoapi.com',
+        'ixigua.com',
+        'zijieapi.com',
+        'tiktokv.com',
+      ],
+      domainKeywords: const [
+        'douyin',
+        'snssdk',
+        'amemv',
+        'zijieapi',
+        'toutiao',
+        'bytedance',
+        'byteimg',
+      ],
+    ),
+  ];
+
+  /// Returns the merged rule list and whether it grew vs disk (new seed or
+  /// extra process/domain entries on an existing seeded rule).
+  (List<Rule>, bool) _withClientProxyRules(List<Rule> current) {
+    final byName = {for (final rule in current) rule.name: rule};
+    final extra = <Rule>[];
+    var changed = false;
+    for (final seed in _clientProxyRules()) {
+      final existing = byName[seed.name];
+      if (existing == null) {
+        extra.add(seed);
+        changed = true;
+        continue;
+      }
+      if (_unionStrings(existing.processNames, seed.processNames) |
+          _unionStrings(existing.domainSuffixes, seed.domainSuffixes) |
+          _unionStrings(existing.domainKeywords, seed.domainKeywords)) {
+        changed = true;
+      }
+    }
+    if (extra.isEmpty) return (current, changed);
+    return (_updateListOrder([...extra, ...current]), true);
+  }
+
+  bool _unionStrings(List<String> dest, List<String> extra) {
+    var changed = false;
+    for (final item in extra) {
+      if (dest.contains(item)) continue;
+      dest.add(item);
+      changed = true;
+    }
+    return changed;
   }
 
   Future<void> addRule(Rule rule) async {

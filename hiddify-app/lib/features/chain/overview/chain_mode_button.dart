@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 import 'package:hiddify/features/chain/model/chain_enum.dart';
 import 'package:hiddify/features/chain/overview/chain_mode_icon.dart';
 import 'package:hiddify/features/chain/overview/chain_mode_menu.dart';
@@ -32,12 +33,12 @@ class ChainModeButton extends HookConsumerWidget {
     return ChainModeMenu(
       (context, toggleVisibility, child) => Material(
         color: bColor,
-        borderRadius: BorderRadius.circular(100),
+        borderRadius: BorderRadius.circular(TechUi.buttonRadius),
         child: InkWell(
           onTap: toggleVisibility,
-          borderRadius: BorderRadius.circular(100),
+          borderRadius: BorderRadius.circular(TechUi.buttonRadius),
           child: Container(
-            height: 32,
+            height: TechUi.buttonHeight,
             padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
             child: Row(
               mainAxisSize: MainAxisSize.min,

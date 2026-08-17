@@ -74,7 +74,6 @@ class LogsPage extends HookConsumerWidget with PresLogger {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'Diagnostics',
               title: t.pages.logs.title,
               subtitle: t.pages.logs.subtitle,
               onBack: () => context.pop(),

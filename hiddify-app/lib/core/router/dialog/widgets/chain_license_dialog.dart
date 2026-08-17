@@ -38,10 +38,7 @@ class ChainLicenseDialog extends HookConsumerWidget {
       termsKey: useState<bool>(false),
       privacyKey: useState<bool>(false),
     };
-    final focusNodes = <String, FocusNode>{
-      termsKey: useFocusNode(),
-      privacyKey: useFocusNode(),
-    };
+    final focusNodes = <String, FocusNode>{termsKey: useFocusNode(), privacyKey: useFocusNode()};
 
     useEffect(() {
       for (final entry in focusNodes.entries) {
@@ -56,9 +53,7 @@ class ChainLicenseDialog extends HookConsumerWidget {
         ? t.dialogs.warpLicense.description(
             tos: (text) => TextSpan(
               text: text,
-              style: TextStyle(
-                color: focusStates[termsKey]!.value ? Colors.green : Colors.blue,
-              ),
+              style: TextStyle(color: focusStates[termsKey]!.value ? Colors.green : Colors.blue),
               recognizer: TapGestureRecognizer()
                 ..onTap = () async {
                   await UriUtils.tryLaunch(Uri.parse(WarpConst.url[termsKey]!));
@@ -66,9 +61,7 @@ class ChainLicenseDialog extends HookConsumerWidget {
             ),
             privacy: (text) => TextSpan(
               text: text,
-              style: TextStyle(
-                color: focusStates[privacyKey]!.value ? Colors.green : Colors.blue,
-              ),
+              style: TextStyle(color: focusStates[privacyKey]!.value ? Colors.green : Colors.blue),
               recognizer: TapGestureRecognizer()
                 ..onTap = () async {
                   await UriUtils.tryLaunch(Uri.parse(WarpConst.url[privacyKey]!));
@@ -125,18 +118,8 @@ class ChainLicenseDialog extends HookConsumerWidget {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () {
-            context.pop(false);
-          },
-          child: Text(t.common.decline),
-        ),
-        TextButton(
-          onPressed: () {
-            context.pop(true);
-          },
-          child: Text(t.common.agree),
-        ),
+        TechDialogActions.cancel(context, onPressed: () => context.pop(false), label: t.common.decline),
+        TechDialogActions.ok(context, onPressed: () => context.pop(true), label: t.common.agree),
       ],
     );
   }

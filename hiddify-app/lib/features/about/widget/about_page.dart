@@ -60,7 +60,6 @@ class AboutPage extends HookConsumerWidget {
             bottom: false,
             child: TechUi.subPageHeader(
               context,
-              eyebrow: 'About',
               title: t.pages.about.title,
               subtitle: '${t.common.appTitle} ${appInfo.presentVersion}',
               onBack: () => context.pop(),
@@ -154,6 +153,11 @@ class AboutPage extends HookConsumerWidget {
                                     await UriUtils.tryLaunch(path);
                                   },
                                 ),
+                              TechUi.ghostButton(
+                                context,
+                                label: t.pages.about.openLogs,
+                                onPressed: () => context.goNamed('logs'),
+                              ),
                               TechUi.ghostButton(
                                 context,
                                 label: t.pages.about.sourceCode,

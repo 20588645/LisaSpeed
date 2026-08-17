@@ -50,8 +50,9 @@ class SettingRadioDialog<T> extends ConsumerWidget {
         ),
       ),
       actions: [
-        if (defaultValue != null) TextButton(child: Text(t.common.reset), onPressed: () => context.pop(defaultValue)),
-        TextButton(child: Text(t.common.cancel), onPressed: () => context.pop()),
+        if (defaultValue != null)
+          TechDialogActions.text(context, label: t.common.reset, onPressed: () => context.pop(defaultValue)),
+        TechDialogActions.cancel(context, onPressed: () => context.pop(), label: t.common.cancel),
       ],
     );
   }

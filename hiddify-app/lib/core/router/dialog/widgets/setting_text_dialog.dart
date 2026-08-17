@@ -37,10 +37,12 @@ class SettingTextDialog extends HookConsumerWidget {
         ),
       ),
       actions: [
-        if (defaultValue != null) TextButton(child: Text(t.common.reset), onPressed: () => context.pop(defaultValue)),
-        TextButton(child: Text(t.common.cancel), onPressed: () => context.pop()),
-        TextButton(
-          child: Text(t.common.ok),
+        if (defaultValue != null)
+          TechDialogActions.text(context, label: t.common.reset, onPressed: () => context.pop(defaultValue)),
+        TechDialogActions.cancel(context, onPressed: () => context.pop(), label: t.common.cancel),
+        TechDialogActions.ok(
+          context,
+          label: t.common.ok,
           onPressed: () {
             if (formKey.currentState!.validate()) {
               context.pop(tController.text.trim());

@@ -20,9 +20,7 @@ class CustomAlertDialog extends HookConsumerWidget {
       title: title,
       icon: Icons.info_outline_rounded,
       content: Text(message, textDirection: TextDirection.ltr),
-      actions: [
-        TechDialogActions.ok(context, onPressed: () => context.pop(), label: t.common.ok),
-      ],
+      actions: [TechDialogActions.ok(context, onPressed: () => context.pop(), label: t.common.ok)],
     );
   }
 }

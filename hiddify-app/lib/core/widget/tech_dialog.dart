@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/theme/theme_extensions.dart';
+import 'package:hiddify/core/widget/tech_ui.dart';
 
 /// Shared LisaSpeed Tech dialog chrome — matches `prototype/tech` `.modal-card`.
 class TechDialog extends StatelessWidget {
@@ -60,28 +61,19 @@ class TechDialog extends StatelessWidget {
         ? ConnectionButtonTheme.bgElevDark
         : ConnectionButtonTheme.bgElevLight;
 
-    final resolvedTitle = titleWidget ??
+    final resolvedTitle =
+        titleWidget ??
         (title == null
             ? null
             : Text(
                 title!,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.2,
-                ),
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.2),
               ));
-    final resolvedIcon = iconWidget ??
-        (icon == null ? null : Icon(icon, size: 20, color: accent));
+    final resolvedIcon = iconWidget ?? (icon == null ? null : Icon(icon, size: 20, color: accent));
 
     final body = scrollable
-        ? SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            child: content,
-          )
-        : Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            child: content,
-          );
+        ? SingleChildScrollView(padding: const EdgeInsets.fromLTRB(16, 14, 16, 14), child: content)
+        : Padding(padding: const EdgeInsets.fromLTRB(16, 14, 16, 14), child: content);
 
     final hasHeader = resolvedTitle != null || resolvedIcon != null || showClose;
 
@@ -130,11 +122,11 @@ class TechDialog extends StatelessWidget {
                         ),
                       ),
                       if (showClose)
-                        IconButton(
+                        TechUi.iconButton(
+                          context,
+                          icon: Icons.close_rounded,
                           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                           onPressed: onClose ?? () => Navigator.of(context).maybePop(),
-                          icon: const Icon(Icons.close_rounded, size: 20),
-                          visualDensity: VisualDensity.compact,
                         ),
                     ],
                   ),
@@ -146,12 +138,7 @@ class TechDialog extends StatelessWidget {
                   decoration: BoxDecoration(
                     border: Border(top: BorderSide(color: line)),
                   ),
-                  child: Wrap(
-                    alignment: WrapAlignment.end,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: actions!,
-                  ),
+                  child: Wrap(alignment: WrapAlignment.end, spacing: 8, runSpacing: 8, children: actions!),
                 ),
             ],
           ),
@@ -161,48 +148,31 @@ class TechDialog extends StatelessWidget {
   }
 }
 
-/// Consistent action buttons for [TechDialog].
+/// Consistent action buttons for [TechDialog] — same 36px metrics as [TechUi].
 class TechDialogActions {
   TechDialogActions._();
 
-  static ButtonStyle ghost(BuildContext context) {
-    return TextButton.styleFrom(
-      foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-    );
-  }
+  static ButtonStyle ghost(BuildContext context) => TechUi.outlinedStyle(context);
 
-  static ButtonStyle primary(BuildContext context) {
-    final accent = ConnectionButtonTheme.accentOf(context);
-    return FilledButton.styleFrom(
-      backgroundColor: accent,
-      foregroundColor: const Color(0xFF041016),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
-    );
-  }
+  static ButtonStyle primary(BuildContext context) => TechUi.filledStyle(context);
 
   static Widget cancel(BuildContext context, {VoidCallback? onPressed, String? label}) {
-    return TextButton(
-      style: ghost(context),
+    return TechUi.ghostButton(
+      context,
+      label: label ?? MaterialLocalizations.of(context).cancelButtonLabel,
       onPressed: onPressed,
-      child: Text(label ?? MaterialLocalizations.of(context).cancelButtonLabel),
     );
   }
 
   static Widget ok(BuildContext context, {VoidCallback? onPressed, String? label}) {
-    return FilledButton(
-      style: primary(context),
+    return TechUi.primaryButton(
+      context,
+      label: label ?? MaterialLocalizations.of(context).okButtonLabel,
       onPressed: onPressed,
-      child: Text(label ?? MaterialLocalizations.of(context).okButtonLabel),
     );
   }
 
-  static Widget text(BuildContext context, {required String label, VoidCallback? onPressed}) {
-    return TextButton(
-      style: ghost(context),
-      onPressed: onPressed,
-      child: Text(label),
-    );
+  static Widget text(BuildContext context, {required String label, VoidCallback? onPressed, bool danger = false}) {
+    return TechUi.ghostButton(context, label: label, onPressed: onPressed, danger: danger);
   }
 }

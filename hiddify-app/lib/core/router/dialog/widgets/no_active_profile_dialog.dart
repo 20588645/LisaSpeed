@@ -14,13 +14,14 @@ class NoActiveProfileDialog extends HookConsumerWidget {
       title: Text(t.dialogs.noActiveProfile.title),
       content: Text(t.dialogs.noActiveProfile.msg),
       actions: [
-        TextButton(
+        TechDialogActions.text(
+          context,
+          label: t.dialogs.noActiveProfile.helpBtn.label,
           onPressed: () async {
             await UriUtils.tryLaunch(Uri.parse(t.dialogs.noActiveProfile.helpBtn.url));
           },
-          child: Text(t.dialogs.noActiveProfile.helpBtn.label),
         ),
-        TextButton(onPressed: () => context.pop(), child: Text(t.common.ok)),
+        TechDialogActions.ok(context, onPressed: () => context.pop(), label: t.common.ok),
       ],
     );
   }

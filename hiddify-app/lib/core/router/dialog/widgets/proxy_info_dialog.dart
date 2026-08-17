@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/widget/tech_dialog.dart';
+import 'package:hiddify/features/proxy/overview/proxy_display.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/utils/platform_utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -16,10 +18,13 @@ class ProxyInfoDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
+    final locale = ref.watch(localePreferencesProvider);
+    final chinese = locale == AppLocale.zhCn || locale == AppLocale.zhTw;
+    final title = proxyDisplayTitle(outboundInfo, chinese: chinese, autoLabel: t.pages.proxies.autoSelect);
     return TechDialog.alert(
-      title: SelectionArea(child: Text(outboundInfo.tagDisplay)),
+      title: SelectionArea(child: Text(title)),
       content: OutboundInfoWidget(outboundInfo: outboundInfo),
-      actions: [TextButton(onPressed: context.pop, child: Text(t.common.close))],
+      actions: [TechDialogActions.ok(context, onPressed: context.pop, label: t.common.close)],
     );
   }
 }
@@ -32,29 +37,34 @@ class OutboundInfoWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
-    // final subOutboundInfo = outboundInfo.groupSelectedTag ?? outboundInfo;
+    final delayText = proxyDelayLabel(
+      outboundInfo.urlTestDelay,
+      testing: t.pages.home.delayTesting,
+      timeout: t.pages.proxies.delay.timeout,
+    );
+    final testTime = outboundInfo.urlTestTime.toDateTime().toLocal();
+    final hasTestTime = testTime.year >= 2000;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // SizedBox(height: 16.0),
           _buildInfoRow(t.dialogs.proxyInfo.fullTag, outboundInfo.tag),
           _buildInfoRow(t.dialogs.proxyInfo.type, outboundInfo.type),
-          _buildInfoRow(
-            t.dialogs.proxyInfo.testTime,
-            DateFormat('yyyy-MM-dd HH:mm:ss').format(outboundInfo.urlTestTime.toDateTime().toLocal()),
-          ),
-          _buildInfoRow(t.dialogs.proxyInfo.testDelay, '${outboundInfo.urlTestDelay} ms'),
+          if (hasTestTime)
+            _buildInfoRow(t.dialogs.proxyInfo.testTime, DateFormat('yyyy-MM-dd HH:mm:ss').format(testTime)),
+          _buildInfoRow(t.dialogs.proxyInfo.testDelay, delayText),
           _buildIpInfo(outboundInfo.ipinfo, ref),
           _buildInfoRow(t.dialogs.proxyInfo.upload, formatBytes(outboundInfo.upload.toInt())),
           _buildInfoRow(t.dialogs.proxyInfo.download, formatBytes(outboundInfo.download.toInt())),
-          _buildInfoRow(t.dialogs.proxyInfo.isSelected, outboundInfo.isSelected ? '✅' : '❌'),
-          _buildInfoRow(t.dialogs.proxyInfo.isGroup, outboundInfo.isGroup ? '✅' : '❌'),
-          _buildInfoRow(t.dialogs.proxyInfo.isSecure, outboundInfo.isSecure ? '✅' : '❌'),
-          // _buildInfoRow('Is Visible:', outboundInfo.isVisible ? '✅' : '❌'),
-          _buildInfoRow(t.dialogs.proxyInfo.port, outboundInfo.port.toString()),
-          _buildInfoRow(t.dialogs.proxyInfo.host, outboundInfo.host),
+          _buildInfoRow(t.dialogs.proxyInfo.isSelected, outboundInfo.isSelected ? t.dialogs.proxyInfo.yes : t.dialogs.proxyInfo.no),
+          _buildInfoRow(t.dialogs.proxyInfo.isGroup, outboundInfo.isGroup ? t.dialogs.proxyInfo.yes : t.dialogs.proxyInfo.no),
+          _buildInfoRow(
+            t.dialogs.proxyInfo.isSecure,
+            proxyLooksEncrypted(outboundInfo) ? t.dialogs.proxyInfo.yes : t.dialogs.proxyInfo.no,
+          ),
+          _buildInfoRow(t.dialogs.proxyInfo.port, outboundInfo.port == 0 ? '' : outboundInfo.port.toString()),
+          _buildInfoRow(t.dialogs.proxyInfo.host, outboundInfo.isGroup ? '' : outboundInfo.host),
         ],
       ),
     );
@@ -82,7 +92,7 @@ class OutboundInfoWidget extends HookConsumerWidget {
   }
 
   Widget _buildInfoRow(String title, String value, {Future<bool>? Function()? onTap}) {
-    if (value.isEmpty || value == '0' || value == '0.0, 0.0') {
+    if (value.isEmpty || value == '0.0, 0.0') {
       return const SizedBox();
     }
     return Padding(
@@ -114,15 +124,12 @@ class OutboundInfoWidget extends HookConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Text('IP Info:', style: TextStyle(fontWeight: FontWeight.bold)),
         _buildInfoRow(t.dialogs.proxyInfo.ip, ipInfo.ip),
         _buildInfoRow(t.dialogs.proxyInfo.countryCode, ipInfo.countryCode),
-        _buildInfoRow(t.dialogs.proxyInfo.region, ipInfo.region), // Handle optional fields
+        _buildInfoRow(t.dialogs.proxyInfo.region, ipInfo.region),
         _buildInfoRow(t.dialogs.proxyInfo.city, ipInfo.city),
-        _buildInfoRow(t.dialogs.proxyInfo.asn, ipInfo.asn.toString()),
+        _buildInfoRow(t.dialogs.proxyInfo.asn, ipInfo.asn == 0 ? '' : ipInfo.asn.toString()),
         _buildInfoRow(t.dialogs.proxyInfo.organization, ipInfo.org),
-        // _buildInfoRow(t.outboundInfo.latitude, ipInfo.latitude.toString()),
-        // _buildInfoRow(t.outboundInfo.longitude, ipInfo.longitude.toString()),
         _buildInfoRow(
           t.dialogs.proxyInfo.location,
           "${ipInfo.latitude}, ${ipInfo.longitude}",

@@ -43,16 +43,19 @@ class _WindowClosingDialogState extends ConsumerState<WindowClosingDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        TechDialogActions.text(
+          context,
+          label: t.common.close,
           onPressed: () {
             if (remember) {
               ref.read(Preferences.actionAtClose.notifier).update(ActionsAtClosing.exit);
             }
             ref.read(windowNotifierProvider.notifier).exit();
           },
-          child: Text(t.common.close),
         ),
-        FilledButton(
+        TechDialogActions.ok(
+          context,
+          label: t.common.hide,
           onPressed: () async {
             if (remember) {
               ref.read(Preferences.actionAtClose.notifier).update(ActionsAtClosing.hide);
@@ -60,7 +63,6 @@ class _WindowClosingDialogState extends ConsumerState<WindowClosingDialog> {
             context.pop(false);
             await ref.read(windowNotifierProvider.notifier).hide();
           },
-          child: Text(t.common.hide),
         ),
       ],
     );

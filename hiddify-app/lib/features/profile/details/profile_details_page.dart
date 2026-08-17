@@ -68,7 +68,6 @@ class ProfileDetailsPage extends HookConsumerWidget with PresLogger {
                     bottom: false,
                     child: TechUi.subPageHeader(
                       context,
-                      eyebrow: 'Edit',
                       title: t.pages.profileDetails.title,
                       onBack: () => context.pop(),
                       actions: [

@@ -58,11 +58,12 @@ class ExperimentalFeatureNoticeDialog extends HookConsumerWidget {
         ),
       ),
       actions: [
-        TextButton(
+        TechDialogActions.cancel(
+          context,
           onPressed: () => context.pop(false),
-          child: Text(MaterialLocalizations.of(context).cancelButtonLabel.toUpperCase()),
+          label: MaterialLocalizations.of(context).cancelButtonLabel.toUpperCase(),
         ),
-        TextButton(onPressed: () => context.pop(true), child: Text(t.connection.connect)),
+        TechDialogActions.ok(context, onPressed: () => context.pop(true), label: t.connection.connect),
       ],
     );
   }

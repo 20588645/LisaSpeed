@@ -41,22 +41,22 @@ class PreferenceRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
               child: Row(
                 children: [
-                  Expanded(child: Text(title, style: theme.textTheme.bodyMedium)),
-                  if (valueText != null) ...[
-                    const SizedBox(width: 12),
-                    Flexible(
-                      child: Text(
-                        valueText!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.right,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
+                  Text(title, style: theme.textTheme.bodyMedium),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: valueText == null
+                        ? const SizedBox.shrink()
+                        : Text(
+                            valueText!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                  ),
                   if (trailing != null) ...[
                     const SizedBox(width: 8),
                     trailing!,

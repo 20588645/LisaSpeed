@@ -1,10 +1,20 @@
-
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/theme/theme_extensions.dart';
 
 /// Shared LisaSpeed Tech visual primitives aligned with the Tech prototype.
 class TechUi {
   TechUi._();
+
+  /// One gutter for every top-level page header and body. Extra wrapping
+  /// padding on some pages used to shift titles by 8–28px and made tab
+  /// switches flash.
+  static const double pageInset = 20;
+  static const double pageIntroTop = 8;
+  static const double pageIntroBottom = 4;
+  static const double pageBodyTop = 8;
+  static const double pageBodyBottom = 24;
+  static const EdgeInsets pageIntroPadding = EdgeInsets.fromLTRB(pageInset, pageIntroTop, pageInset, pageIntroBottom);
+  static const EdgeInsets pageBodyPadding = EdgeInsets.fromLTRB(pageInset, pageBodyTop, pageInset, pageBodyBottom);
 
   /// Prototype `--mono` stack ("JetBrains Mono", ui-monospace, Menlo…).
   static TextStyle mono(
@@ -42,15 +52,12 @@ class TechUi {
     return dangerOf(context);
   }
 
-  static Widget latencyPill(BuildContext context, int delayMs) {
+  static Widget latencyPill(BuildContext context, int delayMs, {String? emptyLabel}) {
     final color = delayColor(context, delayMs);
-    final label = delayMs <= 0 || delayMs > 65000 ? '—' : '$delayMs ms';
+    final label = delayMs <= 0 || delayMs >= 65000 ? (emptyLabel ?? '—') : '$delayMs ms';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -60,23 +67,20 @@ class TechUi {
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 6),
-          Text(label, style: mono(context, size: 12, weight: FontWeight.w600, color: color)),
+          Text(
+            label,
+            style: mono(context, size: 12, weight: FontWeight.w600, color: color),
+          ),
         ],
       ),
     );
   }
 
-  static Widget tag(
-    BuildContext context,
-    String text, {
-    bool active = false,
-    bool monoFont = false,
-  }) {
+  /// Compact inline label next to titles (e.g. 使用中 / 本地). Not paired
+  /// with action buttons — those use [statusChip] so height matches 36px.
+  static Widget tag(BuildContext context, String text, {bool active = false, bool monoFont = false}) {
     final color = active ? ConnectionButtonTheme.accentOf(context) : Theme.of(context).colorScheme.onSurfaceVariant;
-    final base = Theme.of(context).textTheme.labelSmall?.copyWith(
-      color: color,
-      fontWeight: FontWeight.w700,
-    );
+    final base = Theme.of(context).textTheme.labelSmall?.copyWith(color: color, fontWeight: FontWeight.w700);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
@@ -100,11 +104,166 @@ class TechUi {
       constraints: const BoxConstraints(minWidth: 22),
       padding: const EdgeInsets.symmetric(horizontal: 6),
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(7),
-      ),
+      decoration: BoxDecoration(color: accent.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(7)),
       child: Text(text, style: mono(context, size: 11, color: accent)),
+    );
+  }
+
+  /// One control size for every text / icon / dialog button.
+  /// Material's default 48px tap target is opted out so visual height stays 36.
+  static const double buttonHeight = 36;
+  static const double buttonRadius = 11;
+  static const double buttonFontSize = 13.5;
+  static const double buttonIconSize = 18;
+  static const Size buttonMinSize = Size(0, buttonHeight);
+  static const Size buttonMaxSize = Size(double.infinity, buttonHeight);
+  static const Size iconButtonSize = Size(buttonHeight, buttonHeight);
+  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: 12);
+  static const double actionGap = 8;
+  static const EdgeInsets cardPadding = EdgeInsets.fromLTRB(14, 12, 14, 12);
+  static const OutlinedBorder buttonShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(buttonRadius)),
+  );
+
+  /// Status control sitting beside [iconButton] / [tinyButton]: same 36×11
+  /// box so 直连 / 空闲 no longer look like a tiny caption glued to a button.
+  static Widget statusChip(BuildContext context, String text, {bool active = false, Color? color}) {
+    final resolved =
+        color ?? (active ? ConnectionButtonTheme.accentOf(context) : Theme.of(context).colorScheme.onSurfaceVariant);
+    final side = active ? resolved.withValues(alpha: 0.55) : ConnectionButtonTheme.lineOf(context);
+    return Container(
+      height: buttonHeight,
+      padding: buttonPadding,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: resolved.withValues(alpha: active ? 0.16 : 0.10),
+        borderRadius: BorderRadius.circular(buttonRadius),
+        border: Border.all(color: side),
+      ),
+      child: Text(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: buttonFontSize, fontWeight: FontWeight.w700, height: 1.1, color: resolved),
+      ),
+    );
+  }
+
+  /// Horizontal trailing cluster: status + actions, 8px gutters, no wrap.
+  static Widget trailingRow(List<Widget> children) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final (i, child) in children.indexed) ...[if (i > 0) const SizedBox(width: actionGap), child],
+      ],
+    );
+  }
+
+  /// Shared size lock used by [ghostButton], [primaryButton], [tinyButton]
+  /// and theme-level Material buttons so nothing can drift to 27 / 32 / 48.
+  static ButtonStyle lockButtonSize({
+    FontWeight weight = FontWeight.w500,
+    EdgeInsetsGeometry padding = buttonPadding,
+    Size minimumSize = buttonMinSize,
+    Size maximumSize = buttonMaxSize,
+  }) {
+    return ButtonStyle(
+      padding: WidgetStatePropertyAll(padding),
+      minimumSize: WidgetStatePropertyAll(minimumSize),
+      maximumSize: WidgetStatePropertyAll(maximumSize),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.standard,
+      alignment: Alignment.center,
+      shape: const WidgetStatePropertyAll(buttonShape),
+      textStyle: WidgetStatePropertyAll(TextStyle(fontSize: buttonFontSize, fontWeight: weight, height: 1.1)),
+    );
+  }
+
+  static ButtonStyle outlinedStyle(BuildContext context, {bool danger = false, Color? background}) {
+    final fg = danger ? dangerOf(context) : Theme.of(context).colorScheme.onSurface;
+    final side = danger
+        ? Color.lerp(dangerOf(context), ConnectionButtonTheme.lineOf(context), 0.6)!
+        : ConnectionButtonTheme.lineOf(context);
+    return OutlinedButton.styleFrom(
+      foregroundColor: fg,
+      side: BorderSide(color: side),
+      backgroundColor: background ?? Colors.transparent,
+      disabledForegroundColor: fg.withValues(alpha: 0.38),
+    ).merge(lockButtonSize());
+  }
+
+  static ButtonStyle filledStyle(BuildContext context) {
+    final accent = ConnectionButtonTheme.accentOf(context);
+    return FilledButton.styleFrom(
+      backgroundColor: accent,
+      foregroundColor: const Color(0xFF041016),
+      disabledBackgroundColor: accent.withValues(alpha: 0.4),
+      disabledForegroundColor: const Color(0xFF041016).withValues(alpha: 0.55),
+    ).merge(lockButtonSize(weight: FontWeight.w700));
+  }
+
+  static ButtonStyle textStyle(BuildContext context, {bool danger = false}) {
+    final fg = danger ? dangerOf(context) : Theme.of(context).colorScheme.onSurfaceVariant;
+    return TextButton.styleFrom(foregroundColor: fg).merge(lockButtonSize());
+  }
+
+  static ButtonStyle iconStyle(BuildContext context, {bool danger = false}) {
+    return outlinedStyle(
+      context,
+      danger: danger,
+    ).merge(lockButtonSize(padding: EdgeInsets.zero, minimumSize: iconButtonSize, maximumSize: iconButtonSize));
+  }
+
+  /// Theme defaults so raw [TextButton] / [FilledButton] / [OutlinedButton]
+  /// in dialogs match [ghostButton] / [primaryButton].
+  static OutlinedButtonThemeData outlinedButtonTheme(ColorScheme scheme) {
+    return OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: scheme.onSurface,
+        side: BorderSide(color: scheme.outline.withValues(alpha: 0.45)),
+      ).merge(lockButtonSize()),
+    );
+  }
+
+  static FilledButtonThemeData filledButtonTheme(Color accent) {
+    return FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: accent,
+        foregroundColor: const Color(0xFF041016),
+        disabledBackgroundColor: accent.withValues(alpha: 0.4),
+      ).merge(lockButtonSize(weight: FontWeight.w700)),
+    );
+  }
+
+  static ElevatedButtonThemeData elevatedButtonTheme(Color accent) {
+    return ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: accent,
+        foregroundColor: const Color(0xFF041016),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+      ).merge(lockButtonSize(weight: FontWeight.w700)),
+    );
+  }
+
+  static TextButtonThemeData textButtonTheme(ColorScheme scheme) {
+    return TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: scheme.onSurfaceVariant).merge(lockButtonSize()),
+    );
+  }
+
+  static IconButtonThemeData iconButtonTheme(ColorScheme scheme) {
+    return IconButtonThemeData(
+      style: IconButton.styleFrom(
+        foregroundColor: scheme.onSurface,
+        iconSize: buttonIconSize,
+        padding: EdgeInsets.zero,
+        minimumSize: iconButtonSize,
+        maximumSize: iconButtonSize,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.standard,
+        shape: buttonShape,
+      ),
     );
   }
 
@@ -115,103 +274,52 @@ class TechUi {
     VoidCallback? onPressed,
     bool danger = false,
   }) {
-    final fg = danger ? dangerOf(context) : Theme.of(context).colorScheme.onSurface;
-    final side = danger
-        ? Color.lerp(dangerOf(context), ConnectionButtonTheme.lineOf(context), 0.6)!
-        : ConnectionButtonTheme.lineOf(context);
     return OutlinedButton(
       onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: fg,
-        side: BorderSide(color: side),
-        backgroundColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        minimumSize: const Size(0, 36),
-        textStyle: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500),
-      ),
+      style: outlinedStyle(context, danger: danger),
       child: Text(label),
     );
   }
 
   /// Prototype `.btn.primary`: accent fill, dark ink text, soft glow.
-  static Widget primaryButton(
-    BuildContext context, {
-    required String label,
-    VoidCallback? onPressed,
-  }) {
+  static Widget primaryButton(BuildContext context, {required String label, VoidCallback? onPressed}) {
     final accent = ConnectionButtonTheme.accentOf(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: BorderRadius.circular(buttonRadius),
         boxShadow: [BoxShadow(color: accent.withValues(alpha: 0.16), blurRadius: 20)],
       ),
-      child: FilledButton(
-        onPressed: onPressed,
-        style: FilledButton.styleFrom(
-          backgroundColor: accent,
-          foregroundColor: const Color(0xFF041016),
-          disabledBackgroundColor: accent.withValues(alpha: 0.4),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          minimumSize: const Size(0, 36),
-          textStyle: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700),
-        ),
-        child: Text(label),
-      ),
+      child: FilledButton(onPressed: onPressed, style: filledStyle(context), child: Text(label)),
     );
   }
 
-  /// Prototype `.btn.tiny`: compact bordered action (list rows).
+  /// Row action button — same 36×11 metrics as [ghostButton], panel fill so
+  /// it stays readable on list rows. Formerly a smaller 27px control.
   static Widget tinyButton(
     BuildContext context, {
     required String label,
     VoidCallback? onPressed,
     bool danger = false,
   }) {
-    final fg = danger ? dangerOf(context) : Theme.of(context).colorScheme.onSurface;
-    final side = danger
-        ? Color.lerp(dangerOf(context), ConnectionButtonTheme.lineOf(context), 0.6)!
-        : ConnectionButtonTheme.lineOf(context);
     return OutlinedButton(
       onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: fg,
-        side: BorderSide(color: side),
-        backgroundColor: ConnectionButtonTheme.panelOf(context),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-        minimumSize: const Size(0, 27),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-      ),
+      style: outlinedStyle(context, danger: danger, background: ConnectionButtonTheme.panelOf(context)),
       child: Text(label),
     );
   }
 
-  /// Prototype `.btn.icon-btn`: 36px bordered square (back arrows…).
+  /// Square icon control, same 36px box and 11px radius as text buttons.
   static Widget iconButton(
     BuildContext context, {
     required IconData icon,
     VoidCallback? onPressed,
     String? tooltip,
+    Color? iconColor,
   }) {
-    final button = SizedBox(
-      width: 36,
-      height: 36,
-      child: Material(
-        color: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: ConnectionButtonTheme.lineOf(context)),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onPressed,
-          child: Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurface),
-        ),
-      ),
+    final button = OutlinedButton(
+      onPressed: onPressed,
+      style: iconStyle(context),
+      child: Icon(icon, size: buttonIconSize, color: iconColor ?? Theme.of(context).colorScheme.onSurface),
     );
     if (tooltip == null) return button;
     return Tooltip(message: tooltip, child: button);
@@ -221,7 +329,7 @@ class TechUi {
   /// on the left, action buttons on the right.
   static Widget subPageHeader(
     BuildContext context, {
-    required String eyebrow,
+    String? eyebrow,
     required String title,
     String? subtitle,
     VoidCallback? onBack,
@@ -229,7 +337,7 @@ class TechUi {
   }) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      padding: const EdgeInsets.fromLTRB(pageInset, 16, pageInset, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -241,21 +349,20 @@ class TechUi {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  eyebrow.toUpperCase(),
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.onSurfaceVariant,
+                if (eyebrow != null && eyebrow.isNotEmpty) ...[
+                  Text(
+                    eyebrow.toUpperCase(),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w800,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
+                  const SizedBox(height: 2),
+                ],
                 Text(
                   title,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                  ),
+                  style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.4),
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 4),
@@ -284,8 +391,8 @@ class TechUi {
     required T selected,
     required String Function(T option) label,
     required ValueChanged<T> onChanged,
-    double height = 38,
-    double fontSize = 12.5,
+    double height = buttonHeight,
+    double fontSize = buttonFontSize,
   }) {
     final accent = ConnectionButtonTheme.accentOf(context);
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
@@ -296,7 +403,7 @@ class TechUi {
           Expanded(
             child: Material(
               color: option == selected ? accent : muted.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(TechUi.buttonRadius),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 hoverColor: option == selected ? null : accent.withValues(alpha: 0.12),
@@ -312,9 +419,7 @@ class TechUi {
                         fontSize: fontSize,
                         // Prototype `.seg`: active button bold (700), rest lighter.
                         fontWeight: option == selected ? FontWeight.w700 : FontWeight.w500,
-                        color: option == selected
-                            ? const Color(0xFF041016)
-                            : Theme.of(context).colorScheme.onSurface,
+                        color: option == selected ? const Color(0xFF041016) : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -396,9 +501,9 @@ class TechUi {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ],
@@ -427,17 +532,13 @@ class TechUi {
     return BoxDecoration(
       color: ConnectionButtonTheme.glassOf(context),
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(
-        color: selected ? accent : ConnectionButtonTheme.lineOf(context),
-      ),
+      border: Border.all(color: selected ? accent : ConnectionButtonTheme.lineOf(context)),
       // Prototype `.panel` soft depth (`--shadow`). List rows (radius < 16)
       // stay flat, matching the prototype's shadowless `.list-row`.
       boxShadow: radius >= 16
           ? [
               BoxShadow(
-                color: isDark
-                    ? Colors.black.withValues(alpha: 0.28)
-                    : const Color(0xFF102033).withValues(alpha: 0.08),
+                color: isDark ? Colors.black.withValues(alpha: 0.28) : const Color(0xFF102033).withValues(alpha: 0.08),
                 blurRadius: isDark ? 28 : 24,
                 offset: const Offset(0, 10),
               ),
@@ -446,10 +547,8 @@ class TechUi {
     );
   }
 
-  /// Prototype `.list-row`: the ONE card shell shared by the nodes,
-  /// subscriptions and rules lists — glass fill, hairline border, 14px
-  /// radius, 13/14 padding; active rows get a full-accent border plus an
-  /// inset 3px accent stripe that never shifts the content.
+  /// Prototype `.list-row`: glass fill, hairline border, 14px radius.
+  /// Active rows use a full-accent border only — no inset color stripe.
   static Widget listRow(
     BuildContext context, {
     required Widget child,
@@ -461,7 +560,6 @@ class TechUi {
     final accent = ConnectionButtonTheme.accentOf(context);
     return _HoverRegion(
       builder: (hovered) => Container(
-        // Prototype `.list-row:hover` strengthens the hairline to `--line-strong`.
         decoration: panelDecoration(context, selected: selected, radius: 14).copyWith(
           border: Border.all(
             color: selected
@@ -472,25 +570,14 @@ class TechUi {
           ),
         ),
         clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            if (selected)
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: Container(width: 3, color: accent),
-              ),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(14),
-                onTap: onTap,
-                onLongPress: onLongPress,
-                child: Padding(padding: padding, child: child),
-              ),
-            ),
-          ],
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: onTap,
+            onLongPress: onLongPress,
+            child: Padding(padding: padding, child: child),
+          ),
         ),
       ),
     );
@@ -566,12 +653,7 @@ class TechUi {
       ),
       child: Text(
         'L',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w800,
-          fontSize: size * 0.42,
-          height: 1,
-        ),
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: size * 0.42, height: 1),
       ),
     );
   }
@@ -631,9 +713,7 @@ class TechUi {
                         if (subtitle != null) ...[
                           const SizedBox(height: 4),
                           DefaultTextStyle(
-                            style: theme.textTheme.bodySmall!.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
+                            style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.onSurfaceVariant),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             child: subtitle,
@@ -643,14 +723,7 @@ class TechUi {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    '›',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 20,
-                      height: 1,
-                    ),
-                  ),
+                  Text('›', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 20, height: 1)),
                 ],
               ),
             ),
@@ -663,7 +736,7 @@ class TechUi {
   /// Prototype `.form.panel.form-card`: one glass panel, 12px row rhythm.
   static Widget preferencePanel(BuildContext context, {required List<Widget> children}) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+      padding: pageBodyPadding,
       children: [
         Container(
           decoration: panelDecoration(context),
@@ -672,10 +745,7 @@ class TechUi {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final (i, child) in children.indexed) ...[
-                if (i > 0) const SizedBox(height: 10),
-                child,
-              ],
+              for (final (i, child) in children.indexed) ...[if (i > 0) const SizedBox(height: 10), child],
             ],
           ),
         ),
@@ -685,16 +755,16 @@ class TechUi {
 
   static Widget pageIntro(
     BuildContext context, {
-    required String eyebrow,
+    String? eyebrow,
     required String title,
     String? subtitle,
+    Widget? action,
   }) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    final copy = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (eyebrow != null && eyebrow.isNotEmpty) ...[
           Text(
             eyebrow.toUpperCase(),
             style: theme.textTheme.labelSmall?.copyWith(
@@ -704,22 +774,26 @@ class TechUi {
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            title,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.4,
-            ),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
-          ],
         ],
-      ),
+        Text(title, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.4)),
+        if (subtitle != null) ...[
+          const SizedBox(height: 4),
+          Text(subtitle, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        ],
+      ],
+    );
+    return Padding(
+      padding: pageIntroPadding,
+      child: action == null
+          ? copy
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: copy),
+                const SizedBox(width: 12),
+                Padding(padding: const EdgeInsets.only(top: 18), child: action),
+              ],
+            ),
     );
   }
 

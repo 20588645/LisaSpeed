@@ -11,7 +11,6 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/core/widget/tech_ui.dart';
-import 'package:hiddify/features/profile/add/widgets/free_btns.dart';
 import 'package:hiddify/features/profile/add/widgets/widgets.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
@@ -27,7 +26,6 @@ class AddProfileModal extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = ref.watch(addProfileNotifierProvider).isLoading;
     final currentWidget = ref.watch(addProfilePageNotifierProvider);
-    ref.listen(freeSwitchNotifierProvider, (_, _) {});
     ref.listen(addProfileNotifierProvider, (previous, next) {
       if (next case AsyncData(value: final _?)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -63,12 +61,10 @@ class AddProfileOptions extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
     final theme = Theme.of(context);
-    final freeSwitch = ref.watch(freeSwitchNotifierProvider);
     final isDesktop = PlatformUtils.isDesktop;
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final nameTextController = useTextEditingController();
     final urlTextController = useTextEditingController();
-    final freeScrollController = useScrollController();
 
     return SingleChildScrollView(
       child: Column(
@@ -192,14 +188,6 @@ class AddProfileOptions extends HookConsumerWidget {
             ),
           ),
           const NavBar(),
-          AnimatedSize(
-            alignment: Alignment.topCenter,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut,
-            child: freeSwitch
-                ? SizedBox(height: 260, child: FreeBtns(scrollController: freeScrollController))
-                : const SizedBox.shrink(),
-          ),
           const Gap(8),
         ],
       ),

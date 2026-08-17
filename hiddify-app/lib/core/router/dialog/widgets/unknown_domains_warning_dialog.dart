@@ -33,8 +33,8 @@ class UnknownDomainsWarningDialog extends HookConsumerWidget {
         ],
       ),
       actions: [
-        TextButton(onPressed: () => context.pop(false), child: Text(t.common.cancel)),
-        FilledButton(onPressed: () => context.pop(true), child: Text(t.common.kContinue)),
+        TechDialogActions.cancel(context, onPressed: () => context.pop(false), label: t.common.cancel),
+        TechDialogActions.ok(context, onPressed: () => context.pop(true), label: t.common.kContinue),
       ],
     );
   }
