@@ -23,6 +23,7 @@ abstract interface class ConnectionRepository {
   TaskEither<ConnectionFailure, Unit> connect(ProfileEntity activeProfile, bool disableMemoryLimit);
   TaskEither<ConnectionFailure, Unit> disconnect();
   TaskEither<ConnectionFailure, Unit> reconnect(ProfileEntity activeProfile, bool disableMemoryLimit);
+  TaskEither<ConnectionFailure, Unit> syncOptions(ProfileEntity activeProfile);
 }
 
 class ConnectionRepositoryImpl with ExceptionHandler, InfraLogger implements ConnectionRepository {
@@ -95,6 +96,9 @@ class ConnectionRepositoryImpl with ExceptionHandler, InfraLogger implements Con
             .restart(profilePathResolver.file(activeProfile.id).path, activeProfile.name, disableMemoryLimit)
             .mapLeft(UnexpectedConnectionFailure.new),
       );
+
+  @override
+  TaskEither<ConnectionFailure, Unit> syncOptions(ProfileEntity activeProfile) => applyConfigOption(activeProfile);
 
   @visibleForTesting
   TaskEither<ConnectionFailure, Unit> applyConfigOption(ProfileEntity prof) =>

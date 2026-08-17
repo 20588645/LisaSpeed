@@ -122,6 +122,20 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
     }
   }
 
+  /// After sleep or a network path change: bounce the tunnel if the user had
+  /// it connected. Does nothing while a connect/disconnect is already in flight.
+  Future<void> reviveAfterInterrupt({required String reason}) async {
+    final profile = await ref.read(activeProfileProvider.future);
+    if (profile == null) return;
+    final status = state.valueOrNull;
+    loggy.info("reviving tunnel after $reason (status: ${status?.format()})");
+    if (status is Connected) {
+      await reconnect(profile);
+    } else if (status is Disconnected) {
+      await _connect();
+    }
+  }
+
   final _singleStart = SingleCall();
 
   Future<void> _connect() async {
